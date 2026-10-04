@@ -24,7 +24,7 @@ jobs:
     env:
       LIGHTSAIL_HOST: ${{ secrets.LIGHTSAIL_HOST || '13.127.237.199' }}
       LIGHTSAIL_USER: ${{ secrets.LIGHTSAIL_USER || 'admin' }}
-      LLIGHTSAIL_SSH_KEY_B64: ${{ secrets.LIGHTSAIL_SSH_KEY_B64 }}
+      LIGHTSAIL_SSH_KEY_B64: ${{ secrets.LIGHTSAIL_SSH_KEY_B64 }}
       LIGHTSAIL_KNOWN_HOSTS: ${{ secrets.LIGHTSAIL_KNOWN_HOSTS }}
       LIGHTSAIL_DEPLOY_PATH: ${{ secrets.LIGHTSAIL_DEPLOY_PATH || '/home/admin/questionyear' }}
 
