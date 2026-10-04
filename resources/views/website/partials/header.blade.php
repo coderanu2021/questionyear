@@ -1,9 +1,10 @@
+<script>window.SITE_TITLE={{ Illuminate\Support\Js::from($siteSettings['site_title']) }};</script>
 <header>
   <div class="wrap top">
-    <a href="/" class="logo"><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#0078d4"/><circle cx="15" cy="15" r="7" fill="none" stroke="#fff" stroke-width="3"/><path d="M20 20l5 5" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>QuizHub</a>
+    <a href="/" class="logo">@include('website.partials.brand-logo'){{ $siteSettings['site_title'] }}</a>
     <nav id="nav"><ul>
       <li><button id="sb" aria-expanded="false" aria-controls="mega">Subjects <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button></li>
-      <li><a href="/#popular">Quizzes</a></li>
+      <li><a href="/#popular">Quizzes</a></li><li><a href="{{ route('daily') }}">Daily quiz</a></li>
       <li><a href="/#exams">Exams</a></li>
       <li><a href="/#how">How it works</a></li>
       <li><a href="/#faq">FAQ</a></li>

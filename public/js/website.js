@@ -1,5 +1,5 @@
 async function api(url,data){const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify(data)});const result=await response.json();if(!response.ok){const error=Error(result.message||'Request failed');error.code=result.code;throw error}return result;}
-const S=window.CURRICULUM.S;
+const SITE_TITLE=window.SITE_TITLE||"questionyear";const S=window.CURRICULUM.S;
 const CH='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
 const CC={"Humanities":"#0078d4","Science":"#107c10","Maths & Tech":"#8661c5","General":"#ca5010"};
 const slug=n=>n.toLowerCase().replace(/&/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
@@ -70,7 +70,7 @@ function renderChaps(){
     :`<div class="chap off" style="--c:${x.c}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>Notes and questions are being added</small></div><span class="soon">Coming soon</span></div>`}).map((markup,k)=>{const index=it[k].i;const tests=window.CURRICULUM.tests[x.id+":"+index]||[];return markup+tests.map(t=>`<a class="chap" href="/quiz/${x.id}/${index}?test=${t.id}"><span class="cn"><i class="fa-solid fa-play"></i></span><div><h3>${esc(t.title)}</h3><small>${t.count} questions · ${t.duration} minutes · Pass ${t.pass}%</small></div></a>`).join("")}).join(""):`<p class="empty" style="display:block">No chapters match your search.</p>`;
 }
 function subjectPage(x){
-  curSub=x;document.title=x.n+" chapters – QuizHub";
+  curSub=x;document.title=x.n+" chapters – "+SITE_TITLE;
   $("sbc").textContent=x.n;$("sn").textContent=x.n;$("sd").textContent=x.d;
   const ic=$("sic");ic.textContent=mono(x.n);ic.style.setProperty("--c",x.c);
   const ready=x.ch.filter((_,i)=>LN[x.id+":"+i]||QB[x.id+":"+i]).length;
@@ -84,7 +84,7 @@ $("cf").oninput=renderChaps;
 const CO={tip:["fa-lightbulb","Exam tip"],key:["fa-key","Key point"],note:["fa-circle-info","Did you know?"]};
 function learnPage(x,i){
   const d=LN[x.id+":"+i],t=x.ch[i],q=QB[x.id+":"+i];
-  document.title=t+" – "+x.n+" – QuizHub";
+  document.title=window.CHAPTER_SEO_TITLE||t+" – "+x.n+" – "+SITE_TITLE;
   const secs=d.s.map((s,n)=>{
     const ps=s.p.map((p,k)=>`<p${n===0&&k===0?' class="drop"':""}>${p}</p>`).join("");
     const tb=s.t?`<div class="bk-t"><table><thead><tr>${s.t.h.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${s.t.r.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:"";
@@ -120,7 +120,7 @@ function drawQ(){
 function accountGate(){clearInterval(tmr);$("qb").innerHTML=`<div class="res"><h2>Create an account to continue</h2><p>You have completed your 25 free guest questions. Log in or create a free account to solve more questions.</p><div class="cta2"><a class="btn btn-o" href="/register">Create free account</a><a class="btn btn-l" href="/login">Log in</a></div></div>`}
 function startQuiz(){qi=0;qsc=0;qans=[];t0=Date.now();clearInterval(tmr);if(!window.CURRENT_USER&&window.GUEST_QUESTIONS_USED>=25){accountGate();return}tmr=setInterval(tick,1000);drawQ()}
 function quizPage(x,i){
-  curId=x.id;curIdx=i;qs=QB[x.id+":"+i];const t=x.ch[i];document.title=t+" quiz – QuizHub";
+  curId=x.id;curIdx=i;qs=QB[x.id+":"+i];const t=x.ch[i];document.title=window.CHAPTER_SEO_TITLE||t+" quiz – "+SITE_TITLE;
   const ln=LN[x.id+":"+i]?`<span>/</span><a href="/learn/${x.id}/${i}">Notes</a>`:"";
   $("qc").innerHTML=`<a href="/">Home</a><span>/</span><a href="/subject/${x.id}">${esc(x.n)}</a>${ln}<span>/</span><b>${esc(t)}</b>`;
   startQuiz();
@@ -152,15 +152,15 @@ let CU=window.CURRENT_USER,amode="login";
 function field(id,label,icon,type,ph,ac){return `<label class="inp"><span>${label}</span><div class="inw"><i class="fa-solid ${icon}"></i><input id="${id}" type="${type}" placeholder="${ph}" autocomplete="${ac}"${type==="password"?'><button type="button" class="eye" data-eye aria-label="Show password"><i class="fa-regular fa-eye"></i></button>':">"}</div></label>`}
 function authPage(mode){
   amode=mode;const L=mode==="login";
-  document.title=(L?"Log in":"Create account")+" – QuizHub";
-  $("auth").innerHTML=`<div class="au"><div class="au-side"><div><h2>Learn. Practice. Improve.</h2><p>${L?"Welcome back! Pick up your practice right where you left off.":"Join QuizHub for free and start practicing in minutes."}</p>
+  document.title=(L?"Log in":"Create account")+" – "+SITE_TITLE;
+  $("auth").innerHTML=`<div class="au"><div class="au-side"><div><h2>Learn. Practice. Improve.</h2><p>${L?"Welcome back! Pick up your practice right where you left off.":"Join "+esc(SITE_TITLE)+" for free and start practicing in minutes."}</p>
   <ul><li><i class="fa-solid fa-book-open"></i>Chapter notes written like a textbook</li><li><i class="fa-solid fa-circle-check"></i>Instant answers with explanations</li><li><i class="fa-solid fa-chart-line"></i>Track your score topic by topic</li><li><i class="fa-solid fa-fire"></i>Build a daily practice streak</li></ul></div></div>
-  <div class="au-main"><div class="au-card"><h1>${L?"Log in to QuizHub":"Create your account"}</h1><p class="lead">${L?"Enter your details to continue.":"It takes less than a minute."}</p>
+  <div class="au-main"><div class="au-card"><h1>${L?"Log in to "+esc(SITE_TITLE):"Create your account"}</h1><p class="lead">${L?"Enter your details to continue.":"It takes less than a minute."}</p>
   <form id="af" novalidate>${L?"":field("an","Full name","fa-user","text","Your name","name")}${field("ae","Email address","fa-envelope","email","you@example.com","email")}${field("ap","Password","fa-lock","password",L?"Your password":"At least 8 characters",L?"current-password":"new-password")}
   ${L?`<div class="rowf"><label class="ck"><input type="checkbox" id="ar" checked> Keep me logged in</label><a href="/forgot-password">Forgot password?</a></div>`:`<label class="ck"><input type="checkbox" id="at"> I agree to the <a href="/terms">Terms of use</a> and <a href="/privacy">Privacy policy</a></label>`}
   <div class="msg" id="am" role="alert" aria-live="polite"></div>
   <button class="btn btn-o au-go" type="submit">${L?"Log in":"Create account"}</button></form>
-  <p class="sw">${L?'New to QuizHub? <a href="/register">Create an account</a>':'Already have an account? <a href="/login">Log in</a>'}</p></div></div></div>`;
+  <p class="sw">${L?'New to '+esc(SITE_TITLE)+'? <a href="/register">Create an account</a>':'Already have an account? <a href="/login">Log in</a>'}</p></div></div></div>`;
 
 }
 function amsg(t,ok){const e=$("am");e.textContent=t;e.className="msg"+(t?(ok?" ok":" bad"):"")}

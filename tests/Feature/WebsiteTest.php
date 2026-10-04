@@ -24,7 +24,7 @@ class WebsiteTest extends TestCase
     public function test_public_pages_render_and_missing_chapters_return_404(): void
     {
         foreach (['/', '/login', '/register', '/subject/history', '/learn/history/0', '/quiz/history/0'] as $url) {
-            $this->get($url)->assertOk()->assertSee('QuizHub');
+            $this->get($url)->assertOk()->assertSee('questionyear');
         }
         $this->get('/subject/missing')->assertNotFound();
         $this->get('/learn/history/999')->assertNotFound();

@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\DailyQuizController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\SiteSettingsController;
 use App\Http\Controllers\WebsiteController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -18,7 +20,10 @@ Route::post('/account/login', [AccountController::class, 'login'])->middleware('
 Route::post('/account/logout', [AccountController::class, 'logout'])->name('logout');
 Route::post('/quizzes/{quiz}/answer', [WebsiteController::class, 'answer'])->middleware('throttle:120,1')->block(10, 10);
 Route::post('/quizzes/{quiz}/attempts', [WebsiteController::class, 'attempt'])->middleware('throttle:30,1')->block(10, 10);
-Route::get('/daily-quiz', [PageController::class, 'daily'])->name('daily');
+Route::get('/daily-quiz', [DailyQuizController::class, 'index'])->name('daily')->block(10, 10);
+Route::post('/daily-quiz', [DailyQuizController::class, 'submit'])->name('daily.submit')->middleware('throttle:10,1')->block(10, 10);
+Route::view('/upcoming', 'website.upcoming')->name('upcoming');
+Route::get('/site-logo/{filename}', [SiteSettingsController::class, 'logo'])->where('filename', '[A-Za-z0-9]+\.(jpg|jpeg|png|webp|gif)')->name('site.logo');
 Route::get('/exams/{exam}', [PageController::class, 'exam'])->name('exam');
 Route::get('/progress', fn (Request $request) => app(PageController::class)->show($request, 'progress'))->middleware('auth')->name('progress');
 Route::post('/contact', [PageController::class, 'contact'])->middleware('throttle:5,1')->name('contact.send');
@@ -31,5 +36,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/chapters/{chapter}/edit', [AdminController::class, 'chapterPage'])->name('admin.chapters.edit');
     Route::get('/admin/chapters/{chapter}', [AdminController::class, 'chapterPage'])->whereNumber('chapter')->name('admin.chapters.show');
     Route::put('/admin/state', [AdminController::class, 'save'])->name('admin.save');
+    Route::put('/admin/settings', [SiteSettingsController::class, 'update'])->name('admin.settings.update');
     Route::get('/admin/{page?}', [AdminController::class, 'index'])->name('admin');
 });

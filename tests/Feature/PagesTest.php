@@ -22,7 +22,7 @@ class PagesTest extends TestCase
         foreach (['/about', '/contact', '/help', '/careers', '/privacy', '/terms', '/cookies', '/leaderboard', '/forgot-password', '/exams/neet'] as $url) {
             $this->get($url)->assertOk();
         }
-        $this->get('/daily-quiz')->assertRedirect();
+        $this->get('/daily-quiz')->assertOk()->assertSee('Daily quiz');
         $this->get('/progress')->assertRedirect('/login');
         $this->post('/contact', ['name' => 'Student', 'email' => 'student@example.com', 'message' => 'Please add more chapter quizzes.'])->assertRedirect();
         $this->assertDatabaseHas('messages', ['email' => 'student@example.com']);

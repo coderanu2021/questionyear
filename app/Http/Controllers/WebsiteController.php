@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Attempt;
 use App\Models\Quiz;
 use App\Models\Subject;
+use App\SiteSettings;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -49,6 +50,11 @@ class WebsiteController extends Controller
                 abort_if($request->is('quiz/*') && ! isset($curriculum['QB'][$key]), 404);
             }
         }
+        $seoChapter = isset($selected) && $chapter !== null ? $selected->chapters[$chapter] : null;
+        $settings = SiteSettings::values();
+        $seoTitle = $seoChapter?->meta_title ?: ($seoChapter ? $seoChapter->title.' – '.$settings['site_title'] : $settings['site_title']);
+        $seoDescription = $seoChapter?->meta_description ?: ($seoChapter?->description ?: $settings['site_description']);
+        $seoKeywords = $seoChapter?->meta_keywords;
         $popular = [];
         foreach ($curriculum['tests'] as $key => $tests) {
             foreach ($tests as $test) {
@@ -57,7 +63,7 @@ class WebsiteController extends Controller
             }
         }
 
-        return view('website.index', ['curriculum' => $curriculum, 'quizIds' => $quizIds, 'currentUser' => $request->user()?->only('name', 'email'), 'popular' => $popular, 'chapterCount' => $subjects->sum(fn ($s) => $s->chapters->count()), 'subjectCount' => $subjects->count(), 'questionCount' => Quiz::whereHas('chapter', fn ($q) => $q->where('status', 'published'))->get()->sum(fn ($q) => count($q->questions))]);
+        return view('website.index', ['chapterMetaTitle' => $seoChapter?->meta_title, 'seoTitle' => $seoTitle, 'seoDescription' => $seoDescription, 'seoKeywords' => $seoKeywords, 'curriculum' => $curriculum, 'quizIds' => $quizIds, 'currentUser' => $request->user()?->only('name', 'email'), 'popular' => $popular, 'chapterCount' => $subjects->sum(fn ($s) => $s->chapters->count()), 'subjectCount' => $subjects->count(), 'questionCount' => Quiz::whereHas('chapter', fn ($q) => $q->where('status', 'published'))->get()->sum(fn ($q) => count($q->questions))]);
     }
 
     public function answer(Request $request, Quiz $quiz): JsonResponse

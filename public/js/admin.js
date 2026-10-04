@@ -10,7 +10,7 @@ const ICON={
  help:'<circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/>'
 };
 const ic=n=>`<svg class="ic" viewBox="0 0 24 24">${ICON[n]}</svg>`;
-const NAV=[['dashboard','Dashboard','dash'],['chapters','Chapters','book'],['tests','Tests & Quizzes','quiz'],['users','Users','users'],['analytics','Analytics','chart'],['messages','Messages','book']];
+const NAV=[['dashboard','Dashboard','dash'],['chapters','Chapters','book'],['tests','Tests & Quizzes','quiz'],['users','Users','users'],['analytics','Analytics','chart'],['messages','Messages','book'],['settings','Settings','edit']];
 
 /* ---------- data ---------- */
 let S=window.ADMIN_STATE;let persisted=JSON.stringify(S);
@@ -64,7 +64,7 @@ function renderChapterForm(id){
  <div class="two"><div class="f"><label>Subject</label><input id="c_s" list="subs" value="${esc(c.subject)}" placeholder="e.g. Maths"><datalist id="subs">${[...new Set(S.chapters.map(x=>x.subject))].map(s=>`<option>${esc(s)}`).join('')}</datalist></div>
  <div class="f"><label>Number of lessons</label><input id="c_l" type="number" min="1" value="${c.lessons}"></div></div>
  <div class="f"><label>Description</label><textarea id="c_d" rows="3" placeholder="What will learners study in this chapter?">${esc(c.desc||'')}</textarea></div>
- <div class="f"><label>Chapter content</label><textarea id="c_c">${esc(c.content||'')}</textarea></div>
+ <div class="f"><label for="c_mt">Meta title</label><input id="c_mt" maxlength="255" value="${esc(c.meta_title||'')}" placeholder="SEO title (ideally 50–60 characters)"></div><div class="f"><label for="c_md">Meta description</label><textarea id="c_md" maxlength="1000" rows="3" placeholder="A short search result description">${esc(c.meta_description||'')}</textarea></div><div class="f"><label for="c_mk">Meta keywords</label><input id="c_mk" maxlength="1000" value="${esc(c.meta_keywords||'')}" placeholder="Comma-separated keywords"></div><div class="f"><label>Chapter content</label><textarea id="c_c">${esc(c.content||'')}</textarea></div>
  <div class="f"><label>Status</label><select id="c_st"><option value="published" ${c.status=='published'?'selected':''}>Published</option><option value="draft" ${c.status=='draft'?'selected':''}>Draft</option></select></div></div>
  <div class="df"><button class="btn" onclick="closeM()">Cancel</button><button class="btn pri" onclick="saveChapter(${id||0})">${id?'Save changes':'Add chapter'}</button></div>`,true);
  initEditor();
@@ -87,7 +87,7 @@ function renderChapterPreview(id){
 async function saveChapter(id){
  const title=$('#c_t').value.trim(),subject=$('#c_s').value.trim();
  if(!title||!subject)return toast('Enter a title and subject');
- const d={title,subject,lessons:+$('#c_l').value||1,desc:$('#c_d').value.trim(),content:editor?editor.getData():$('#c_c').value,status:$('#c_st').value};
+ const d={title,subject,lessons:+$('#c_l').value||1,desc:$('#c_d').value.trim(),content:editor?editor.getData():$('#c_c').value,status:$('#c_st').value,meta_title:$('#c_mt').value.trim(),meta_description:$('#c_md').value.trim(),meta_keywords:$('#c_mk').value.trim()};
  if(id)Object.assign(S.chapters.find(c=>c.id==id),d);else S.chapters.push({id:nid(S.chapters),...d});
  if(!await save()){return;}location.href='/admin/chapters';
 }
@@ -134,7 +134,7 @@ function rerender(focusId){
 function go(v){
  cur=v;$('#title').textContent=NAV.find(n=>n[0]==v)[1];
  $('#nav').innerHTML=NAV.map(n=>`<button class="${n[0]==v?'on':''}" onclick="location.href='/admin/${n[0]}'">${ic(n[2])}${n[1]}</button>`).join('');
- $('#side').classList.remove('open');rerender();scrollTo(0,0);
+ $('#side').classList.remove('open');if(v!=='settings')rerender();scrollTo(0,0);
 }
 $('#burger').onclick=()=>$('#side').classList.toggle('open');
 go(window.ADMIN_PAGE);

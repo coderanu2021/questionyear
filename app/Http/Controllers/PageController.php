@@ -7,10 +7,12 @@ use App\Models\Message;
 use App\Models\Quiz;
 use App\Models\Subject;
 use App\Models\User;
+use App\SiteSettings;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 
@@ -18,24 +20,26 @@ class PageController extends Controller
 {
     public function show(Request $request, string $page): View
     {
+        $settings = SiteSettings::values();
         $pages = [
-            'about' => ['About QuizHub', 'QuizHub brings chapter notes and practice quizzes together. Choose a subject, study the available notes and practice with immediate feedback.'],
+            'about' => ['About '.$settings['site_title'], $settings['about_content']],
             'help' => ['Help centre', 'Choose a subject and open a published chapter. Read its notes or select a quiz. Your results are saved to your progress when you are logged in. Contact us if you find an incorrect question.'],
             'careers' => ['Careers', 'There are no open positions currently. Use the contact form to express interest in contributing educational content.'],
             'privacy' => ['Privacy', 'We store your name, email, securely hashed password, quiz answers and results to provide your account and learning history. Contact form messages are stored for administrators to review.'],
-            'terms' => ['Terms of use', 'Use QuizHub for personal study and practice. Content is provided for learning and does not guarantee an exam result. Do not misuse accounts or submit abusive content.'],
-            'cookies' => ['Cookies', 'QuizHub uses a session cookie for login and request security. A remember-me cookie is used when you choose to stay logged in. Your theme preference is stored in your browser.'],
-            'contact' => ['Contact us', 'Send a question, report an issue or suggest a correction.'],
+            'terms' => ['Terms of use', 'Use '.$settings['site_title'].' for personal study and practice. Content is provided for learning and does not guarantee an exam result. Do not misuse accounts or submit abusive content.'],
+            'cookies' => ['Cookies', $settings['site_title'].' uses a session cookie for login and request security. A remember-me cookie is used when you choose to stay logged in. Your theme preference is stored in your browser.'],
+            'contact' => ['Contact us', $settings['contact_description']],
             'leaderboard' => ['Leaderboard', 'Registered learners ranked by average practice score.'],
             'progress' => ['My progress', 'Your saved practice attempts and chapter results.'],
             'forgot-password' => ['Reset your password', 'Enter your account email to request a reset link.'],
         ];
         abort_unless(isset($pages[$page]), 404);
         $attempts = $page === 'progress' ? Attempt::where('user_id', $request->user()->id)->latest()->get() : collect();
+        $dailyAttempts = $page === 'progress' ? DB::table('daily_quiz_attempts')->where('user_id', $request->user()->id)->orderByDesc('quiz_date')->orderByDesc('set_number')->get() : collect();
         $quizzes = Quiz::with('chapter.subject')->get()->keyBy('id');
         $leaders = $page === 'leaderboard' ? User::where('role', 'student')->where('status', 'active')->join('attempts', 'users.id', '=', 'attempts.user_id')->select('users.name')->selectRaw('AVG(attempts.percentage) as average, COUNT(*) as attempts')->groupBy('users.id', 'users.name')->orderByDesc('average')->limit(20)->get() : collect();
 
-        return view('website.content', ['page' => $page, 'title' => $pages[$page][0], 'description' => $pages[$page][1], 'attempts' => $attempts, 'quizzes' => $quizzes, 'leaders' => $leaders]);
+        return view('website.content', ['page' => $page, 'title' => $pages[$page][0], 'description' => $pages[$page][1], 'attempts' => $attempts, 'dailyAttempts' => $dailyAttempts, 'quizzes' => $quizzes, 'leaders' => $leaders]);
     }
 
     public function contact(Request $request): RedirectResponse
@@ -45,23 +49,11 @@ class PageController extends Controller
         return back()->with('status', 'Your message has been saved. An administrator can review it.');
     }
 
-    public function daily(): RedirectResponse
+    public function exam(string $exam): View|RedirectResponse
     {
-        $subjects = Subject::with(['chapters' => fn ($q) => $q->where('status', 'published')->orderBy('id'), 'chapters.quizzes'])->get();
-        $links = [];
-        foreach ($subjects as $subject) {
-            foreach ($subject->chapters as $index => $chapter) {
-                foreach ($chapter->quizzes as $quiz) {
-                    $links[] = route('quiz', ['subject' => $subject->slug, 'chapter' => $index, 'test' => $quiz->id]);
-                }
-            }
+        if (in_array($exam, ['ssc', 'upsc', 'banking', 'baking', 'railways', 'railway'], true)) {
+            return redirect()->route('upcoming', ['exam' => $exam]);
         }
-
-        return redirect($links ? $links[now()->dayOfYear % count($links)] : route('home').'#subjects');
-    }
-
-    public function exam(string $exam): View
-    {
         $exams = ['upsc' => ['History', 'Geography', 'Political Science', 'Economics', 'Environment'], 'ssc' => ['Mathematics', 'Reasoning', 'English', 'General Knowledge'], 'banking' => ['Mathematics', 'Reasoning', 'English', 'Economics'], 'railways' => ['Mathematics', 'Reasoning', 'Physics', 'General Knowledge'], 'neet' => ['Biology', 'Physics', 'Chemistry'], 'jee' => ['Mathematics', 'Physics', 'Chemistry'], 'cbse-board' => ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'English'], 'state-psc' => ['History', 'Geography', 'Political Science', 'General Knowledge']];
         abort_unless(isset($exams[$exam]), 404);
 
