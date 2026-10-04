@@ -24,7 +24,7 @@ jobs:
     env:
       LIGHTSAIL_HOST: ${{ secrets.LIGHTSAIL_HOST || '13.127.237.199' }}
       LIGHTSAIL_USER: ${{ secrets.LIGHTSAIL_USER || 'admin' }}
-      LIGHTSAIL_SSH_KEY: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+      LLIGHTSAIL_SSH_KEY_B64: ${{ secrets.LIGHTSAIL_SSH_KEY_B64 }}
       LIGHTSAIL_KNOWN_HOSTS: ${{ secrets.LIGHTSAIL_KNOWN_HOSTS }}
       LIGHTSAIL_DEPLOY_PATH: ${{ secrets.LIGHTSAIL_DEPLOY_PATH || '/home/admin/questionyear' }}
 
@@ -35,14 +35,14 @@ jobs:
       - name: Configure SSH
         run: |
           set -euo pipefail
-          : "${LIGHTSAIL_SSH_KEY:?Add the LIGHTSAIL_SSH_KEY repository secret}"
+          : "${LIGHTSAIL_SSH_KEY_B64:?Add the LIGHTSAIL_SSH_KEY_B64 repository secret}"
           : "${LIGHTSAIL_KNOWN_HOSTS:?Add the LIGHTSAIL_KNOWN_HOSTS repository secret}"
           [[ "$LIGHTSAIL_HOST" =~ ^[A-Za-z0-9][A-Za-z0-9.-]*$ ]]
           [[ "$LIGHTSAIL_USER" =~ ^[a-z_][a-z0-9_-]*$ ]]
           [[ "$LIGHTSAIL_DEPLOY_PATH" =~ ^/[A-Za-z0-9/_-]+$ ]]
           [[ "$LIGHTSAIL_DEPLOY_PATH" != / && "$LIGHTSAIL_DEPLOY_PATH" != *..* ]]
           install -m 700 -d "$HOME/.ssh"
-          printf '%s\n' "$LIGHTSAIL_SSH_KEY" | tr -d '\r' > "$HOME/.ssh/lightsail"
+          printf '%s' "$LIGHTSAIL_SSH_KEY_B64" | base64 --decode > "$HOME/.ssh/lightsail"
           printf '%s\n' "$LIGHTSAIL_KNOWN_HOSTS" | tr -d '\r' > "$HOME/.ssh/known_hosts"
           chmod 600 "$HOME/.ssh/lightsail" "$HOME/.ssh/known_hosts"
           ssh-keygen -y -P '' -f "$HOME/.ssh/lightsail" > /dev/null
