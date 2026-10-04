@@ -1,0 +1,955 @@
+{
+  "S": [
+    [
+      "History",
+      "Humanities",
+      "Ancient, medieval and modern history, from empires to independence movements.",
+      "Indus Valley Civilization|Vedic Age|Mauryan and Gupta Empires|Delhi Sultanate|Mughal Empire|Revolt of 1857|Freedom Struggle|Post-Independence India"
+    ],
+    [
+      "Geography",
+      "Humanities",
+      "Physical, human and world geography, maps and climate.",
+      "Universe and Solar System|Earth Structure and Landforms|Rivers and Lakes|Climate and Monsoon|Soils and Natural Vegetation|Indian Agriculture|Population and Cities|World Geography"
+    ],
+    [
+      "Political Science",
+      "Humanities",
+      "Constitution, governance, rights and international relations.",
+      "Making of the Constitution|Fundamental Rights|Directive Principles|Parliament|President and Governor|Judiciary|Local Government|International Relations"
+    ],
+    [
+      "Economics",
+      "General",
+      "Micro and macro basics, banking, budgets and trade.",
+      "Basic Concepts|National Income|Money and Banking|Inflation|Budget and Taxation|Poverty and Unemployment|International Trade|Five Year Plans"
+    ],
+    [
+      "Art & Culture",
+      "Humanities",
+      "Architecture, music, dance, festivals and heritage.",
+      "Architecture|Sculpture and Painting|Classical Dance|Music|Festivals|Literature|UNESCO Heritage Sites"
+    ],
+    [
+      "Physics",
+      "Science",
+      "Motion, energy, electricity, optics and modern physics.",
+      "Units and Measurement|Motion and Force|Work, Energy and Power|Heat|Light and Optics|Sound|Electricity|Magnetism|Modern Physics"
+    ],
+    [
+      "Chemistry",
+      "Science",
+      "Elements, reactions, organic chemistry and the periodic table.",
+      "Matter and Atoms|Periodic Table|Chemical Bonding|Acids, Bases and Salts|Metals and Non-metals|Carbon Compounds|Chemical Reactions|Everyday Chemistry"
+    ],
+    [
+      "Biology",
+      "Science",
+      "Cells, human body, genetics, plants and ecosystems.",
+      "Cell Structure|Plant Kingdom|Animal Kingdom|Human Digestive System|Circulatory System|Nervous System|Genetics|Diseases and Nutrition"
+    ],
+    [
+      "Environment",
+      "Science",
+      "Ecology, climate change, biodiversity and conservation.",
+      "Ecosystems|Biodiversity|Climate Change|Pollution|Conservation Laws|Renewable Energy"
+    ],
+    [
+      "Astronomy",
+      "Science",
+      "Solar system, stars, space missions and cosmology.",
+      "Solar System|Stars and Galaxies|Space Missions|Satellites|Eclipses and Tides"
+    ],
+    [
+      "Mathematics",
+      "Maths & Tech",
+      "Arithmetic, algebra, geometry and number systems.",
+      "Number System|Percentage|Ratio and Proportion|Profit and Loss|Time and Work|Algebra|Geometry|Mensuration|Trigonometry"
+    ],
+    [
+      "Reasoning",
+      "Maths & Tech",
+      "Series, puzzles, coding-decoding and logical deduction.",
+      "Number Series|Coding-Decoding|Blood Relations|Direction Sense|Syllogism|Seating Arrangement|Puzzles"
+    ],
+    [
+      "Computer Science",
+      "Maths & Tech",
+      "Programming basics, networks, databases and cloud.",
+      "Computer Fundamentals|Operating Systems|Networking and Internet|Databases|Programming Basics|Cloud Computing|Cyber Security"
+    ],
+    [
+      "Data Interpretation",
+      "Maths & Tech",
+      "Tables, charts and graphs with quick calculations.",
+      "Tables|Bar Graphs|Line Graphs|Pie Charts|Caselets"
+    ],
+    [
+      "General Knowledge",
+      "General",
+      "Static GK on people, places, awards and firsts.",
+      "Famous Personalities|Awards and Honours|Books and Authors|Sports|Important Days|Countries and Capitals|Firsts in India"
+    ],
+    [
+      "Current Affairs",
+      "General",
+      "Weekly and monthly news capsules with quizzes.",
+      "National News|International News|Economy and Business|Science and Technology|Sports Updates|Appointments|Government Schemes"
+    ],
+    [
+      "English",
+      "General",
+      "Grammar, vocabulary, comprehension and error spotting.",
+      "Grammar|Vocabulary|Synonyms and Antonyms|Idioms and Phrases|Error Spotting|Reading Comprehension|Sentence Improvement"
+    ]
+  ],
+  "QB": {
+    "history:6": [
+      [
+        "Who helped found the Indian National Congress in 1885?",
+        [
+          "A.O. Hume",
+          "Dadabhai Naoroji",
+          "G.K. Gokhale",
+          "Lala Lajpat Rai"
+        ],
+        0,
+        "Allan Octavian Hume, a retired British civil servant, was a key founder of the Congress in 1885."
+      ],
+      [
+        "The Dandi March of 1930 was a protest against which British law?",
+        [
+          "Rowlatt Act",
+          "Salt law",
+          "Vernacular Press Act",
+          "Arms Act"
+        ],
+        1,
+        "Gandhi marched from Sabarmati to Dandi to break the salt law and begin the Civil Disobedience Movement."
+      ],
+      [
+        "In which year did the Jallianwala Bagh massacre take place?",
+        [
+          "1905",
+          "1919",
+          "1930",
+          "1942"
+        ],
+        1,
+        "General Dyer's troops fired on a gathering in Amritsar on 13 April 1919."
+      ],
+      [
+        "Who gave the slogan 'Do or Die' during the Quit India Movement?",
+        [
+          "Subhas Chandra Bose",
+          "Jawaharlal Nehru",
+          "Mahatma Gandhi",
+          "Sardar Patel"
+        ],
+        2,
+        "Gandhi gave this call in Bombay in August 1942."
+      ],
+      [
+        "Which Viceroy partitioned Bengal in 1905?",
+        [
+          "Lord Curzon",
+          "Lord Ripon",
+          "Lord Dalhousie",
+          "Lord Minto"
+        ],
+        0,
+        "Lord Curzon announced the partition, which led to the Swadeshi Movement."
+      ]
+    ],
+    "history:0": [
+      [
+        "Which Harappan site is famous for the Great Bath?",
+        [
+          "Lothal",
+          "Mohenjo-daro",
+          "Kalibangan",
+          "Dholavira"
+        ],
+        1,
+        "The Great Bath was found at Mohenjo-daro in present-day Pakistan."
+      ],
+      [
+        "The Indus Valley Civilization is also called the:",
+        [
+          "Vedic Civilization",
+          "Harappan Civilization",
+          "Gupta Civilization",
+          "Mauryan Civilization"
+        ],
+        1,
+        "Harappa was the first site discovered, so the civilization is also known as Harappan."
+      ],
+      [
+        "Which metal was not known to the Harappan people?",
+        [
+          "Copper",
+          "Bronze",
+          "Iron",
+          "Gold"
+        ],
+        2,
+        "Harappans used copper, bronze and gold, but iron came into use much later."
+      ],
+      [
+        "Kalibangan, a Harappan site, is located in which state?",
+        [
+          "Gujarat",
+          "Punjab",
+          "Rajasthan",
+          "Uttar Pradesh"
+        ],
+        2,
+        "Kalibangan lies on the dry bed of the Ghaggar-Hakra river in Rajasthan."
+      ],
+      [
+        "Which Harappan port city is in Gujarat?",
+        [
+          "Lothal",
+          "Harappa",
+          "Ropar",
+          "Chanhudaro"
+        ],
+        0,
+        "Lothal had a dockyard and was a major trade centre."
+      ]
+    ],
+    "geography:2": [
+      [
+        "Which is the longest river flowing mostly within India?",
+        [
+          "Godavari",
+          "Ganga",
+          "Yamuna",
+          "Krishna"
+        ],
+        1,
+        "The Ganga is about 2,500 km long."
+      ],
+      [
+        "Which river is called 'Dakshin Ganga'?",
+        [
+          "Krishna",
+          "Kaveri",
+          "Godavari",
+          "Mahanadi"
+        ],
+        2,
+        "The Godavari is the longest peninsular river, so it is called Dakshin Ganga."
+      ],
+      [
+        "Chilika Lake is located in which state?",
+        [
+          "Odisha",
+          "Kerala",
+          "Andhra Pradesh",
+          "West Bengal"
+        ],
+        0,
+        "Chilika is a brackish water lagoon on the coast of Odisha."
+      ],
+      [
+        "Which river flows west through a rift valley into the Arabian Sea?",
+        [
+          "Mahanadi",
+          "Narmada",
+          "Krishna",
+          "Kaveri"
+        ],
+        1,
+        "The Narmada flows west through a rift valley and drains into the Arabian Sea."
+      ],
+      [
+        "Which lake is often called the largest freshwater lake in India?",
+        [
+          "Wular Lake",
+          "Chilika Lake",
+          "Sambhar Lake",
+          "Pulicat Lake"
+        ],
+        0,
+        "Wular Lake in Jammu and Kashmir is commonly cited as India's largest freshwater lake."
+      ]
+    ],
+    "biology:3": [
+      [
+        "Where does most digestion and absorption of food take place?",
+        [
+          "Stomach",
+          "Small intestine",
+          "Large intestine",
+          "Oesophagus"
+        ],
+        1,
+        "The small intestine has villi that absorb most nutrients."
+      ],
+      [
+        "Which is the largest gland in the human body?",
+        [
+          "Pancreas",
+          "Thyroid",
+          "Liver",
+          "Pituitary"
+        ],
+        2,
+        "The liver is the largest gland and produces bile."
+      ],
+      [
+        "Which enzyme in saliva starts the digestion of starch?",
+        [
+          "Pepsin",
+          "Salivary amylase",
+          "Lipase",
+          "Trypsin"
+        ],
+        1,
+        "Salivary amylase breaks starch into simpler sugars in the mouth."
+      ],
+      [
+        "Where is bile stored?",
+        [
+          "Liver",
+          "Pancreas",
+          "Gall bladder",
+          "Stomach"
+        ],
+        2,
+        "Bile is made in the liver and stored in the gall bladder."
+      ],
+      [
+        "Which acid is secreted in the stomach?",
+        [
+          "Sulphuric acid",
+          "Hydrochloric acid",
+          "Nitric acid",
+          "Acetic acid"
+        ],
+        1,
+        "Hydrochloric acid activates pepsin and kills many germs."
+      ]
+    ],
+    "reasoning:1": [
+      [
+        "If CAT is coded as DBU, how is DOG coded?",
+        [
+          "EPH",
+          "DPH",
+          "EOH",
+          "FPI"
+        ],
+        0,
+        "Each letter moves one step forward: D to E, O to P, G to H."
+      ],
+      [
+        "If A=1, B=2, C=3 and so on, what is the sum for the word CAB?",
+        [
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        1,
+        "C + A + B = 3 + 1 + 2 = 6."
+      ],
+      [
+        "If MANGO is coded as NBOHP, how is APPLE coded?",
+        [
+          "BQQMF",
+          "BPQMF",
+          "CQQNG",
+          "AQQME"
+        ],
+        0,
+        "Each letter moves one step forward, so APPLE becomes BQQMF."
+      ],
+      [
+        "If RED is written as SFE, how is BLUE written?",
+        [
+          "CMVF",
+          "CNVF",
+          "BMVF",
+          "CMWF"
+        ],
+        0,
+        "Add one to every letter: B to C, L to M, U to V, E to F."
+      ],
+      [
+        "If PEN is coded as NEP, how is BOOK coded?",
+        [
+          "KOOB",
+          "OOKB",
+          "BKOO",
+          "KBOO"
+        ],
+        0,
+        "The code reverses the order of the letters."
+      ]
+    ],
+    "mathematics:1": [
+      [
+        "What is 25% of 480?",
+        [
+          "100",
+          "120",
+          "140",
+          "160"
+        ],
+        1,
+        "25% is one-fourth, and 480 ÷ 4 = 120."
+      ],
+      [
+        "If 40% of a number is 80, what is the number?",
+        [
+          "160",
+          "180",
+          "200",
+          "240"
+        ],
+        2,
+        "The number is 80 × 100 ÷ 40 = 200."
+      ],
+      [
+        "A price rises from ₹200 to ₹250. What is the percentage increase?",
+        [
+          "20%",
+          "25%",
+          "30%",
+          "50%"
+        ],
+        1,
+        "The increase is 50 on a base of 200, which is 25%."
+      ],
+      [
+        "What is 15% of 200 plus 10% of 300?",
+        [
+          "50",
+          "55",
+          "60",
+          "65"
+        ],
+        2,
+        "15% of 200 is 30 and 10% of 300 is 30, so the total is 60."
+      ],
+      [
+        "A student scores 360 out of 600. What is the percentage?",
+        [
+          "50%",
+          "55%",
+          "60%",
+          "65%"
+        ],
+        2,
+        "360 ÷ 600 × 100 = 60%."
+      ]
+    ]
+  },
+  "LN": {
+    "history:6": {
+      "sub": "From petitions to Poorna Swaraj: India's long road to 15 August 1947",
+      "icon": "fa-flag",
+      "time": "7 min read",
+      "s": [
+        {
+          "h": "The Birth of Organised Nationalism",
+          "i": "fa-landmark",
+          "p": [
+            "In December 1885, a small group of educated Indians gathered in Bombay and founded the <b>Indian National Congress</b>. A retired British civil servant, <b>A.O. Hume</b>, helped bring the group together, and <b>W.C. Bonnerjee</b> presided over the first session.",
+            "The early leaders, known as the <b>Moderates</b>, included Dadabhai Naoroji, G.K. Gokhale and Pherozeshah Mehta. They trusted constitutional methods such as petitions, speeches and resolutions. Naoroji's <b>drain of wealth</b> theory showed how British rule steadily carried India's resources out of the country."
+          ],
+          "n": {
+            "type": "key",
+            "x": "Moderates believed in petitions and prayers. The Extremists, who came later, believed in boycott and self-reliance."
+          }
+        },
+        {
+          "h": "Partition of Bengal and the Swadeshi Wave",
+          "i": "fa-map-location-dot",
+          "p": [
+            "In 1905 the Viceroy <b>Lord Curzon</b> divided Bengal into two parts, officially for administrative convenience. Indians saw it as a plan to split Hindus from Muslims, and the reaction was explosive. The <b>Swadeshi</b> movement urged people to use Indian goods, while the <b>Boycott</b> of British cloth spread across the country.",
+            "This phase gave rise to the <b>Extremists</b>, remembered as Lal-Bal-Pal: Lala Lajpat Rai, Bal Gangadhar Tilak and Bipin Chandra Pal. Tilak's cry that Swaraj was his birthright became a rallying call. The Muslim League was formed in 1906, and in 1907 the Congress split at Surat between the Moderates and the Extremists."
+          ]
+        },
+        {
+          "h": "Gandhi Enters: The Age of Mass Movements",
+          "i": "fa-people-group",
+          "p": [
+            "Mahatma Gandhi returned from South Africa in 1915. His first satyagrahas in India were at <b>Champaran</b> (1917), Kheda and Ahmedabad (1918). Then came the <b>Rowlatt Act</b> of 1919, which allowed detention without trial. During the protests, General Dyer's troops fired on an unarmed crowd at <b>Jallianwala Bagh</b>, Amritsar, on 13 April 1919.",
+            "Gandhi answered with the <b>Non-Cooperation Movement</b> (1920-22), which he withdrew after violence at Chauri Chaura. In 1930 he led the <b>Dandi March</b> from Sabarmati to the sea to break the salt law, beginning the Civil Disobedience Movement."
+          ],
+          "t": {
+            "h": [
+              "Year",
+              "Event"
+            ],
+            "r": [
+              [
+                "1917",
+                "Champaran Satyagraha"
+              ],
+              [
+                "1919",
+                "Rowlatt Act and Jallianwala Bagh"
+              ],
+              [
+                "1920",
+                "Non-Cooperation Movement"
+              ],
+              [
+                "1930",
+                "Dandi March, Civil Disobedience"
+              ],
+              [
+                "1942",
+                "Quit India Movement"
+              ]
+            ]
+          }
+        },
+        {
+          "h": "Quit India and Independence",
+          "i": "fa-flag-checkered",
+          "p": [
+            "The Cripps Mission of 1942 failed to satisfy Indian leaders. In August 1942 Gandhi gave the call <b>Do or Die</b> at Bombay, launching the Quit India Movement. Most leaders were arrested at once, yet the movement spread widely on its own.",
+            "After the Second World War, the Cabinet Mission of 1946 prepared the ground for a transfer of power. India became independent on <b>15 August 1947</b>, together with the pain of Partition."
+          ],
+          "n": {
+            "type": "tip",
+            "x": "Learn this year chain: 1885, 1905, 1919, 1930, 1942, 1947. Most questions test these dates."
+          }
+        }
+      ],
+      "sum": [
+        "The Congress was founded in 1885; Hume was a key founder.",
+        "The Partition of Bengal (1905) by Curzon sparked Swadeshi.",
+        "Jallianwala Bagh (1919) and Dandi March (1930) are major turning points.",
+        "Quit India (1942) gave the slogan Do or Die.",
+        "Independence came on 15 August 1947."
+      ]
+    },
+    "history:0": {
+      "sub": "One of the world's first great urban cultures, built on grids, bricks and trade",
+      "icon": "fa-city",
+      "time": "6 min read",
+      "s": [
+        {
+          "h": "Discovery and Timeline",
+          "i": "fa-magnifying-glass",
+          "p": [
+            "The civilization was first noticed at <b>Harappa</b> in 1921 and then at <b>Mohenjo-daro</b> in 1922, which is why it is also called the <b>Harappan Civilization</b>. Its mature phase lasted from about 2600 to 1900 BCE, and it belongs to the <b>Bronze Age</b>.",
+            "Its settlements stretched across present-day Pakistan and north-western India, along the Indus and the now-dry Ghaggar-Hakra river."
+          ]
+        },
+        {
+          "h": "Cities Planned Like Never Before",
+          "i": "fa-table-cells",
+          "p": [
+            "What amazes historians is the town planning. Streets met at right angles in a <b>grid pattern</b>, houses were built of <b>burnt bricks</b>, and a system of <b>covered drains</b> carried waste water away. Most cities were divided into a raised <b>citadel</b> and a lower town.",
+            "At Mohenjo-daro stands the famous <b>Great Bath</b>, probably used for ritual bathing. Large granaries have been found at Harappa."
+          ],
+          "n": {
+            "type": "key",
+            "x": "Great Bath = Mohenjo-daro. Dockyard = Lothal. Fire altars = Kalibangan."
+          }
+        },
+        {
+          "h": "Important Sites at a Glance",
+          "i": "fa-location-dot",
+          "p": [
+            "Hundreds of sites have been found. The table lists the ones that appear again and again in exams."
+          ],
+          "t": {
+            "h": [
+              "Site",
+              "Location",
+              "Known for"
+            ],
+            "r": [
+              [
+                "Harappa",
+                "Punjab (Pakistan)",
+                "Granaries"
+              ],
+              [
+                "Mohenjo-daro",
+                "Sindh (Pakistan)",
+                "Great Bath"
+              ],
+              [
+                "Lothal",
+                "Gujarat",
+                "Dockyard, trade"
+              ],
+              [
+                "Kalibangan",
+                "Rajasthan",
+                "Ploughed field, fire altars"
+              ],
+              [
+                "Dholavira",
+                "Gujarat",
+                "Water reservoirs"
+              ],
+              [
+                "Chanhudaro",
+                "Sindh (Pakistan)",
+                "Bead making"
+              ]
+            ]
+          }
+        },
+        {
+          "h": "Life, Trade and Craft",
+          "i": "fa-boxes-stacked",
+          "p": [
+            "The people grew <b>wheat, barley</b> and <b>cotton</b>, and kept cattle, sheep and goats. Craftsmen worked with <b>copper, bronze, gold</b> and silver, but <b>iron was unknown</b>. Square stone <b>seals</b> made of steatite carried animal figures and a script that nobody has yet deciphered.",
+            "Traders exchanged goods with Mesopotamia by land and sea, and Lothal's dockyard shows how important sea trade was."
+          ],
+          "n": {
+            "type": "tip",
+            "x": "A favourite question: which metal was not known to the Harappans? The answer is iron."
+          }
+        }
+      ],
+      "sum": [
+        "Harappa was found in 1921 and Mohenjo-daro in 1922.",
+        "Cities followed a grid plan with burnt bricks and covered drains.",
+        "Lothal had a dockyard; Kalibangan had fire altars.",
+        "Copper, bronze and gold were used; iron was not."
+      ]
+    },
+    "geography:2": {
+      "sub": "The lifelines of India: how rivers shape land, farming and cities",
+      "icon": "fa-water",
+      "time": "6 min read",
+      "s": [
+        {
+          "h": "Two Great River Systems",
+          "i": "fa-mountain",
+          "p": [
+            "Indian rivers fall into two groups. The <b>Himalayan rivers</b>, the Indus, the Ganga and the Brahmaputra, are <b>perennial</b>: they are fed by both rain and melting snow, so they carry water all year.",
+            "The <b>Ganga</b>, about 2,500 km long, is the longest river flowing mostly within India. Its important tributaries include the Yamuna, Ghaghara, Gandak and Kosi."
+          ]
+        },
+        {
+          "h": "The Peninsular Rivers",
+          "i": "fa-droplet",
+          "p": [
+            "Rivers of the peninsula depend on monsoon rain, so their flow rises and falls with the seasons. Because the Deccan plateau slopes towards the east, most of them, such as the <b>Godavari, Krishna, Kaveri</b> and <b>Mahanadi</b>, flow into the Bay of Bengal.",
+            "The Godavari is the longest peninsular river and is called <b>Dakshin Ganga</b>. Two rivers behave differently: the <b>Narmada</b> and <b>Tapi</b> flow west through rift valleys and fall into the Arabian Sea, forming estuaries instead of deltas."
+          ],
+          "t": {
+            "h": [
+              "East-flowing",
+              "West-flowing"
+            ],
+            "r": [
+              [
+                "Godavari",
+                "Narmada"
+              ],
+              [
+                "Krishna",
+                "Tapi"
+              ],
+              [
+                "Kaveri",
+                "Mahi"
+              ],
+              [
+                "Mahanadi",
+                "Sabarmati"
+              ]
+            ]
+          },
+          "n": {
+            "type": "tip",
+            "x": "Narmada and Tapi are the two big west-flowing rivers of the peninsula."
+          }
+        },
+        {
+          "h": "Lakes of India",
+          "i": "fa-sailboat",
+          "p": [
+            "Lakes may be freshwater, saline or coastal lagoons. <b>Wular Lake</b> in Jammu and Kashmir is commonly cited as the largest freshwater lake, while <b>Chilika</b> in Odisha is a brackish water lagoon and a famous bird habitat."
+          ],
+          "t": {
+            "h": [
+              "Lake",
+              "State",
+              "Type"
+            ],
+            "r": [
+              [
+                "Wular",
+                "Jammu and Kashmir",
+                "Freshwater"
+              ],
+              [
+                "Dal",
+                "Jammu and Kashmir",
+                "Freshwater"
+              ],
+              [
+                "Chilika",
+                "Odisha",
+                "Brackish lagoon"
+              ],
+              [
+                "Pulicat",
+                "Andhra Pradesh / Tamil Nadu",
+                "Lagoon"
+              ],
+              [
+                "Sambhar",
+                "Rajasthan",
+                "Salt lake"
+              ]
+            ]
+          }
+        }
+      ],
+      "sum": [
+        "Himalayan rivers are perennial; peninsular rivers are rain-fed.",
+        "The Ganga is the longest river within India; the Godavari is the longest peninsular river.",
+        "Narmada and Tapi flow west into the Arabian Sea.",
+        "Chilika is a lagoon in Odisha; Wular is a freshwater lake in J&amp;K."
+      ]
+    },
+    "biology:3": {
+      "sub": "The remarkable journey of a meal, from your first bite to the last nutrient",
+      "icon": "fa-utensils",
+      "time": "6 min read",
+      "s": [
+        {
+          "h": "The Journey of Food",
+          "i": "fa-route",
+          "p": [
+            "Food travels through the <b>alimentary canal</b>: mouth, oesophagus, stomach, small intestine, large intestine and anus. Along the way the body carries out five steps: <b>ingestion, digestion, absorption, assimilation</b> and <b>egestion</b>.",
+            "Digestion is both mechanical, as teeth chew and muscles churn, and chemical, as <b>enzymes</b> break big molecules into small ones that the blood can carry."
+          ]
+        },
+        {
+          "h": "The Mouth and the Stomach",
+          "i": "fa-bowl-food",
+          "p": [
+            "Digestion begins in the mouth. Saliva contains <b>salivary amylase</b>, an enzyme that starts turning starch into sugar. Waves of muscle movement, called <b>peristalsis</b>, push food down the oesophagus.",
+            "In the stomach, gastric juice does the work. <b>Hydrochloric acid</b> kills germs and creates the right conditions for <b>pepsin</b>, an enzyme that digests proteins. Mucus protects the stomach wall from its own acid."
+          ]
+        },
+        {
+          "h": "The Small Intestine: Where Absorption Happens",
+          "i": "fa-flask",
+          "p": [
+            "The small intestine is the longest part of the canal and the main site of digestion and absorption. Its inner wall is covered with finger-like <b>villi</b> that increase the surface area for absorbing nutrients.",
+            "The <b>liver</b>, the largest gland of the body, makes <b>bile</b>, which is stored in the <b>gall bladder</b>. Bile does not contain enzymes, but it breaks fat into tiny droplets. The pancreas adds juice containing trypsin, lipase and amylase."
+          ],
+          "t": {
+            "h": [
+              "Food",
+              "Enzyme",
+              "Where"
+            ],
+            "r": [
+              [
+                "Starch",
+                "Amylase",
+                "Mouth, small intestine"
+              ],
+              [
+                "Proteins",
+                "Pepsin, Trypsin",
+                "Stomach, small intestine"
+              ],
+              [
+                "Fats",
+                "Lipase (with bile)",
+                "Small intestine"
+              ]
+            ]
+          }
+        },
+        {
+          "h": "The Large Intestine",
+          "i": "fa-recycle",
+          "p": [
+            "What remains passes into the large intestine, which absorbs most of the remaining <b>water</b> and forms solid waste that leaves the body through the anus."
+          ],
+          "n": {
+            "type": "tip",
+            "x": "Remember: most absorption is in the small intestine, water absorption is in the large intestine."
+          }
+        }
+      ],
+      "sum": [
+        "Digestion starts in the mouth with salivary amylase.",
+        "The stomach secretes HCl and pepsin.",
+        "Most digestion and absorption occurs in the small intestine.",
+        "The liver is the largest gland; bile is stored in the gall bladder."
+      ]
+    },
+    "reasoning:1": {
+      "sub": "Crack the secret rule behind every coded word",
+      "icon": "fa-lock",
+      "time": "5 min read",
+      "s": [
+        {
+          "h": "What is Coding-Decoding?",
+          "i": "fa-key",
+          "p": [
+            "In coding-decoding questions, a word or number is changed into a <b>code</b> using a hidden rule. You are shown one example, and you must discover the rule and use it on a new word. The rule is nearly always simple, so the skill lies in spotting it quickly."
+          ]
+        },
+        {
+          "h": "Letter Shifting",
+          "i": "fa-arrows-left-right",
+          "p": [
+            "The most common rule moves every letter a fixed number of steps along the alphabet. In <b>CAT to DBU</b>, each letter moves one step forward. Using the same rule, <b>DOG</b> becomes <b>EPH</b>.",
+            "Sometimes letters are replaced by their <b>position numbers</b>, where A=1, B=2 and so on up to Z=26. Opposite letters, such as A and Z or B and Y, always add up to 27."
+          ],
+          "t": {
+            "h": [
+              "Word",
+              "Code",
+              "Rule"
+            ],
+            "r": [
+              [
+                "CAT",
+                "DBU",
+                "+1 each letter"
+              ],
+              [
+                "RED",
+                "SFE",
+                "+1 each letter"
+              ],
+              [
+                "MANGO",
+                "NBOHP",
+                "+1 each letter"
+              ],
+              [
+                "PEN",
+                "NEP",
+                "Reverse the word"
+              ]
+            ]
+          },
+          "n": {
+            "type": "tip",
+            "x": "Memorise EJOTY: E=5, J=10, O=15, T=20, Y=25. It helps you count positions fast."
+          }
+        },
+        {
+          "h": "Reversal and Position Patterns",
+          "i": "fa-rotate-left",
+          "p": [
+            "Another rule writes the letters in <b>reverse order</b>, so PEN becomes NEP. Some questions mix two rules, for example reversing the word and then shifting every letter. When that happens, test each rule on its own first."
+          ]
+        },
+        {
+          "h": "A Step-by-Step Method",
+          "i": "fa-list-check",
+          "p": [
+            "First compare the <b>first letter</b> of the word with the first letter of its code to see the shift. Then check that the same rule fits the other letters. Finally, apply it to the new word.",
+            "Worked example: if MANGO is coded as NBOHP, each letter moves one step ahead, so APPLE is coded as <b>BQQMF</b>."
+          ]
+        }
+      ],
+      "sum": [
+        "Find the rule from the given example.",
+        "Common rules are +1, -1, reversal and position numbers.",
+        "Opposite letters add up to 27.",
+        "Always test the rule on every letter."
+      ]
+    },
+    "mathematics:1": {
+      "sub": "The foundation of profit and loss, interest and data interpretation",
+      "icon": "fa-percent",
+      "time": "5 min read",
+      "s": [
+        {
+          "h": "What Does Percent Mean?",
+          "i": "fa-percent",
+          "p": [
+            "The word <b>percent</b> means per hundred. So 25% means 25 out of every 100. To find x% of a number N, multiply N by x and divide by 100.",
+            "To express one number as a percentage of another, use <b>(obtained / total) × 100</b>. A student who scores 360 out of 600 has scored 60%."
+          ]
+        },
+        {
+          "h": "Handy Percentage-Fraction Pairs",
+          "i": "fa-table",
+          "p": [
+            "Learning a few fractions saves a lot of time. Instead of multiplying by 25 and dividing by 100, just divide by 4."
+          ],
+          "t": {
+            "h": [
+              "Percentage",
+              "Fraction"
+            ],
+            "r": [
+              [
+                "50%",
+                "1/2"
+              ],
+              [
+                "25%",
+                "1/4"
+              ],
+              [
+                "20%",
+                "1/5"
+              ],
+              [
+                "10%",
+                "1/10"
+              ],
+              [
+                "12.5%",
+                "1/8"
+              ],
+              [
+                "33.33%",
+                "1/3"
+              ]
+            ]
+          },
+          "n": {
+            "type": "key",
+            "x": "25% of 480 = 480 ÷ 4 = 120. No long multiplication needed."
+          }
+        },
+        {
+          "h": "Percentage Increase and Decrease",
+          "i": "fa-chart-line",
+          "p": [
+            "To find how much a value has grown or fallen, use <b>% change = (change / original) × 100</b>. Always divide by the <b>original</b> value, not the new one.",
+            "If a price rises from ₹200 to ₹250, the change is 50 and the base is 200, so the increase is 25%."
+          ]
+        },
+        {
+          "h": "Finding the Whole",
+          "i": "fa-calculator",
+          "p": [
+            "Sometimes the percentage and its value are given, and you must find the full number. If x% of a number is V, then the number equals <b>V × 100 / x</b>.",
+            "For example, if 40% of a number is 80, the number is 80 × 100 / 40 = <b>200</b>."
+          ],
+          "n": {
+            "type": "tip",
+            "x": "Always convert the percentage to a simple fraction first. It is faster and less error-prone."
+          }
+        }
+      ],
+      "sum": [
+        "x% of N = x × N / 100.",
+        "Learn fraction equivalents like 25% = 1/4.",
+        "% change = change / original × 100.",
+        "If x% of a number is V, the number is V × 100 / x."
+      ]
+    }
+  }
+}

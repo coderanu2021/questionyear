@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>QuizHub – Practice quizzes for every subject</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--navy:#002050;--navy-d:#00133a;--navy-m:#0b3a73;--accent:#0078d4;--accent-h:#106ebe;--cyan:#50e6ff;--link:#0067b8;
+--bg:#f3f2f1;--card:#fff;--text:#201f1e;--muted:#605e5c;--line:#d2d0ce;--ok:#107c10;--bad:#d13438}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1a19;--card:#292827;--text:#f3f2f1;--muted:#c8c6c4;--line:#3b3a39;--link:#4cc2ff}}
+:root[data-theme="dark"]{--bg:#1b1a19;--card:#292827;--text:#f3f2f1;--muted:#c8c6c4;--line:#3b3a39;--link:#4cc2ff}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(110px + env(safe-area-inset-top,0px));scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 "Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:var(--card);border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:center;gap:8px;height:64px}
+.logo{font-weight:700;font-size:21px;letter-spacing:-.3px;display:flex;align-items:center;gap:10px;color:var(--text)}
+nav{margin-left:28px}nav ul{list-style:none;margin:0;padding:0;display:flex;gap:2px}
+nav a,nav button{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 14px;border-radius:6px;font:inherit;font-size:15px;color:var(--text);background:none;border:0;cursor:pointer}
+nav a:hover,nav button:hover,nav button[aria-expanded=true]{background:var(--bg)}
+nav button svg{transition:transform .2s}nav button[aria-expanded=true] svg{transform:rotate(180deg)}
+.sp{flex:1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:40px;padding:0 20px;border-radius:4px;font-weight:600;font-size:15px;border:1px solid transparent;cursor:pointer;font-family:inherit}
+.btn-o{background:var(--accent);color:#fff}.btn-o:hover{background:var(--accent-h)}
+.btn-l{background:transparent;color:var(--text);border-color:var(--muted)}.btn-l:hover{background:var(--bg)}
+.hero .btn-l{color:#fff;border-color:#fff}.hero .btn-l:hover{background:rgba(255,255,255,.12)}
+.signin{font-size:15px;font-weight:600;padding:0 14px;height:40px;display:inline-flex;align-items:center;border-radius:6px;color:var(--text)}.signin:hover{background:var(--bg)}
+.theme,.menu-btn{background:none;border:0;color:var(--text);width:40px;height:40px;border-radius:6px;cursor:pointer;display:grid;place-items:center}
+.theme:hover,.menu-btn:hover{background:var(--bg)}.menu-btn{display:none}
+.mega{display:none;position:absolute;left:0;right:0;top:100%;background:var(--card);border-bottom:1px solid var(--line);box-shadow:0 16px 32px rgba(0,0,0,.14)}
+.mega.open{display:block}
+.mega .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;padding-top:28px;padding-bottom:28px}
+.mega h4{margin:0 0 10px;font-size:14px;padding-bottom:8px;border-bottom:2px solid var(--c);color:var(--text)}
+.mega a{display:block;padding:5px 0;font-size:15px;color:var(--muted)}.mega a:hover{color:var(--accent)}
+.hero{background:radial-gradient(circle at 88% 12%,rgba(80,230,255,.22),transparent 42%),radial-gradient(rgba(255,255,255,.09) 1px,transparent 1.5px) 0 0/24px 24px,linear-gradient(120deg,#00133a,#002050 50%,#0063b1);color:#fff;padding:72px 0 100px}
+.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
+h1{font-size:clamp(32px,4.6vw,52px);line-height:1.1;margin:0 0 16px;letter-spacing:-1px;font-weight:600}
+.hero p{font-size:18px;color:#e1dfdd;max-width:52ch;margin:0 0 28px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.hero .btn{height:46px;padding:0 24px;font-size:16px}
+.stats{display:flex;gap:32px;margin-top:36px;flex-wrap:wrap}
+.stats strong{display:block;font-size:28px;color:var(--cyan)}.stats span{font-size:14px;color:#c8c6c4}
+.demo{background:var(--card);color:var(--text);border-radius:8px;border-top:5px solid var(--accent);padding:24px;box-shadow:0 20px 40px rgba(0,0,0,.35)}
+.demo-h{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:10px}
+.demo h3{margin:0 0 16px;font-size:19px;line-height:1.35}
+.opt{display:block;width:100%;text-align:left;font:inherit;font-size:15px;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:11px 14px;margin-bottom:8px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt.ok{background:rgba(29,129,2,.15);border-color:var(--ok)}.opt.bad{background:rgba(209,50,18,.14);border-color:var(--bad)}
+.fb{min-height:22px;font-size:14px;color:var(--muted);margin:6px 0 10px}
+.demo-f{display:flex;justify-content:space-between;align-items:center}
+.demo-f button{background:none;border:0;color:var(--link);font:inherit;font-weight:700;cursor:pointer}
+section{padding:60px 0}
+h2{font-size:28px;font-weight:600;margin:0 0 8px;letter-spacing:-.4px}
+h3{font-weight:600}
+.sub{color:var(--muted);margin:0 0 28px;max-width:60ch}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:20px;padding:6px 16px;font:inherit;font-size:14px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px}
+.empty{display:none;color:var(--muted);padding:24px 0}
+.alt{background:var(--card);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;counter-reset:s}
+.steps div{counter-increment:s;padding-left:0}
+.steps div::before{content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;margin-bottom:12px}
+.steps div{position:relative}.steps div:not(:last-child)::after{content:"";position:absolute;top:17px;left:48px;right:8px;height:2px;background:var(--line)}
+.steps h3{margin:0 0 4px;font-size:17px}.steps p{margin:0;color:var(--muted);font-size:14px}
+.band{background:linear-gradient(120deg,var(--navy),#0063b1);color:#fff;border-radius:8px;padding:40px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
+.band h2{margin:0 0 4px}.band p{margin:0;color:#e1dfdd}
+footer{background:#201f1e;color:#c8c6c4;padding:48px 0 28px;font-size:14px}
+footer h4{color:#fff;margin:0 0 10px}footer a{display:block;padding:3px 0}footer a:hover{color:var(--cyan)}
+.box{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.g4{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px}
+details{background:var(--card);border:1px solid var(--line);border-radius:8px;margin-bottom:12px;max-width:820px}
+summary{cursor:pointer;padding:16px 20px;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:12px}
+summary::after{content:"+";font-size:22px;line-height:1;color:var(--link)}details[open] summary::after{content:"−"}
+summary::-webkit-details-marker{display:none}
+details p{margin:0;padding:0 20px 18px;color:var(--muted)}
+details[open]{border-color:var(--accent)}
+.hs{display:flex;align-items:center;gap:8px;background:#fff;border-radius:8px;padding:6px 6px 6px 14px;max-width:540px;box-shadow:0 8px 24px rgba(0,0,0,.28)}
+.hs svg{flex:none;color:#605e5c}.hs:focus-within{outline:3px solid var(--cyan)}
+.hs input{flex:1;min-width:0;border:0;outline:0;font:inherit;font-size:16px;color:#201f1e;background:transparent;height:40px}
+.pop{margin-top:18px;font-size:14px;color:#c8c6c4;display:flex;gap:6px 16px;flex-wrap:wrap}.pop a{color:#fff;text-decoration:underline;text-underline-offset:3px}
+.strip{margin-top:-48px;position:relative;z-index:2}
+.strip .box{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:26px 32px;box-shadow:0 10px 30px rgba(0,0,0,.14)}
+.strip strong{display:block;font-size:32px;line-height:1.15;font-weight:600;color:var(--link)}.strip span{font-size:14px;color:var(--muted)}
+.fcols{display:grid;grid-template-columns:1.6fr repeat(4,1fr);gap:32px}
+.copy{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;border-top:1px solid #3b3a39;margin-top:36px;padding-top:20px;font-size:13px}
+.copy a{display:inline;padding:0;margin-left:18px}.copy a:first-child{margin-left:0}
+.pill{display:inline-block;font-size:13px;font-weight:600;color:var(--link);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:3px 12px;border-radius:20px;margin-bottom:12px}
+.dqb{display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center}
+.dqd{width:190px;text-align:center;background:var(--card);border:1px solid var(--line);border-top:6px solid var(--accent);border-radius:8px;padding:16px 12px;box-shadow:0 8px 24px rgba(0,0,0,.1)}
+.dqd small{display:block;color:var(--muted);font-size:14px}.dqd b{display:block;font-size:56px;line-height:1.1;font-weight:600;color:var(--link)}.dqd span{font-size:14px;color:var(--muted)}
+.faqw{display:grid;grid-template-columns:1fr 1.8fr;gap:48px;align-items:start}.faqw details{max-width:none}
+header.scrolled{box-shadow:0 2px 10px rgba(0,0,0,.1)}
+.card{position:relative;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:22px;transition:border-color .15s,box-shadow .15s}
+a.card:hover{border-color:var(--accent);box-shadow:0 6px 18px rgba(0,0,0,.1)}
+.card-h{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.card-h small{display:block;font-size:12px;color:var(--muted);margin-bottom:2px}
+.ic{width:46px;height:46px;flex:none;border-radius:10px;display:grid;place-items:center;background:var(--c,var(--accent));color:#fff;font-weight:600;font-size:17px;letter-spacing:.3px}
+.card h3{margin:0;font-size:18px;line-height:1.25}
+.card p{margin:0 0 18px;color:var(--muted);font-size:14px;flex:1}
+.card .cat{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:7px}
+.card-f{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:14px;font-size:13px;color:var(--muted)}
+.card-f b{display:inline-flex;align-items:center;gap:4px;color:var(--link);font-size:14px;font-weight:600}
+.card svg{transition:transform .15s}a.card:hover svg{transform:translateX(3px)}
+.card.q h3{margin-bottom:6px}.card.q p{margin-bottom:16px}
+.ex{flex-direction:row;align-items:center;justify-content:space-between;padding:18px 20px}
+.ex h3{font-size:16px}.ex p{margin:2px 0 0;flex:none;font-size:13px}.ex>svg{color:var(--link);flex:none}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:36px 40px}
+.fi{width:46px;height:46px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--link);margin-bottom:14px}
+.feat h3{margin:0 0 6px;font-size:17px}.feat p{margin:0;color:var(--muted);font-size:14px}
+.crumb{font-size:14px;color:#c8c6c4;display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}.crumb a{color:#fff;text-decoration:underline;text-underline-offset:3px}
+.phero{background:linear-gradient(120deg,#00133a,#002050 55%,#0063b1);color:#fff;padding:28px 0 32px}
+.phero h1{font-size:clamp(28px,4vw,38px);margin:0 0 6px}.phero p{margin:0;color:#e1dfdd;max-width:62ch}
+.ph-row{display:flex;gap:18px;align-items:center}
+.phero .ic{width:64px;height:64px;font-size:24px;border-radius:14px;background:#fff;color:var(--c)}
+.ph-stats{display:flex;gap:32px;margin-top:22px;font-size:14px;color:#c8c6c4}.ph-stats b{font-size:24px;font-weight:600;color:var(--cyan);margin-right:6px}
+.lay{display:grid;grid-template-columns:1fr 300px;gap:32px;padding-top:36px;padding-bottom:60px;align-items:start}
+.lh{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap}.lh h2{margin:0}
+.lh input{height:38px;border:1px solid var(--line);border-radius:4px;padding:0 12px;font:inherit;font-size:14px;background:var(--card);color:var(--text);min-width:220px}
+.chap{display:flex;align-items:center;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px 18px;margin-bottom:10px;transition:border-color .15s,box-shadow .15s}
+a.chap:hover{border-color:var(--accent);box-shadow:0 6px 18px rgba(0,0,0,.1)}
+.cn{width:36px;height:36px;border-radius:50%;background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--c);display:grid;place-items:center;font-weight:600;font-size:14px;flex:none}
+.chap h3{margin:0;font-size:16px}.chap small{color:var(--muted);font-size:13px}
+.chap .go{margin-left:auto;color:var(--link);font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.chap .soon{margin-left:auto;font-size:12px;color:var(--muted);border:1px solid var(--line);padding:2px 10px;border-radius:20px;white-space:nowrap}
+.chap.off{background:transparent}.chap.off h3{color:var(--muted)}
+a.chap:hover svg{transform:translateX(3px)}.chap svg{transition:transform .15s}
+.side{position:sticky;top:calc(84px + env(safe-area-inset-top,0px));padding:18px}.side h3{margin:0 0 10px;font-size:16px}
+.side a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;font-size:14px;color:var(--text)}
+.side a:hover{background:var(--bg)}.side a.on{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--link);font-weight:600}
+.side a i{width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
+.qwrap{padding-top:28px;padding-bottom:60px;max-width:820px}.qwrap .crumb{color:var(--muted)}.qwrap .crumb a{color:var(--link)}
+.qbox{padding:28px}
+.qtop{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);margin-bottom:10px}
+.prog{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:24px}.prog i{display:block;height:100%;background:var(--accent);transition:width .25s}
+.qt{font-size:21px;line-height:1.4;margin:0 0 20px;font-weight:600}
+.qo{display:flex;gap:12px;align-items:center;width:100%;text-align:left;font:inherit;font-size:16px;color:var(--text);background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:12px 16px;margin-bottom:10px;cursor:pointer}
+.qo:hover:not(:disabled){border-color:var(--accent)}.qo:disabled{cursor:default;color:var(--text)}
+.qo b{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:13px;flex:none}
+.qo.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,transparent)}.qo.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,transparent)}
+.qe{margin:6px 0 18px;padding:12px 16px;border-left:4px solid var(--accent);background:var(--bg);border-radius:4px;font-size:14px;color:var(--muted)}
+.qf{display:flex;justify-content:space-between;align-items:center;margin-top:18px}
+.res{text-align:center}.sb{font-size:60px;font-weight:600;color:var(--link);line-height:1.1}.sb span{font-size:26px;color:var(--muted)}
+.cta2{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.rv{margin-top:28px}.rv h3{margin:0 0 8px}.rv>div{padding:12px 0;border-top:1px solid var(--line);font-size:14px}.rv .t{font-weight:600;margin-bottom:4px}
+@media (max-width:900px){.g3{grid-template-columns:1fr 1fr}.lay{grid-template-columns:1fr}.side{position:static}.ph-stats{gap:20px}.hero .wrap,.steps,.fcols{grid-template-columns:1fr 1fr}.hero .wrap{grid-template-columns:1fr}
+.mega .wrap{grid-template-columns:1fr 1fr}.menu-btn{display:grid}.signin{display:none}
+nav{display:none;position:absolute;left:0;right:0;top:100%;margin:0;background:var(--card);border-bottom:1px solid var(--line);padding:8px 20px 12px}
+nav.show{display:block}nav ul{flex-direction:column}.mega{max-height:70vh;overflow:auto}
+.strip .box{grid-template-columns:1fr 1fr}.band{padding:28px}.dqb,.faqw{grid-template-columns:1fr}.steps div::after{display:none!important}}
+@media (max-width:560px){.steps,.fcols,.g3{grid-template-columns:1fr}.hero{padding:40px 0 72px}.hs .btn{display:none}.top .btn-o{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+/* book-style chapter page */
+.rp{position:fixed;left:0;right:0;top:calc(64px + env(safe-area-inset-top,0px));height:3px;z-index:49;background:transparent}.rp i{display:block;height:100%;width:0;background:var(--cyan)}
+.bk-hero{position:relative;overflow:hidden;background:radial-gradient(circle at 85% 20%,rgba(80,230,255,.2),transparent 45%),linear-gradient(120deg,#00133a,#002050 55%,#0063b1);color:#fff;padding:28px 0 52px}
+.bk-hero .wrap{position:relative;z-index:1}
+.bk-lab{display:inline-block;font:600 13px Poppins,"Segoe UI",system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);margin-bottom:12px}
+.bk-hero h1{font-family:"Playfair Display",Georgia,serif;font-size:clamp(34px,5.4vw,58px);line-height:1.1;margin:0 0 14px;font-weight:700;letter-spacing:-.5px;max-width:20ch}
+.bk-sub{font-family:Lora,Georgia,serif;font-style:italic;font-size:clamp(17px,2vw,20px);color:#e1dfdd;max-width:56ch;margin:0 0 24px}
+.bk-meta{display:flex;gap:10px;flex-wrap:wrap}.bk-meta span{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);padding:6px 14px;border-radius:20px;font-size:14px}.bk-meta i{color:var(--cyan)}
+.bk-wm{position:absolute;right:5%;top:50%;transform:translateY(-50%);font-size:220px;opacity:.08;pointer-events:none}
+.bk-lay{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:56px;padding-top:48px;padding-bottom:64px;align-items:start}
+.bk-art{max-width:720px;font-family:Lora,Georgia,serif;font-size:18px;line-height:1.85}
+.bk-s{margin-bottom:46px;scroll-margin-top:90px}
+.bk-h{margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.bk-no{display:block;font:700 12px Poppins,"Segoe UI",system-ui,sans-serif;letter-spacing:.18em;color:var(--link);margin-bottom:8px}
+.bk-h h2{display:flex;align-items:center;gap:14px;margin:0;font:600 clamp(22px,3vw,29px)/1.25 Poppins,"Segoe UI",system-ui,sans-serif;letter-spacing:-.2px}
+.bk-h h2 i{width:46px;height:46px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:19px;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--link)}
+.bk-art p{margin:0 0 18px}
+.bk-art p.drop::first-letter{float:left;font:700 68px/.85 "Playfair Display",Georgia,serif;padding:8px 12px 0 0;color:var(--link)}
+.bk-art b{font-weight:700;background:linear-gradient(transparent 62%,color-mix(in srgb,var(--cyan) 38%,transparent) 0)}
+.co{display:flex;gap:14px;margin:24px 0;padding:16px 20px;border-radius:10px;border-left:4px solid var(--k);background:color-mix(in srgb,var(--k) 10%,transparent);font:15px/1.65 Poppins,"Segoe UI",system-ui,sans-serif}
+.co>i{color:var(--k);font-size:20px;margin-top:3px}.co strong{display:block;color:var(--k);margin-bottom:2px;font-weight:600}
+.co-tip{--k:#ca5010}.co-key{--k:#0078d4}.co-note{--k:#107c10}
+.bk-t{overflow-x:auto;margin:24px 0;border:1px solid var(--line);border-radius:10px}
+.bk-t table{border-collapse:collapse;width:100%;font:15px/1.5 Poppins,"Segoe UI",system-ui,sans-serif}
+.bk-t th{background:var(--navy);color:#fff;text-align:left;padding:11px 16px;font-weight:600;white-space:nowrap}
+.bk-t td{padding:11px 16px;border-top:1px solid var(--line)}.bk-t tbody tr:nth-child(even) td{background:var(--bg)}
+.bk-sum{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--accent);border-radius:10px;padding:24px 26px;margin:10px 0 28px;font-family:Poppins,"Segoe UI",system-ui,sans-serif;font-size:15.5px;line-height:1.6;scroll-margin-top:90px}
+.bk-sum h2{display:flex;align-items:center;gap:10px;font-size:21px;margin:0 0 14px}.bk-sum h2 i{color:var(--link)}
+.bk-sum ul{list-style:none;margin:0;padding:0}.bk-sum li{display:flex;gap:12px;margin-bottom:10px}.bk-sum li i{color:var(--ok);margin-top:5px}
+.bk-cta h2{font-family:Poppins,"Segoe UI",system-ui,sans-serif;font-size:22px}
+.bk-nav{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:28px;font-family:Poppins,"Segoe UI",system-ui,sans-serif}
+.bk-nav a{display:block;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:14px 18px;transition:border-color .15s}.bk-nav a:hover{border-color:var(--accent)}
+.bk-nav small{display:block;color:var(--muted);font-size:13px;margin-bottom:2px}.bk-nav b{font-size:15px;color:var(--link)}
+.bk-toc{position:sticky;top:calc(88px + env(safe-area-inset-top,0px));padding:20px}
+.bk-toc h3{margin:0 0 12px;font:600 15px Poppins,"Segoe UI",system-ui,sans-serif;display:flex;gap:10px;align-items:center}.bk-toc h3 i{color:var(--link)}
+.bk-toc button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:9px 10px;font:14px/1.35 Poppins,"Segoe UI",system-ui,sans-serif;color:var(--text);cursor:pointer}
+.bk-toc button:hover{background:var(--bg);color:var(--link)}.bk-toc button i{width:18px;text-align:center;color:var(--link);flex:none}
+@media (max-width:900px){.bk-lay{grid-template-columns:1fr}.bk-toc{display:none}.bk-wm{font-size:140px;right:-10px}.bk-nav{grid-template-columns:1fr}}
+@media (max-width:560px){.bk-art{font-size:17px}.bk-art p.drop::first-letter{font-size:56px}}
+/* auth pages + user menu */
+.au{display:grid;grid-template-columns:1fr 1.1fr;min-height:calc(100vh - 64px)}
+.au-side{background:radial-gradient(circle at 85% 15%,rgba(80,230,255,.22),transparent 45%),radial-gradient(rgba(255,255,255,.08) 1px,transparent 1.5px) 0 0/24px 24px,linear-gradient(130deg,#00133a,#002050 55%,#0063b1);color:#fff;padding:64px 56px;display:flex;align-items:center}
+.au-side h2{font-size:clamp(30px,3.6vw,46px);line-height:1.12;margin:0 0 14px;letter-spacing:-.8px}
+.au-side p{color:#e1dfdd;font-size:17px;max-width:42ch;margin:0 0 30px}
+.au-side ul{list-style:none;margin:0;padding:0}.au-side li{display:flex;gap:14px;align-items:center;margin-bottom:16px;font-size:16px}
+.au-side li i{width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,.14);display:grid;place-items:center;color:var(--cyan);font-size:17px;flex:none}
+.au-main{display:grid;place-items:center;padding:40px 20px}
+.au-card{width:100%;max-width:430px}
+.au-card h1{font-size:30px;line-height:1.2;margin:0 0 6px;letter-spacing:-.5px}
+.au-card .lead{color:var(--muted);margin:0 0 24px}
+.gwrap{min-height:44px;display:flex;justify-content:center}
+.gfb{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;height:44px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--text);font:600 15px inherit;font-family:inherit;cursor:pointer}
+.gfb:hover:not(:disabled){background:var(--bg);border-color:var(--muted)}
+.or{display:flex;align-items:center;gap:14px;margin:22px 0;color:var(--muted);font-size:13px}.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.inp{display:block;margin-bottom:16px}.inp>span{display:block;font-size:14px;font-weight:600;margin-bottom:6px}
+.inw{position:relative;display:flex;align-items:center}
+.inw>i{position:absolute;left:14px;color:var(--muted);font-size:15px;pointer-events:none}
+.inw input{width:100%;height:46px;padding:0 44px 0 42px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--text);font:inherit;font-size:15px}
+.inw input:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+.eye{position:absolute;right:4px;width:38px;height:38px;border:0;background:none;color:var(--muted);cursor:pointer;border-radius:6px}.eye:hover{color:var(--text)}
+.rowf{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px;font-size:14px}.rowf a,.ck a,.sw a{color:var(--link);font-weight:600}
+.ck{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--muted);margin-bottom:6px}.ck input{margin-top:4px;accent-color:var(--accent)}
+.msg{min-height:22px;margin:10px 0;font-size:14px}.msg.bad{color:var(--bad)}.msg.ok{color:var(--ok)}
+.au-go{width:100%;height:46px;font-size:16px}
+.sw{text-align:center;margin:20px 0 0;font-size:14.5px;color:var(--muted)}
+.um{position:relative}.um[hidden],.umd[hidden]{display:none}
+.um>button{display:flex;align-items:center;gap:8px;height:40px;padding:0 8px;border:0;background:none;border-radius:6px;color:var(--text);font:inherit;font-size:15px;font-weight:600;cursor:pointer}.um>button:hover{background:var(--bg)}
+.av{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:14px;overflow:hidden}.av img{width:100%;height:100%;object-fit:cover}
+.umd{position:absolute;right:0;top:46px;min-width:230px;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:0 12px 28px rgba(0,0,0,.18);padding:8px;z-index:60}
+.umd .who{padding:8px 10px 10px;border-bottom:1px solid var(--line);margin-bottom:6px;font-size:14px;line-height:1.4}.umd .who b{display:block}.umd .who span{color:var(--muted);word-break:break-all}
+.umd button{display:flex;align-items:center;gap:10px;width:100%;height:38px;padding:0 10px;border:0;background:none;color:var(--text);font:inherit;font-size:14px;border-radius:6px;cursor:pointer}.umd button:hover{background:var(--bg)}
+.mnav{display:none}
+@media (max-width:900px){.au{grid-template-columns:1fr}.au-side{display:none}.mnav{display:block}.mnav[hidden]{display:none}#unm{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap top">
+    <a href="#/" class="logo"><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#0078d4"/><circle cx="15" cy="15" r="7" fill="none" stroke="#fff" stroke-width="3"/><path d="M20 20l5 5" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>QuizHub</a>
+    <nav id="nav"><ul>
+      <li><button id="sb" aria-expanded="false" aria-controls="mega">Subjects <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button></li>
+      <li><a href="#popular">Quizzes</a></li>
+      <li><a href="#exams">Exams</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#faq">FAQ</a></li>
+      <li class="mnav" id="msi"><a href="#/login">Sign in</a></li>
+    </ul></nav>
+    <span class="sp"></span>
+    <button class="theme" id="th" aria-label="Switch theme"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg></button>
+    <a href="#/login" class="signin" id="si">Sign in</a>
+    <div class="um" id="um" hidden><button id="umb" aria-expanded="false" aria-haspopup="true"><span class="av" id="uav"></span><span id="unm"></span><i class="fa-solid fa-chevron-down" style="font-size:11px"></i></button><div class="umd" id="umd" hidden><div class="who"><b id="uwn"></b><span id="uwe"></span></div><button id="lo"><i class="fa-solid fa-right-from-bracket"></i> Log out</button></div></div>
+    <a href="#/register" class="btn btn-o" id="gs">Get started</a>
+    <button class="menu-btn" id="mb" aria-label="Open menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+  <div class="mega" id="mega"><div class="wrap"><div style="--c:#0078d4"><h4>Humanities</h4><a href="#subjects">History</a><a href="#subjects">Geography</a><a href="#subjects">Political Science</a><a href="#subjects">Economics</a><a href="#subjects">Art &amp; Culture</a></div><div style="--c:#107c10"><h4>Science</h4><a href="#subjects">Physics</a><a href="#subjects">Chemistry</a><a href="#subjects">Biology</a><a href="#subjects">Environment</a><a href="#subjects">Astronomy</a></div><div style="--c:#8661c5"><h4>Maths &amp; Tech</h4><a href="#subjects">Mathematics</a><a href="#subjects">Reasoning</a><a href="#subjects">Computer Science</a><a href="#subjects">Data Interpretation</a></div><div style="--c:#ca5010"><h4>General</h4><a href="#subjects">General Knowledge</a><a href="#subjects">Current Affairs</a><a href="#subjects">English</a></div></div></div>
+</header>
+
+<main id="home">
+<div class="hero"><div class="wrap">
+  <div>
+    <h1>Practice any subject. Know where you stand.</h1>
+    <p>Thousands of timed questions in history, geography, science and more. Get instant answers with explanations, and track your progress topic by topic.</p>
+    <div class="hs"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" placeholder="Search a subject, e.g. History" aria-label="Search subjects"><a href="#subjects" class="btn btn-o">Search</a></div>
+    <div class="pop"><span>Popular:</span><a href="#subjects" data-s="history">History</a><a href="#subjects" data-s="geography">Geography</a><a href="#subjects" data-s="biology">Biology</a><a href="#subjects" data-s="mathematics">Mathematics</a></div>
+  </div>
+  <div class="demo" aria-live="polite">
+    <div class="demo-h"><span id="dq">Question 1 of 3</span><span id="dsub">History</span></div>
+    <h3 id="dt"></h3>
+    <div id="do"></div>
+    <div class="fb" id="fb"></div>
+    <div class="demo-f"><span id="ds" style="font-size:14px;color:var(--muted)">Score: 0</span><button id="dn" hidden>Next question</button></div>
+  </div>
+</div></div>
+
+<div class="wrap strip"><div class="box">
+  <div><strong data-n="124">0</strong><span>Chapters</span></div>
+  <div><strong data-n="17">0</strong><span>Subjects</span></div>
+  <div><strong data-n="6">0</strong><span>Quizzes ready</span></div>
+  <div><strong data-n="8">0</strong><span>Exams covered</span></div>
+</div></div>
+
+<section id="subjects"><div class="wrap">
+  <h2>Choose a subject</h2>
+  <p class="sub">Pick a subject to start a quiz. Every subject has topic-wise sets, timed tests and previous-style questions.</p>
+  <div class="filters" id="fl"></div>
+  <div class="grid" id="gr"></div>
+  <p class="empty" id="em">No subjects match your search. Try a different word.</p>
+</div></section>
+
+<section class="alt"><div class="wrap dqb">
+  <div><span class="pill">Daily quiz</span><h2>Today's 10-question challenge</h2><p class="sub">A fresh mix of current affairs, history and science every day. Finish in 10 minutes and keep your streak going.</p><a href="#" class="btn btn-o" style="height:44px;padding:0 24px">Start today's quiz</a></div>
+  <div class="dqd"><small id="dw">Today</small><b id="dd">1</b><span id="dm"></span></div>
+</div></section>
+
+<section id="popular"><div class="wrap"><h2>Popular quizzes</h2><p class="sub">Short, ready-to-play sets. Pick one and begin in a click.</p><div class="g4"><a href="#/quiz/history/6" class="card q" style="--c:#0078d4"><span class="cat"><i class="dot"></i>History</span><h3>Freedom Struggle</h3><p>5 questions, about 5 minutes</p><div class="card-f"><span><i class="dot" style="background:#ca5010"></i>Medium</span><b>Start <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></b></div></a><a href="#/quiz/geography/2" class="card q" style="--c:#0078d4"><span class="cat"><i class="dot"></i>Geography</span><h3>Rivers and Lakes</h3><p>5 questions, about 5 minutes</p><div class="card-f"><span><i class="dot" style="background:#107c10"></i>Easy</span><b>Start <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></b></div></a><a href="#/quiz/biology/3" class="card q" style="--c:#107c10"><span class="cat"><i class="dot"></i>Biology</span><h3>Human Digestive System</h3><p>5 questions, about 5 minutes</p><div class="card-f"><span><i class="dot" style="background:#107c10"></i>Easy</span><b>Start <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></b></div></a><a href="#/quiz/reasoning/1" class="card q" style="--c:#8661c5"><span class="cat"><i class="dot"></i>Reasoning</span><h3>Coding-Decoding</h3><p>5 questions, about 5 minutes</p><div class="card-f"><span><i class="dot" style="background:#ca5010"></i>Medium</span><b>Start <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></b></div></a></div></div></section>
+
+<section class="alt" id="exams"><div class="wrap"><h2>Practice by exam</h2><p class="sub">Find question sets built for the exam you are preparing for.</p><div class="g4"><a href="#" class="card ex"><div><h3>UPSC</h3><p>Prelims and CSAT</p></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><a href="#" class="card ex"><div><h3>SSC</h3><p>CGL, CHSL and MTS</p></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><a href="#" class="card ex"><div><h3>Banking</h3><p>IBPS, SBI and RBI</p></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><a href="#" class="card ex"><div><h3>Railways</h3><p>RRB NTPC and Group D</p></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><a href="#" class="card ex"><div><h3>NEET</h3><p>Biology, Physics, Chemistry</p></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><a href="#" class="card ex"><div><h3>JEE</h3><p>Maths, Physics, Chemistry</p></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><a href="#" class="card ex"><div><h3>CBSE Board</h3><p>Class 9 to 12</p></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><a href="#" class="card ex"><div><h3>State PSC</h3><p>State-level exams</p></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></div></div></section>
+
+<section><div class="wrap"><h2>Why practice on QuizHub</h2><p class="sub">Everything you need to learn from your mistakes and improve every week.</p><div class="g3"><div class="feat"><div class="fi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div><h3>Instant explanations</h3><p>See the correct answer and why, right after each question.</p></div><div class="feat"><div class="fi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><h3>Timed mock tests</h3><p>Practice under real exam time pressure and get a full report.</p></div><div class="feat"><div class="fi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10M18 20V4M6 20v-4"/></svg></div><h3>Progress tracking</h3><p>Spot weak topics with subject-wise scores and daily streaks.</p></div><div class="feat"><div class="fi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></div><h3>Bookmark questions</h3><p>Save tricky questions and revise them later in one place.</p></div><div class="feat"><div class="fi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div><h3>Topic-wise sets</h3><p>Study one chapter at a time or mix topics together.</p></div><div class="feat"><div class="fi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg></div><h3>Works on any device</h3><p>Practice on phone, tablet or laptop without installing anything.</p></div></div></div></section>
+
+<section class="alt" id="how"><div class="wrap">
+  <h2>How it works</h2>
+  <p class="sub">From first question to full mock test in four steps.</p>
+  <div class="steps">
+    <div><h3>Pick a subject</h3><p>Choose from history, geography, science and 20+ more.</p></div>
+    <div><h3>Learn the chapter</h3><p>Read short notes and key points for each topic.</p></div>
+    <div><h3>Answer and learn</h3><p>See the right answer and a short explanation after each question.</p></div>
+    <div><h3>Track progress</h3><p>Review your score, weak topics and streaks.</p></div>
+  </div>
+</div></section>
+
+<section id="faq"><div class="wrap faqw"><div><h2>Frequently asked questions</h2><p class="sub">Quick answers before you start.</p><a href="#" class="btn btn-l">Contact support</a></div><div><details><summary>Is QuizHub free to use?</summary><p>Yes. Daily quizzes and subject practice are free. Create an account to save scores and streaks.</p></details><details><summary>Do I get explanations for answers?</summary><p>Yes. Every question shows the correct answer with a short explanation.</p></details><details><summary>Can I practice only one topic?</summary><p>Yes. Pick a subject, then choose a topic, or take a mixed set of all topics.</p></details><details><summary>How often are new questions added?</summary><p>Current Affairs is updated every week. Other subjects get new sets every month.</p></details><details><summary>Can I use it on my phone?</summary><p>Yes. The site works in any mobile browser, no app needed.</p></details></div></div></section>
+
+<section><div class="wrap">
+  <div class="band">
+    <div><h2>Ready for your first quiz?</h2><p>Create a free account to save scores and build a daily streak.</p></div>
+    <a href="#/register" class="btn btn-o" id="gb" style="height:46px;padding:0 26px">Create free account</a>
+  </div>
+</div></section>
+</main>
+
+<main id="subj" hidden>
+  <div class="phero"><div class="wrap">
+    <div class="crumb"><a href="#/">Home</a><span>/</span><a href="#subjects">Subjects</a><span>/</span><b id="sbc"></b></div>
+    <div class="ph-row"><div class="ic" id="sic"></div><div><h1 id="sn"></h1><p id="sd"></p></div></div>
+    <div class="ph-stats" id="ss"></div>
+  </div></div>
+  <div class="wrap lay">
+    <div>
+      <div class="lh"><h2>Chapters</h2><input id="cf" type="search" placeholder="Search chapters" aria-label="Search chapters"></div>
+      <div id="cl"></div>
+    </div>
+    <aside class="box side"><h3>All subjects</h3><div id="sl"></div></aside>
+  </div>
+</main>
+
+<main id="learn" hidden></main>
+
+<main id="auth" hidden></main>
+
+<main id="quiz" hidden>
+  <div class="wrap qwrap"><div class="crumb" id="qc"></div><div class="box qbox" id="qb"></div></div>
+</main>
+
+<footer>
+<div class="wrap fcols">
+  <div><div class="logo" style="color:#fff;margin-bottom:12px"><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#0078d4"/><circle cx="15" cy="15" r="7" fill="none" stroke="#fff" stroke-width="3"/><path d="M20 20l5 5" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>QuizHub</div><p style="margin:0;max-width:34ch">Free subject-wise quiz practice for students and exam aspirants. Learn, test and improve every day.</p></div>
+  <div><h4>Subjects</h4><a href="#">History</a><a href="#">Geography</a><a href="#">Science</a><a href="#">Mathematics</a><a href="#">Current Affairs</a></div>
+  <div><h4>Practice</h4><a href="#">Daily quiz</a><a href="#">Mock tests</a><a href="#">Topic-wise sets</a><a href="#">Leaderboard</a></div>
+  <div><h4>Exams</h4><a href="#">UPSC</a><a href="#">SSC</a><a href="#">Banking</a><a href="#">Railways</a><a href="#">NEET and JEE</a></div>
+  <div><h4>Company</h4><a href="#">About us</a><a href="#">Contact</a><a href="#">Help centre</a><a href="#">Careers</a></div>
+</div>
+<div class="wrap copy"><span>© 2026 QuizHub. All rights reserved.</span><span><a href="#">Privacy</a><a href="#">Terms of use</a><a href="#">Cookies</a></span></div>
+</footer>
+
+<script>
+const S=[
+["History","Humanities","Ancient, medieval and modern history, from empires to independence movements.","Indus Valley Civilization|Vedic Age|Mauryan and Gupta Empires|Delhi Sultanate|Mughal Empire|Revolt of 1857|Freedom Struggle|Post-Independence India"],
+["Geography","Humanities","Physical, human and world geography, maps and climate.","Universe and Solar System|Earth Structure and Landforms|Rivers and Lakes|Climate and Monsoon|Soils and Natural Vegetation|Indian Agriculture|Population and Cities|World Geography"],
+["Political Science","Humanities","Constitution, governance, rights and international relations.","Making of the Constitution|Fundamental Rights|Directive Principles|Parliament|President and Governor|Judiciary|Local Government|International Relations"],
+["Economics","General","Micro and macro basics, banking, budgets and trade.","Basic Concepts|National Income|Money and Banking|Inflation|Budget and Taxation|Poverty and Unemployment|International Trade|Five Year Plans"],
+["Art & Culture","Humanities","Architecture, music, dance, festivals and heritage.","Architecture|Sculpture and Painting|Classical Dance|Music|Festivals|Literature|UNESCO Heritage Sites"],
+["Physics","Science","Motion, energy, electricity, optics and modern physics.","Units and Measurement|Motion and Force|Work, Energy and Power|Heat|Light and Optics|Sound|Electricity|Magnetism|Modern Physics"],
+["Chemistry","Science","Elements, reactions, organic chemistry and the periodic table.","Matter and Atoms|Periodic Table|Chemical Bonding|Acids, Bases and Salts|Metals and Non-metals|Carbon Compounds|Chemical Reactions|Everyday Chemistry"],
+["Biology","Science","Cells, human body, genetics, plants and ecosystems.","Cell Structure|Plant Kingdom|Animal Kingdom|Human Digestive System|Circulatory System|Nervous System|Genetics|Diseases and Nutrition"],
+["Environment","Science","Ecology, climate change, biodiversity and conservation.","Ecosystems|Biodiversity|Climate Change|Pollution|Conservation Laws|Renewable Energy"],
+["Astronomy","Science","Solar system, stars, space missions and cosmology.","Solar System|Stars and Galaxies|Space Missions|Satellites|Eclipses and Tides"],
+["Mathematics","Maths & Tech","Arithmetic, algebra, geometry and number systems.","Number System|Percentage|Ratio and Proportion|Profit and Loss|Time and Work|Algebra|Geometry|Mensuration|Trigonometry"],
+["Reasoning","Maths & Tech","Series, puzzles, coding-decoding and logical deduction.","Number Series|Coding-Decoding|Blood Relations|Direction Sense|Syllogism|Seating Arrangement|Puzzles"],
+["Computer Science","Maths & Tech","Programming basics, networks, databases and cloud.","Computer Fundamentals|Operating Systems|Networking and Internet|Databases|Programming Basics|Cloud Computing|Cyber Security"],
+["Data Interpretation","Maths & Tech","Tables, charts and graphs with quick calculations.","Tables|Bar Graphs|Line Graphs|Pie Charts|Caselets"],
+["General Knowledge","General","Static GK on people, places, awards and firsts.","Famous Personalities|Awards and Honours|Books and Authors|Sports|Important Days|Countries and Capitals|Firsts in India"],
+["Current Affairs","General","Weekly and monthly news capsules with quizzes.","National News|International News|Economy and Business|Science and Technology|Sports Updates|Appointments|Government Schemes"],
+["English","General","Grammar, vocabulary, comprehension and error spotting.","Grammar|Vocabulary|Synonyms and Antonyms|Idioms and Phrases|Error Spotting|Reading Comprehension|Sentence Improvement"]
+];
+const CH='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+const CC={"Humanities":"#0078d4","Science":"#107c10","Maths & Tech":"#8661c5","General":"#ca5010"};
+const slug=n=>n.toLowerCase().replace(/&/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const SUB=S.map(x=>({n:x[0],cat:x[1],d:x[2],ch:x[3].split("|"),c:CC[x[1]],id:slug(x[0])}));
+const cats=["All",...new Set(SUB.map(x=>x.cat))];let cat="All",term="";
+const gr=document.getElementById("gr"),fl=document.getElementById("fl"),em=document.getElementById("em");
+function esc(t){return t.replace(/&/g,"&amp;")}
+function mono(n){const w=n.replace("&","").split(/\s+/).filter(Boolean);return w.length>1?(w[0][0]+w[1][0]).toUpperCase():n.slice(0,2)}
+function render(){
+  fl.innerHTML=cats.map(c=>`<button class="chip" aria-pressed="${c===cat}" data-c="${c}">${esc(c)}</button>`).join("");
+  const r=SUB.filter(x=>(cat==="All"||x.cat===cat)&&x.n.toLowerCase().includes(term));
+  gr.innerHTML=r.map(x=>`<a href="#/subject/${x.id}" class="card" style="--c:${x.c}"><div class="card-h"><div class="ic">${mono(x.n)}</div><div><small>${esc(x.cat)}</small><h3>${esc(x.n)}</h3></div></div><p>${esc(x.d)}</p><div class="card-f"><span>${x.ch.length} chapters</span><b>View chapters ${CH}</b></div></a>`).join("");
+  em.style.display=r.length?"none":"block";
+}
+fl.onclick=e=>{const b=e.target.closest("[data-c]");if(b){cat=b.dataset.c;render()}};
+document.getElementById("q").oninput=e=>{term=e.target.value.trim().toLowerCase();render();if(term)document.getElementById("subjects").scrollIntoView()};
+render();
+const sb=document.getElementById("sb"),mg=document.getElementById("mega"),nav=document.getElementById("nav");
+sb.onclick=()=>{nav.classList.remove("show");const o=mg.classList.toggle("open");sb.setAttribute("aria-expanded",o)};
+document.querySelectorAll("[data-s]").forEach(a=>a.onclick=()=>{const i=document.getElementById("q");i.value=a.dataset.s;term=a.dataset.s;render()});
+document.addEventListener("click",e=>{if(!e.target.closest("header")){mg.classList.remove("open");sb.setAttribute("aria-expanded","false")}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){mg.classList.remove("open");sb.setAttribute("aria-expanded","false")}});
+document.getElementById("mb").onclick=()=>{mg.classList.remove("open");sb.setAttribute("aria-expanded","false");nav.classList.toggle("show")};
+document.getElementById("th").onclick=()=>{
+  const r=document.documentElement,d=matchMedia("(prefers-color-scheme:dark)").matches;
+  const cur=r.dataset.theme||(d?"dark":"light");r.dataset.theme=cur==="dark"?"light":"dark";
+  try{localStorage.setItem("qh-theme",r.dataset.theme)}catch(e){}};
+try{const t=localStorage.getItem("qh-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}
+document.querySelectorAll("[data-n]").forEach(el=>{
+  const n=+el.dataset.n,t0=performance.now();
+  (function f(t){const p=Math.min((t-t0)/1200,1);el.textContent=Math.round(n*p).toLocaleString()+(p===1?"+":"");if(p<1)requestAnimationFrame(f)})(t0)});
+const Q=[
+["History","Who was the first Emperor of the Mauryan Empire?",["Ashoka","Chandragupta Maurya","Bindusara","Harsha"],1,"Chandragupta Maurya founded the empire around 321 BCE."],
+["Geography","Which is the longest river in Africa?",["Congo","Niger","Nile","Zambezi"],2,"The Nile flows about 6,650 km to the Mediterranean."],
+["Science","What is the chemical symbol for sodium?",["So","Na","Sd","S"],1,"Na comes from the Latin word natrium."]];
+let i=0,sc=0;
+const $=id=>document.getElementById(id),dn=$("dn");
+function load(){
+  const q=Q[i];$("dq").textContent=`Question ${i+1} of ${Q.length}`;$("dsub").textContent=q[0];$("dt").textContent=q[1];
+  $("fb").textContent="";dn.hidden=true;
+  $("do").innerHTML=q[2].map((o,k)=>`<button class="opt" data-k="${k}">${o}</button>`).join("");}
+$("do").onclick=e=>{
+  const b=e.target.closest(".opt");if(!b||b.disabled)return;
+  const k=+b.dataset.k,q=Q[i],all=[...document.querySelectorAll(".opt")];
+  all.forEach(x=>x.disabled=true);all[q[3]].classList.add("ok");
+  if(k===q[3]){sc++}else b.classList.add("bad");
+  $("fb").textContent=(k===q[3]?"Correct. ":"Not quite. ")+q[4];$("ds").textContent="Score: "+sc;
+  dn.textContent=i<Q.length-1?"Next question":"Try again";dn.hidden=false;};
+dn.onclick=()=>{if(i<Q.length-1)i++;else{i=0;sc=0;$("ds").textContent="Score: 0"}load()};
+load();
+window.addEventListener("scroll",()=>document.querySelector("header").classList.toggle("scrolled",scrollY>4),{passive:true});
+const dt=new Date();document.getElementById("dd").textContent=dt.getDate();
+document.getElementById("dm").textContent=dt.toLocaleDateString("en-IN",{month:"long",year:"numeric"});
+document.getElementById("dw").textContent=dt.toLocaleDateString("en-IN",{weekday:"long"});
+
+/* ===== QUESTIONS: key = subjectId:chapterIndex ===== */
+const QB={
+"history:6":[["Who helped found the Indian National Congress in 1885?",["A.O. Hume","Dadabhai Naoroji","G.K. Gokhale","Lala Lajpat Rai"],0,"Allan Octavian Hume, a retired British civil servant, was a key founder of the Congress in 1885."],
+["The Dandi March of 1930 was a protest against which British law?",["Rowlatt Act","Salt law","Vernacular Press Act","Arms Act"],1,"Gandhi marched from Sabarmati to Dandi to break the salt law and begin the Civil Disobedience Movement."],
+["In which year did the Jallianwala Bagh massacre take place?",["1905","1919","1930","1942"],1,"General Dyer's troops fired on a gathering in Amritsar on 13 April 1919."],
+["Who gave the slogan 'Do or Die' during the Quit India Movement?",["Subhas Chandra Bose","Jawaharlal Nehru","Mahatma Gandhi","Sardar Patel"],2,"Gandhi gave this call in Bombay in August 1942."],
+["Which Viceroy partitioned Bengal in 1905?",["Lord Curzon","Lord Ripon","Lord Dalhousie","Lord Minto"],0,"Lord Curzon announced the partition, which led to the Swadeshi Movement."]],
+"history:0":[["Which Harappan site is famous for the Great Bath?",["Lothal","Mohenjo-daro","Kalibangan","Dholavira"],1,"The Great Bath was found at Mohenjo-daro in present-day Pakistan."],
+["The Indus Valley Civilization is also called the:",["Vedic Civilization","Harappan Civilization","Gupta Civilization","Mauryan Civilization"],1,"Harappa was the first site discovered, so the civilization is also known as Harappan."],
+["Which metal was not known to the Harappan people?",["Copper","Bronze","Iron","Gold"],2,"Harappans used copper, bronze and gold, but iron came into use much later."],
+["Kalibangan, a Harappan site, is located in which state?",["Gujarat","Punjab","Rajasthan","Uttar Pradesh"],2,"Kalibangan lies on the dry bed of the Ghaggar-Hakra river in Rajasthan."],
+["Which Harappan port city is in Gujarat?",["Lothal","Harappa","Ropar","Chanhudaro"],0,"Lothal had a dockyard and was a major trade centre."]],
+"geography:2":[["Which is the longest river flowing mostly within India?",["Godavari","Ganga","Yamuna","Krishna"],1,"The Ganga is about 2,500 km long."],
+["Which river is called 'Dakshin Ganga'?",["Krishna","Kaveri","Godavari","Mahanadi"],2,"The Godavari is the longest peninsular river, so it is called Dakshin Ganga."],
+["Chilika Lake is located in which state?",["Odisha","Kerala","Andhra Pradesh","West Bengal"],0,"Chilika is a brackish water lagoon on the coast of Odisha."],
+["Which river flows west through a rift valley into the Arabian Sea?",["Mahanadi","Narmada","Krishna","Kaveri"],1,"The Narmada flows west through a rift valley and drains into the Arabian Sea."],
+["Which lake is often called the largest freshwater lake in India?",["Wular Lake","Chilika Lake","Sambhar Lake","Pulicat Lake"],0,"Wular Lake in Jammu and Kashmir is commonly cited as India's largest freshwater lake."]],
+"biology:3":[["Where does most digestion and absorption of food take place?",["Stomach","Small intestine","Large intestine","Oesophagus"],1,"The small intestine has villi that absorb most nutrients."],
+["Which is the largest gland in the human body?",["Pancreas","Thyroid","Liver","Pituitary"],2,"The liver is the largest gland and produces bile."],
+["Which enzyme in saliva starts the digestion of starch?",["Pepsin","Salivary amylase","Lipase","Trypsin"],1,"Salivary amylase breaks starch into simpler sugars in the mouth."],
+["Where is bile stored?",["Liver","Pancreas","Gall bladder","Stomach"],2,"Bile is made in the liver and stored in the gall bladder."],
+["Which acid is secreted in the stomach?",["Sulphuric acid","Hydrochloric acid","Nitric acid","Acetic acid"],1,"Hydrochloric acid activates pepsin and kills many germs."]],
+"reasoning:1":[["If CAT is coded as DBU, how is DOG coded?",["EPH","DPH","EOH","FPI"],0,"Each letter moves one step forward: D to E, O to P, G to H."],
+["If A=1, B=2, C=3 and so on, what is the sum for the word CAB?",["5","6","7","8"],1,"C + A + B = 3 + 1 + 2 = 6."],
+["If MANGO is coded as NBOHP, how is APPLE coded?",["BQQMF","BPQMF","CQQNG","AQQME"],0,"Each letter moves one step forward, so APPLE becomes BQQMF."],
+["If RED is written as SFE, how is BLUE written?",["CMVF","CNVF","BMVF","CMWF"],0,"Add one to every letter: B to C, L to M, U to V, E to F."],
+["If PEN is coded as NEP, how is BOOK coded?",["KOOB","OOKB","BKOO","KBOO"],0,"The code reverses the order of the letters."]],
+"mathematics:1":[["What is 25% of 480?",["100","120","140","160"],1,"25% is one-fourth, and 480 ÷ 4 = 120."],
+["If 40% of a number is 80, what is the number?",["160","180","200","240"],2,"The number is 80 × 100 ÷ 40 = 200."],
+["A price rises from ₹200 to ₹250. What is the percentage increase?",["20%","25%","30%","50%"],1,"The increase is 50 on a base of 200, which is 25%."],
+["What is 15% of 200 plus 10% of 300?",["50","55","60","65"],2,"15% of 200 is 30 and 10% of 300 is 30, so the total is 60."],
+["A student scores 360 out of 600. What is the percentage?",["50%","55%","60%","65%"],2,"360 ÷ 600 × 100 = 60%."]]
+};
+
+/* ===== BOOK-STYLE CHAPTERS: key = subjectId:chapterIndex (same as QB) =====
+   {sub, icon, time, s:[{h, i, p:[paragraphs], t:{h:[cols], r:[[row]]}, n:{type:'tip|key|note', x:'text'}}], sum:[takeaways]}
+   Use <b>term</b> to highlight important words. Icons: any Font Awesome 6 free "fa-solid" name. */
+const LN={
+"history:6":{sub:"From petitions to Poorna Swaraj: India's long road to 15 August 1947",icon:"fa-flag",time:"7 min read",s:[
+{h:"The Birth of Organised Nationalism",i:"fa-landmark",p:["In December 1885, a small group of educated Indians gathered in Bombay and founded the <b>Indian National Congress</b>. A retired British civil servant, <b>A.O. Hume</b>, helped bring the group together, and <b>W.C. Bonnerjee</b> presided over the first session.","The early leaders, known as the <b>Moderates</b>, included Dadabhai Naoroji, G.K. Gokhale and Pherozeshah Mehta. They trusted constitutional methods such as petitions, speeches and resolutions. Naoroji's <b>drain of wealth</b> theory showed how British rule steadily carried India's resources out of the country."],n:{type:"key",x:"Moderates believed in petitions and prayers. The Extremists, who came later, believed in boycott and self-reliance."}},
+{h:"Partition of Bengal and the Swadeshi Wave",i:"fa-map-location-dot",p:["In 1905 the Viceroy <b>Lord Curzon</b> divided Bengal into two parts, officially for administrative convenience. Indians saw it as a plan to split Hindus from Muslims, and the reaction was explosive. The <b>Swadeshi</b> movement urged people to use Indian goods, while the <b>Boycott</b> of British cloth spread across the country.","This phase gave rise to the <b>Extremists</b>, remembered as Lal-Bal-Pal: Lala Lajpat Rai, Bal Gangadhar Tilak and Bipin Chandra Pal. Tilak's cry that Swaraj was his birthright became a rallying call. The Muslim League was formed in 1906, and in 1907 the Congress split at Surat between the Moderates and the Extremists."]},
+{h:"Gandhi Enters: The Age of Mass Movements",i:"fa-people-group",p:["Mahatma Gandhi returned from South Africa in 1915. His first satyagrahas in India were at <b>Champaran</b> (1917), Kheda and Ahmedabad (1918). Then came the <b>Rowlatt Act</b> of 1919, which allowed detention without trial. During the protests, General Dyer's troops fired on an unarmed crowd at <b>Jallianwala Bagh</b>, Amritsar, on 13 April 1919.","Gandhi answered with the <b>Non-Cooperation Movement</b> (1920-22), which he withdrew after violence at Chauri Chaura. In 1930 he led the <b>Dandi March</b> from Sabarmati to the sea to break the salt law, beginning the Civil Disobedience Movement."],t:{h:["Year","Event"],r:[["1917","Champaran Satyagraha"],["1919","Rowlatt Act and Jallianwala Bagh"],["1920","Non-Cooperation Movement"],["1930","Dandi March, Civil Disobedience"],["1942","Quit India Movement"]]}},
+{h:"Quit India and Independence",i:"fa-flag-checkered",p:["The Cripps Mission of 1942 failed to satisfy Indian leaders. In August 1942 Gandhi gave the call <b>Do or Die</b> at Bombay, launching the Quit India Movement. Most leaders were arrested at once, yet the movement spread widely on its own.","After the Second World War, the Cabinet Mission of 1946 prepared the ground for a transfer of power. India became independent on <b>15 August 1947</b>, together with the pain of Partition."],n:{type:"tip",x:"Learn this year chain: 1885, 1905, 1919, 1930, 1942, 1947. Most questions test these dates."}}
+],sum:["The Congress was founded in 1885; Hume was a key founder.","The Partition of Bengal (1905) by Curzon sparked Swadeshi.","Jallianwala Bagh (1919) and Dandi March (1930) are major turning points.","Quit India (1942) gave the slogan Do or Die.","Independence came on 15 August 1947."]},
+
+"history:0":{sub:"One of the world's first great urban cultures, built on grids, bricks and trade",icon:"fa-city",time:"6 min read",s:[
+{h:"Discovery and Timeline",i:"fa-magnifying-glass",p:["The civilization was first noticed at <b>Harappa</b> in 1921 and then at <b>Mohenjo-daro</b> in 1922, which is why it is also called the <b>Harappan Civilization</b>. Its mature phase lasted from about 2600 to 1900 BCE, and it belongs to the <b>Bronze Age</b>.","Its settlements stretched across present-day Pakistan and north-western India, along the Indus and the now-dry Ghaggar-Hakra river."]},
+{h:"Cities Planned Like Never Before",i:"fa-table-cells",p:["What amazes historians is the town planning. Streets met at right angles in a <b>grid pattern</b>, houses were built of <b>burnt bricks</b>, and a system of <b>covered drains</b> carried waste water away. Most cities were divided into a raised <b>citadel</b> and a lower town.","At Mohenjo-daro stands the famous <b>Great Bath</b>, probably used for ritual bathing. Large granaries have been found at Harappa."],n:{type:"key",x:"Great Bath = Mohenjo-daro. Dockyard = Lothal. Fire altars = Kalibangan."}},
+{h:"Important Sites at a Glance",i:"fa-location-dot",p:["Hundreds of sites have been found. The table lists the ones that appear again and again in exams."],t:{h:["Site","Location","Known for"],r:[["Harappa","Punjab (Pakistan)","Granaries"],["Mohenjo-daro","Sindh (Pakistan)","Great Bath"],["Lothal","Gujarat","Dockyard, trade"],["Kalibangan","Rajasthan","Ploughed field, fire altars"],["Dholavira","Gujarat","Water reservoirs"],["Chanhudaro","Sindh (Pakistan)","Bead making"]]}},
+{h:"Life, Trade and Craft",i:"fa-boxes-stacked",p:["The people grew <b>wheat, barley</b> and <b>cotton</b>, and kept cattle, sheep and goats. Craftsmen worked with <b>copper, bronze, gold</b> and silver, but <b>iron was unknown</b>. Square stone <b>seals</b> made of steatite carried animal figures and a script that nobody has yet deciphered.","Traders exchanged goods with Mesopotamia by land and sea, and Lothal's dockyard shows how important sea trade was."],n:{type:"tip",x:"A favourite question: which metal was not known to the Harappans? The answer is iron."}}
+],sum:["Harappa was found in 1921 and Mohenjo-daro in 1922.","Cities followed a grid plan with burnt bricks and covered drains.","Lothal had a dockyard; Kalibangan had fire altars.","Copper, bronze and gold were used; iron was not."]},
+
+"geography:2":{sub:"The lifelines of India: how rivers shape land, farming and cities",icon:"fa-water",time:"6 min read",s:[
+{h:"Two Great River Systems",i:"fa-mountain",p:["Indian rivers fall into two groups. The <b>Himalayan rivers</b>, the Indus, the Ganga and the Brahmaputra, are <b>perennial</b>: they are fed by both rain and melting snow, so they carry water all year.","The <b>Ganga</b>, about 2,500 km long, is the longest river flowing mostly within India. Its important tributaries include the Yamuna, Ghaghara, Gandak and Kosi."]},
+{h:"The Peninsular Rivers",i:"fa-droplet",p:["Rivers of the peninsula depend on monsoon rain, so their flow rises and falls with the seasons. Because the Deccan plateau slopes towards the east, most of them, such as the <b>Godavari, Krishna, Kaveri</b> and <b>Mahanadi</b>, flow into the Bay of Bengal.","The Godavari is the longest peninsular river and is called <b>Dakshin Ganga</b>. Two rivers behave differently: the <b>Narmada</b> and <b>Tapi</b> flow west through rift valleys and fall into the Arabian Sea, forming estuaries instead of deltas."],t:{h:["East-flowing","West-flowing"],r:[["Godavari","Narmada"],["Krishna","Tapi"],["Kaveri","Mahi"],["Mahanadi","Sabarmati"]]},n:{type:"tip",x:"Narmada and Tapi are the two big west-flowing rivers of the peninsula."}},
+{h:"Lakes of India",i:"fa-sailboat",p:["Lakes may be freshwater, saline or coastal lagoons. <b>Wular Lake</b> in Jammu and Kashmir is commonly cited as the largest freshwater lake, while <b>Chilika</b> in Odisha is a brackish water lagoon and a famous bird habitat."],t:{h:["Lake","State","Type"],r:[["Wular","Jammu and Kashmir","Freshwater"],["Dal","Jammu and Kashmir","Freshwater"],["Chilika","Odisha","Brackish lagoon"],["Pulicat","Andhra Pradesh / Tamil Nadu","Lagoon"],["Sambhar","Rajasthan","Salt lake"]]}}
+],sum:["Himalayan rivers are perennial; peninsular rivers are rain-fed.","The Ganga is the longest river within India; the Godavari is the longest peninsular river.","Narmada and Tapi flow west into the Arabian Sea.","Chilika is a lagoon in Odisha; Wular is a freshwater lake in J&amp;K."]},
+
+"biology:3":{sub:"The remarkable journey of a meal, from your first bite to the last nutrient",icon:"fa-utensils",time:"6 min read",s:[
+{h:"The Journey of Food",i:"fa-route",p:["Food travels through the <b>alimentary canal</b>: mouth, oesophagus, stomach, small intestine, large intestine and anus. Along the way the body carries out five steps: <b>ingestion, digestion, absorption, assimilation</b> and <b>egestion</b>.","Digestion is both mechanical, as teeth chew and muscles churn, and chemical, as <b>enzymes</b> break big molecules into small ones that the blood can carry."]},
+{h:"The Mouth and the Stomach",i:"fa-bowl-food",p:["Digestion begins in the mouth. Saliva contains <b>salivary amylase</b>, an enzyme that starts turning starch into sugar. Waves of muscle movement, called <b>peristalsis</b>, push food down the oesophagus.","In the stomach, gastric juice does the work. <b>Hydrochloric acid</b> kills germs and creates the right conditions for <b>pepsin</b>, an enzyme that digests proteins. Mucus protects the stomach wall from its own acid."]},
+{h:"The Small Intestine: Where Absorption Happens",i:"fa-flask",p:["The small intestine is the longest part of the canal and the main site of digestion and absorption. Its inner wall is covered with finger-like <b>villi</b> that increase the surface area for absorbing nutrients.","The <b>liver</b>, the largest gland of the body, makes <b>bile</b>, which is stored in the <b>gall bladder</b>. Bile does not contain enzymes, but it breaks fat into tiny droplets. The pancreas adds juice containing trypsin, lipase and amylase."],t:{h:["Food","Enzyme","Where"],r:[["Starch","Amylase","Mouth, small intestine"],["Proteins","Pepsin, Trypsin","Stomach, small intestine"],["Fats","Lipase (with bile)","Small intestine"]]}},
+{h:"The Large Intestine",i:"fa-recycle",p:["What remains passes into the large intestine, which absorbs most of the remaining <b>water</b> and forms solid waste that leaves the body through the anus."],n:{type:"tip",x:"Remember: most absorption is in the small intestine, water absorption is in the large intestine."}}
+],sum:["Digestion starts in the mouth with salivary amylase.","The stomach secretes HCl and pepsin.","Most digestion and absorption occurs in the small intestine.","The liver is the largest gland; bile is stored in the gall bladder."]},
+
+"reasoning:1":{sub:"Crack the secret rule behind every coded word",icon:"fa-lock",time:"5 min read",s:[
+{h:"What is Coding-Decoding?",i:"fa-key",p:["In coding-decoding questions, a word or number is changed into a <b>code</b> using a hidden rule. You are shown one example, and you must discover the rule and use it on a new word. The rule is nearly always simple, so the skill lies in spotting it quickly."]},
+{h:"Letter Shifting",i:"fa-arrows-left-right",p:["The most common rule moves every letter a fixed number of steps along the alphabet. In <b>CAT to DBU</b>, each letter moves one step forward. Using the same rule, <b>DOG</b> becomes <b>EPH</b>.","Sometimes letters are replaced by their <b>position numbers</b>, where A=1, B=2 and so on up to Z=26. Opposite letters, such as A and Z or B and Y, always add up to 27."],t:{h:["Word","Code","Rule"],r:[["CAT","DBU","+1 each letter"],["RED","SFE","+1 each letter"],["MANGO","NBOHP","+1 each letter"],["PEN","NEP","Reverse the word"]]},n:{type:"tip",x:"Memorise EJOTY: E=5, J=10, O=15, T=20, Y=25. It helps you count positions fast."}},
+{h:"Reversal and Position Patterns",i:"fa-rotate-left",p:["Another rule writes the letters in <b>reverse order</b>, so PEN becomes NEP. Some questions mix two rules, for example reversing the word and then shifting every letter. When that happens, test each rule on its own first."]},
+{h:"A Step-by-Step Method",i:"fa-list-check",p:["First compare the <b>first letter</b> of the word with the first letter of its code to see the shift. Then check that the same rule fits the other letters. Finally, apply it to the new word.","Worked example: if MANGO is coded as NBOHP, each letter moves one step ahead, so APPLE is coded as <b>BQQMF</b>."]}
+],sum:["Find the rule from the given example.","Common rules are +1, -1, reversal and position numbers.","Opposite letters add up to 27.","Always test the rule on every letter."]},
+
+"mathematics:1":{sub:"The foundation of profit and loss, interest and data interpretation",icon:"fa-percent",time:"5 min read",s:[
+{h:"What Does Percent Mean?",i:"fa-percent",p:["The word <b>percent</b> means per hundred. So 25% means 25 out of every 100. To find x% of a number N, multiply N by x and divide by 100.","To express one number as a percentage of another, use <b>(obtained / total) × 100</b>. A student who scores 360 out of 600 has scored 60%."]},
+{h:"Handy Percentage-Fraction Pairs",i:"fa-table",p:["Learning a few fractions saves a lot of time. Instead of multiplying by 25 and dividing by 100, just divide by 4."],t:{h:["Percentage","Fraction"],r:[["50%","1/2"],["25%","1/4"],["20%","1/5"],["10%","1/10"],["12.5%","1/8"],["33.33%","1/3"]]},n:{type:"key",x:"25% of 480 = 480 ÷ 4 = 120. No long multiplication needed."}},
+{h:"Percentage Increase and Decrease",i:"fa-chart-line",p:["To find how much a value has grown or fallen, use <b>% change = (change / original) × 100</b>. Always divide by the <b>original</b> value, not the new one.","If a price rises from ₹200 to ₹250, the change is 50 and the base is 200, so the increase is 25%."]},
+{h:"Finding the Whole",i:"fa-calculator",p:["Sometimes the percentage and its value are given, and you must find the full number. If x% of a number is V, then the number equals <b>V × 100 / x</b>.","For example, if 40% of a number is 80, the number is 80 × 100 / 40 = <b>200</b>."],n:{type:"tip",x:"Always convert the percentage to a simple fraction first. It is faster and less error-prone."}}
+],sum:["x% of N = x × N / 100.","Learn fraction equivalents like 25% = 1/4.","% change = change / original × 100.","If x% of a number is V, the number is V × 100 / x."]}
+};
+
+const HT=document.title;let curSub=null,curId="",curIdx=0,qs=null,qi=0,qsc=0,qans=[],tmr=null,t0=0;
+function linkify(sel){document.querySelectorAll(sel).forEach(a=>{const o=SUB.find(x=>x.n===a.textContent.trim());if(o)a.href="#/subject/"+o.id;else if(sel===".mega a")a.href="#subjects"})}
+linkify(".mega a");linkify("footer .fcols>div:nth-child(2) a");
+
+/* chapter list: opens the Learn page first */
+function renderChaps(){
+  const x=curSub,f=$("cf").value.trim().toLowerCase();
+  const it=x.ch.map((t,i)=>({t,i})).filter(o=>o.t.toLowerCase().includes(f));
+  $("cl").innerHTML=it.length?it.map(({t,i})=>{const b=QB[x.id+":"+i],n=LN[x.id+":"+i];
+    return n?`<a class="chap" style="--c:${x.c}" href="#/learn/${x.id}/${i}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>Chapter notes${b?" + "+b.length+" practice questions":""}</small></div><span class="go"><i class="fa-solid fa-book-open"></i> Read chapter</span></a>`
+    :`<div class="chap off" style="--c:${x.c}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>Notes and questions are being added</small></div><span class="soon">Coming soon</span></div>`}).join(""):`<p class="empty" style="display:block">No chapters match your search.</p>`;
+}
+function subjectPage(x){
+  curSub=x;document.title=x.n+" chapters – QuizHub";
+  $("sbc").textContent=x.n;$("sn").textContent=x.n;$("sd").textContent=x.d;
+  const ic=$("sic");ic.textContent=mono(x.n);ic.style.setProperty("--c",x.c);
+  const ready=x.ch.filter((_,i)=>LN[x.id+":"+i]).length;
+  $("ss").innerHTML=`<div><b>${x.ch.length}</b>chapters</div><div><b>${ready}</b>ready to learn and practice</div>`;
+  $("cf").value="";renderChaps();
+  $("sl").innerHTML=SUB.map(o=>`<a href="#/subject/${o.id}" class="${o.id===x.id?"on":""}" style="--c:${o.c}"><i></i>${esc(o.n)}</a>`).join("");
+}
+$("cf").oninput=renderChaps;
+
+/* learn page: book-style chapter */
+const CO={tip:["fa-lightbulb","Exam tip"],key:["fa-key","Key point"],note:["fa-circle-info","Did you know?"]};
+function learnPage(x,i){
+  const d=LN[x.id+":"+i],t=x.ch[i],q=QB[x.id+":"+i];
+  document.title=t+" – "+x.n+" – QuizHub";
+  const secs=d.s.map((s,n)=>{
+    const ps=s.p.map((p,k)=>`<p${n===0&&k===0?' class="drop"':""}>${p}</p>`).join("");
+    const tb=s.t?`<div class="bk-t"><table><thead><tr>${s.t.h.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${s.t.r.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:"";
+    const c=s.n?`<div class="co co-${s.n.type}"><i class="fa-solid ${CO[s.n.type][0]}"></i><div><strong>${CO[s.n.type][1]}</strong>${s.n.x}</div></div>`:"";
+    return `<section class="bk-s" id="bk${n}"><div class="bk-h"><span class="bk-no">SECTION ${String(n+1).padStart(2,"0")}</span><h2><i class="fa-solid ${s.i}"></i>${s.h}</h2></div>${ps}${tb}${c}</section>`}).join("");
+  const sib=k=>LN[x.id+":"+k]?`#/learn/${x.id}/${k}`:null,pv=sib(i-1),nx=sib(i+1);
+  $("learn").innerHTML=`<div class="rp"><i id="rpi"></i></div>
+  <div class="bk-hero"><div class="wrap"><div class="crumb"><a href="#/">Home</a><span>/</span><a href="#/subject/${x.id}">${esc(x.n)}</a><span>/</span><b>${esc(t)}</b></div>
+  <span class="bk-lab">Chapter ${i+1} &middot; ${esc(x.n)}</span><h1>${esc(t)}</h1><p class="bk-sub">${d.sub}</p>
+  <div class="bk-meta"><span><i class="fa-regular fa-clock"></i>${d.time}</span><span><i class="fa-solid fa-list"></i>${d.s.length} sections</span>${q?`<span><i class="fa-solid fa-circle-question"></i>${q.length} practice questions</span>`:""}</div></div><i class="fa-solid ${d.icon} bk-wm"></i></div>
+  <div class="wrap bk-lay"><article class="bk-art">${secs}
+  <div class="bk-sum"><h2><i class="fa-solid fa-list-check"></i>Chapter summary</h2><ul>${d.sum.map(z=>`<li><i class="fa-solid fa-circle-check"></i><span>${z}</span></li>`).join("")}</ul></div>
+  ${q?`<div class="band bk-cta"><div><h2><i class="fa-solid fa-pen-to-square"></i> Ready to test yourself?</h2><p>${q.length} practice questions based on this chapter.</p></div><a class="btn btn-o" href="#/quiz/${x.id}/${i}" style="height:46px;padding:0 26px">Start practice quiz</a></div>`:""}
+  <div class="bk-nav">${pv?`<a href="${pv}"><small><i class="fa-solid fa-arrow-left"></i> Previous</small><b>${esc(x.ch[i-1])}</b></a>`:"<span></span>"}${nx?`<a href="${nx}" style="text-align:right"><small>Next <i class="fa-solid fa-arrow-right"></i></small><b>${esc(x.ch[i+1])}</b></a>`:"<span></span>"}</div>
+  </article>
+  <aside class="bk-toc box"><h3><i class="fa-solid fa-book-open"></i> In this chapter</h3>${d.s.map((s,n)=>`<button data-go="bk${n}"><i class="fa-solid ${s.i}"></i>${s.h}</button>`).join("")}<button data-go="bkend"><i class="fa-solid fa-list-check"></i>Chapter summary</button>${q?`<a class="btn btn-o" href="#/quiz/${x.id}/${i}" style="width:100%;margin-top:14px"><i class="fa-solid fa-play"></i> Practice quiz</a>`:""}</aside></div>`;
+  const sm=document.querySelector(".bk-sum");if(sm)sm.id="bkend";
+  upd();
+}
+function upd(){const L=$("learn"),b=$("rpi");if(!b||L.hidden)return;const a=document.querySelector(".bk-art");if(!a)return;
+  const r=a.getBoundingClientRect(),h=r.height-innerHeight*.6;b.style.width=Math.max(0,Math.min(100,(-r.top+innerHeight*.2)/h*100))+"%"}
+addEventListener("scroll",upd,{passive:true});
+$("learn").addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(b){const el=document.getElementById(b.dataset.go);el&&el.scrollIntoView({behavior:"smooth"})}});
+
+const fmt=(sec=Math.round((Date.now()-t0)/1000))=>Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0");
+function tick(){const e=$("tm");if(e)e.textContent=fmt()}
+function drawQ(){
+  const q=qs[qi];
+  $("qb").innerHTML=`<div class="qtop"><span>Question ${qi+1} of ${qs.length}</span><span id="tm">${fmt()}</span></div><div class="prog"><i style="width:${qi/qs.length*100}%"></i></div><h2 class="qt">${esc(q[0])}</h2>`+q[1].map((o,k)=>`<button class="qo" data-k="${k}"><b>${"ABCD"[k]}</b>${esc(o)}</button>`).join("")+`<div id="qe"></div><div class="qf"><a href="#/subject/${curId}" class="btn btn-l">Exit quiz</a><button class="btn btn-o" id="qn" hidden>Next question</button></div>`;
+}
+function startQuiz(){qi=0;qsc=0;qans=[];t0=Date.now();clearInterval(tmr);tmr=setInterval(tick,1000);drawQ()}
+function quizPage(x,i){
+  curId=x.id;curIdx=i;qs=QB[x.id+":"+i];const t=x.ch[i];document.title=t+" quiz – QuizHub";
+  const ln=LN[x.id+":"+i]?`<span>/</span><a href="#/learn/${x.id}/${i}">Notes</a>`:"";
+  $("qc").innerHTML=`<a href="#/">Home</a><span>/</span><a href="#/subject/${x.id}">${esc(x.n)}</a>${ln}<span>/</span><b>${esc(t)}</b>`;
+  startQuiz();
+}
+function grade(k){
+  const q=qs[qi],all=[...document.querySelectorAll("#qb .qo")],ok=k===q[2];
+  all.forEach(b=>b.disabled=true);all[q[2]].classList.add("ok");if(!ok)all[k].classList.add("bad");
+  qans[qi]=k;if(ok)qsc++;
+  $("qe").innerHTML=`<div class="qe"><b>${ok?"Correct.":"Not quite."}</b> ${esc(q[3])}</div>`;
+  const n=$("qn");n.textContent=qi<qs.length-1?"Next question":"See results";n.hidden=false;
+}
+function results(){
+  clearInterval(tmr);const pct=Math.round(qsc/qs.length*100);
+  const msg=pct>=80?"Excellent work":pct>=50?"Good effort":"Keep practicing";
+  const rev=LN[curId+":"+curIdx]?`<a class="btn btn-l" href="#/learn/${curId}/${curIdx}">Revise notes</a>`:"";
+  $("qb").innerHTML=`<div class="res"><div class="sb">${qsc}<span>/${qs.length}</span></div><h2>${msg}</h2><p class="sub" style="margin:0 auto 20px">You scored ${pct}% in ${fmt()}.</p><div class="cta2"><button class="btn btn-o" id="qr">Try again</button>${rev}<a class="btn btn-l" href="#/subject/${curId}">Back to chapters</a></div></div><div class="rv"><h3>Review answers</h3>`+qs.map((q,i)=>{const ok=qans[i]===q[2];return `<div><div class="t">${i+1}. ${esc(q[0])}</div><span style="color:var(--${ok?"ok":"bad"});font-weight:600">${ok?"Correct":"Your answer: "+esc(q[1][qans[i]])}</span><div>Correct answer: ${esc(q[1][q[2]])}</div></div>`}).join("")+`</div>`;
+}
+$("qb").addEventListener("click",e=>{
+  const o=e.target.closest(".qo");
+  if(o){if(!o.disabled)grade(+o.dataset.k);return}
+  if(e.target.closest("#qn")){qi++;qi<qs.length?drawQ():results();return}
+  if(e.target.closest("#qr"))startQuiz();
+});
+/* ===== AUTH (login / register / Google) =====
+   1) Get a Client ID: Google Cloud Console > APIs & Services > Credentials > OAuth client ID (Web).
+      Add your site URL under "Authorized JavaScript origins", then paste the ID below.
+   2) Email accounts here are saved in this browser only (demo). For a real site, send them to your backend. */
+const GOOGLE_CLIENT_ID="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
+const K_USERS="qh-users",K_SES="qh-session";
+const ld=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}};
+const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let CU=ld(K_SES,null),amode="login";
+async function hashPw(p){try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("qh:"+p));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}catch(e){return btoa(unescape(encodeURIComponent("qh:"+p)))}}
+const GI='<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
+function field(id,label,icon,type,ph,ac){return `<label class="inp"><span>${label}</span><div class="inw"><i class="fa-solid ${icon}"></i><input id="${id}" type="${type}" placeholder="${ph}" autocomplete="${ac}"${type==="password"?'><button type="button" class="eye" data-eye aria-label="Show password"><i class="fa-regular fa-eye"></i></button>':">"}</div></label>`}
+function authPage(mode){
+  amode=mode;const L=mode==="login";
+  document.title=(L?"Log in":"Create account")+" – QuizHub";
+  $("auth").innerHTML=`<div class="au"><div class="au-side"><div><h2>Learn. Practice. Improve.</h2><p>${L?"Welcome back! Pick up your practice right where you left off.":"Join QuizHub for free and start practicing in minutes."}</p>
+  <ul><li><i class="fa-solid fa-book-open"></i>Chapter notes written like a textbook</li><li><i class="fa-solid fa-circle-check"></i>Instant answers with explanations</li><li><i class="fa-solid fa-chart-line"></i>Track your score topic by topic</li><li><i class="fa-solid fa-fire"></i>Build a daily practice streak</li></ul></div></div>
+  <div class="au-main"><div class="au-card"><h1>${L?"Log in to QuizHub":"Create your account"}</h1><p class="lead">${L?"Enter your details to continue.":"It takes less than a minute."}</p>
+  <div id="gbtn" class="gwrap"></div><div class="or"><span>or ${L?"log in":"sign up"} with email</span></div>
+  <form id="af" novalidate>${L?"":field("an","Full name","fa-user","text","Your name","name")}${field("ae","Email address","fa-envelope","email","you@example.com","email")}${field("ap","Password","fa-lock","password",L?"Your password":"At least 8 characters",L?"current-password":"new-password")}
+  ${L?`<div class="rowf"><label class="ck"><input type="checkbox" id="ar" checked> Keep me logged in</label><a href="#" id="afg">Forgot password?</a></div>`:`<label class="ck"><input type="checkbox" id="at"> I agree to the <a href="#">Terms of use</a> and <a href="#">Privacy policy</a></label>`}
+  <div class="msg" id="am" role="alert" aria-live="polite"></div>
+  <button class="btn btn-o au-go" type="submit">${L?"Log in":"Create account"}</button></form>
+  <p class="sw">${L?'New to QuizHub? <a href="#/register">Create an account</a>':'Already have an account? <a href="#/login">Log in</a>'}</p></div></div></div>`;
+  gInit();
+}
+function amsg(t,ok){const e=$("am");e.textContent=t;e.className="msg"+(t?(ok?" ok":" bad"):"")}
+function setUser(u,remember=true){CU=u;try{(remember?localStorage:sessionStorage).setItem(K_SES,JSON.stringify(u));if(!remember)localStorage.removeItem(K_SES)}catch(e){}renderUser()}
+function renderUser(){
+  const on=!!CU;
+  ["si","gs","gb","msi"].forEach(id=>{const e=$(id);if(e)e.hidden=on});
+  $("um").hidden=!on;if(!on){$("umd").hidden=true;return}
+  const av=$("uav");av.textContent="";
+  if(CU.pic){const im=new Image();im.src=CU.pic;im.alt="";im.referrerPolicy="no-referrer";av.appendChild(im)}else av.textContent=(CU.name||CU.email||"U").trim()[0].toUpperCase();
+  $("unm").textContent=(CU.name||"").split(" ")[0];$("uwn").textContent=CU.name||"";$("uwe").textContent=CU.email||"";
+}
+function logout(){CU=null;try{localStorage.removeItem(K_SES);sessionStorage.removeItem(K_SES)}catch(e){}
+  try{google.accounts.id.disableAutoSelect()}catch(e){}renderUser();location.hash="#/"}
+/* Google Identity Services */
+function jwt(t){const p=t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/");return JSON.parse(decodeURIComponent(atob(p).split("").map(c=>"%"+("00"+c.charCodeAt(0).toString(16)).slice(-2)).join("")))}
+function onG(r){try{const p=jwt(r.credential);
+  const users=ld(K_USERS,{});if(!users[p.email])users[p.email]={name:p.name,email:p.email,google:true};sv(K_USERS,users);
+  setUser({name:p.name,email:p.email,pic:p.picture,provider:"google"});location.hash="#/"}catch(e){amsg("Google sign-in failed. Please try again.")}}
+function gInit(){
+  const box=$("gbtn");
+  if(GOOGLE_CLIENT_ID.startsWith("YOUR_")){box.innerHTML=`<button type="button" class="gfb" id="gfake">${GI} Continue with Google</button>`;return}
+  const go=()=>{google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:onG});
+    google.accounts.id.renderButton(box,{theme:"outline",size:"large",width:Math.min(430,box.offsetWidth||340),text:amode==="login"?"signin_with":"signup_with",shape:"rectangular",logo_alignment:"center"})};
+  if(window.google&&google.accounts&&google.accounts.id)return go();
+  if(!document.getElementById("gis")){const s=document.createElement("script");s.src="https://accounts.google.com/gsi/client";s.async=true;s.id="gis";document.head.appendChild(s)}
+  document.getElementById("gis").addEventListener("load",go);
+  box.innerHTML=`<button type="button" class="gfb" disabled>${GI} Loading Google...</button>`;
+}
+/* form + clicks */
+$("auth").addEventListener("click",e=>{
+  const eye=e.target.closest("[data-eye]");
+  if(eye){const i=eye.previousElementSibling,s=i.type==="password";i.type=s?"text":"password";eye.innerHTML=`<i class="fa-regular fa-eye${s?"-slash":""}"></i>`;return}
+  if(e.target.closest("#gfake")){amsg("Google login is not set up yet. Paste your Google Client ID in GOOGLE_CLIENT_ID in the code.");return}
+  if(e.target.closest("#afg")){e.preventDefault();amsg("Password reset needs an email service. Connect your backend to enable it.",true)}
+});
+$("auth").addEventListener("submit",async e=>{
+  e.preventDefault();amsg("");
+  const em=$("ae").value.trim().toLowerCase(),pw=$("ap").value,users=ld(K_USERS,{});
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em))return amsg("Please enter a valid email address.");
+  if(amode==="register"){
+    const nm=$("an").value.trim();
+    if(nm.length<2)return amsg("Please enter your full name.");
+    if(pw.length<8)return amsg("Password must be at least 8 characters.");
+    if(!$("at").checked)return amsg("Please accept the Terms of use to continue.");
+    if(users[em])return amsg(users[em].google&&!users[em].h?"This email is registered with Google. Use Continue with Google.":"This email is already registered. Please log in.");
+    users[em]={name:nm,email:em,h:await hashPw(pw)};sv(K_USERS,users);
+    setUser({name:nm,email:em,provider:"email"});location.hash="#/";
+  }else{
+    const u=users[em];
+    if(u&&u.google&&!u.h)return amsg("This account uses Google. Please use Continue with Google.");
+    if(!u||u.h!==await hashPw(pw))return amsg("Incorrect email or password.");
+    setUser({name:u.name,email:em,provider:"email"},$("ar").checked);location.hash="#/";
+  }
+});
+$("umb").onclick=()=>{const d=$("umd");d.hidden=!d.hidden;$("umb").setAttribute("aria-expanded",!d.hidden)};
+$("lo").onclick=logout;
+document.addEventListener("click",e=>{if(!e.target.closest("#um"))$("umd").hidden=true});
+try{if(!CU){const s=JSON.parse(sessionStorage.getItem(K_SES));if(s)CU=s}}catch(e){}
+renderUser();
+
+function route(){
+  const h=location.hash,m=h.match(/^#\/(subject|quiz|learn)\/([^/]+)(?:\/(\d+))?$/);
+  clearInterval(tmr);mg.classList.remove("open");sb.setAttribute("aria-expanded","false");nav.classList.remove("show");
+  const P=$("home"),SP=$("subj"),QP=$("quiz"),LP=$("learn"),AP=$("auth");P.hidden=SP.hidden=QP.hidden=LP.hidden=AP.hidden=true;
+  if(h==="#/login"||h==="#/register"){if(CU){location.hash="#/";return}authPage(h.slice(2));AP.hidden=false;scrollTo(0,0);return}
+  const x=m&&SUB.find(o=>o.id===m[2]);
+  if(x&&m[1]==="subject"){subjectPage(x);SP.hidden=false;scrollTo(0,0);return}
+  if(x&&m[1]==="learn"&&LN[x.id+":"+m[3]]){learnPage(x,+m[3]);LP.hidden=false;scrollTo(0,0);return}
+  if(x&&m[1]==="quiz"&&QB[x.id+":"+m[3]]){quizPage(x,+m[3]);QP.hidden=false;scrollTo(0,0);return}
+  P.hidden=false;document.title=HT;
+  const id=h.replace(/^#\/?/,""),el=id&&document.getElementById(id);
+  if(el)el.scrollIntoView();else scrollTo(0,0);
+}
+addEventListener("hashchange",route);route();
+</script>
+</body>
+</html>

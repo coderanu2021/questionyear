@@ -1,0 +1,9 @@
+window.ADMIN_VIEWS=window.ADMIN_VIEWS||{};window.ADMIN_VIEWS.tests=function tests(){
+ const f=window._tf||'';const list=S.tests.filter(t=>!f||t.ch==f);
+ return `<div class="head"><div><h2>Tests & Quizzes</h2><p>Create chapter-wise tests and track how learners perform.</p></div><button class="btn pri" onclick="testModal()">${ic('plus')}Create test</button></div>
+ <div class="tools"><select onchange="window._tf=this.value;rerender()"><option value="">All chapters</option>${S.chapters.map(c=>`<option value="${c.id}" ${c.id==f?'selected':''}>${esc(c.title)}</option>`).join('')}</select></div>
+ ${list.length?`<div class="tests">${list.map(t=>`<div class="card test"><span class="badge b-info">${esc(chName(t.ch))}</span><h3 style="margin-top:12px;font-size:16px">${esc(t.title)}</h3>
+ <div class="meta"><span>${ic('help')}${t.qs.length} questions</span><span>${ic('clock')}${t.dur} min</span><span>Pass ${t.pass}%</span></div>
+ <div class="row" style="margin-bottom:6px"><div class="bar ok"><i style="width:${t.avg}%"></i></div><div class="v">${t.avg}%</div></div><small style="color:var(--mute)">Avg score · ${t.attempts} attempts</small>
+ <div class="acts" style="margin-top:16px"><button class="btn sm" onclick="testModal(${t.id})">${ic('edit')}Edit</button><button class="btn sm dng" onclick="delTest(${t.id})">${ic('trash')}</button></div></div>`).join('')}</div>`:'<div class="card empty">No tests yet. Create a test and add questions to a chapter.</div>'}`;
+};

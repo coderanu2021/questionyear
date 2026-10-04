@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LearnDesk Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--ink:#14213d;--mute:#6b7690;--line:#e6eaf2;--brand:#2f4bd8;--brand-soft:#eaeefe;--ok:#12a36b;--ok-soft:#e3f6ee;--warn:#d98a0b;--warn-soft:#fdf2dc;--bad:#d64545;--bad-soft:#fce8e8;--r:12px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;display:flex;min-height:100vh}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.side{width:248px;background:#fff;border-right:1px solid var(--line);padding:22px 14px;position:fixed;inset:0 auto 0 0;display:flex;flex-direction:column;z-index:20;transition:transform .2s}
+.logo{display:flex;align-items:center;gap:10px;padding:0 10px 22px;font-weight:800;font-size:18px}
+.logo i{width:34px;height:34px;border-radius:10px;background:var(--brand);color:#fff;display:grid;place-items:center;font-style:normal}
+.nav button{display:flex;align-items:center;gap:12px;width:100%;padding:11px 12px;border:0;background:none;border-radius:10px;color:var(--mute);font-weight:600;text-align:left;margin-bottom:2px}
+.nav button:hover{background:var(--bg);color:var(--ink)}
+.nav button.on{background:var(--brand-soft);color:var(--brand)}
+.nav svg,.ic{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.me{margin-top:auto;display:flex;gap:10px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:12px}
+.me b{display:block;font-size:13px}.me span{font-size:12px;color:var(--mute)}
+.main{margin-left:248px;flex:1;min-width:0}
+.top{height:66px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 28px;position:sticky;top:0;z-index:10}
+.top h1{font-size:19px;font-weight:800}
+.burger{display:none;border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px}
+.grow{flex:1}
+.search{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:0 12px;height:38px;min-width:0}
+.search input{border:0;background:none;outline:0;width:100%;min-width:180px}
+.av{width:34px;height:34px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-weight:700;font-size:12px;flex:none}
+.page{padding:28px;max-width:1280px}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+.head h2{font-size:22px;font-weight:800}.head p{color:var(--mute);margin-top:3px}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;padding:9px 15px;border-radius:10px;font-weight:600}
+.btn:hover{border-color:#cfd6e6}
+.btn.pri{background:var(--brand);border-color:var(--brand);color:#fff}.btn.pri:hover{background:#2540c0}
+.btn.sm{padding:6px 10px;font-size:13px}.btn.dng{color:var(--bad)}
+.grid{display:grid;gap:18px}
+.g4{grid-template-columns:repeat(4,1fr)}.g2{grid-template-columns:2fr 1fr}.g2e{grid-template-columns:1fr 1fr}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:0 1px 2px rgba(20,33,61,.04)}
+.card h3{font-size:15px;font-weight:700}.card .sub{color:var(--mute);font-size:12.5px;margin:2px 0 14px}
+.stat{display:flex;gap:14px;align-items:center}
+.stat .ico{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;flex:none}
+.stat b{font-size:24px;font-weight:800;display:block;line-height:1.1}
+.stat span{color:var(--mute);font-size:12.5px}
+.trend{font-size:12px;font-weight:700;color:var(--ok)}.trend.dn{color:var(--bad)}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:640px}
+th{text-align:left;font-size:12px;color:var(--mute);font-weight:600;padding:10px 14px;background:#f9fafd;border-bottom:1px solid var(--line)}
+td{padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}tbody tr:hover{background:#fafbfe}
+.tc{padding:0;overflow:hidden}
+.cell{display:flex;align-items:center;gap:12px}.cell b{display:block}.cell small{color:var(--mute)}
+.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600}
+.b-ok{background:var(--ok-soft);color:var(--ok)}.b-warn{background:var(--warn-soft);color:var(--warn)}.b-bad{background:var(--bad-soft);color:var(--bad)}.b-info{background:var(--brand-soft);color:var(--brand)}
+.bar{height:7px;background:var(--line);border-radius:9px;overflow:hidden;min-width:90px}.bar i{display:block;height:100%;background:var(--brand);border-radius:9px}
+.bar.ok i{background:var(--ok)}
+.tools{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.tools select,.tools .search{height:40px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:0 12px}
+.tests{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.test .meta{display:flex;gap:14px;color:var(--mute);font-size:12.5px;margin:12px 0}
+.test .meta span{display:flex;gap:5px;align-items:center}
+.acts{display:flex;gap:8px;justify-content:flex-end}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--mute);margin-bottom:6px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px}
+.row{display:flex;align-items:center;gap:12px;margin-bottom:14px}.row .n{width:150px;font-weight:600;font-size:13px}.row .bar{flex:1}.row .v{width:40px;text-align:right;font-weight:700;font-size:13px}
+.empty{padding:40px;text-align:center;color:var(--mute)}
+.modal{position:fixed;inset:0;background:rgba(20,33,61,.4);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
+.modal.show{display:flex}
+.dlg{background:#fff;border-radius:16px;width:100%;max-width:560px;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(20,33,61,.25)}
+.dlg.wide{max-width:720px}
+.dh{padding:20px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.dh h3{font-size:17px}.x{border:0;background:none;font-size:22px;color:var(--mute)}
+.db{padding:22px 24px}.df{padding:16px 24px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;background:#f9fafd;border-radius:0 0 16px 16px}
+.f{margin-bottom:16px}.f label{display:block;font-weight:600;font-size:13px;margin-bottom:6px}
+.f input,.f select,.f textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff}
+.f input:focus,.f select:focus,.f textarea:focus{outline:0;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.q{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px;background:#fafbfe}
+.q .opt{display:flex;gap:8px;align-items:center;margin-top:8px}.q .opt input[type=text]{flex:1;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.q .qt{display:flex;gap:8px}.q .qt input{flex:1;border:1px solid var(--line);border-radius:8px;padding:9px 10px;font-weight:600}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:12px 18px;border-radius:10px;font-weight:600;transform:translateY(80px);opacity:0;transition:.25s;z-index:60}
+.toast.show{transform:none;opacity:1}
+svg text{font-family:inherit;fill:var(--mute);font-size:11px}
+@media(max-width:1100px){.g4{grid-template-columns:1fr 1fr}.g2,.g2e{grid-template-columns:1fr}}
+@media(max-width:820px){.side{transform:translateX(-100%)}.side.open{transform:none;box-shadow:0 0 40px rgba(0,0,0,.2)}.main{margin-left:0}.burger{display:block}.page{padding:18px}.top{padding:0 16px}.search.hide{display:none}}
+@media(max-width:520px){.g4,.two{grid-template-columns:1fr}.row .n{width:100px}}
+.ck.ck-editor__editable_inline{min-height:260px;max-height:48vh;padding:0 16px}.ck.ck-editor__editable:not(.ck-editor__nested-editable).ck-focused{border-color:var(--brand)!important;box-shadow:0 0 0 3px var(--brand-soft)!important}.ck.ck-editor__main>.ck-editor__editable{border-radius:0 0 10px 10px}.ck.ck-toolbar{border-radius:10px 10px 0 0}.ck.ck-balloon-panel,.ck.ck-dropdown__panel{z-index:1200!important}
+.content{line-height:1.7}.content h2,.content h3{margin:18px 0 8px}.content p{margin-bottom:10px}.content ul,.content ol{margin:0 0 10px 22px}.content table{min-width:0;border:1px solid var(--line)}.content td,.content th{border:1px solid var(--line)}.content blockquote{border-left:4px solid var(--brand);padding-left:14px;color:var(--mute);margin:12px 0}.content img{max-width:100%;height:auto}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<aside class="side" id="side">
+  <div class="logo"><i>L</i>LearnDesk</div>
+  <nav class="nav" id="nav"></nav>
+  <div class="me"><div class="av">AD</div><div><b>Admin</b><span>Super admin</span></div></div>
+</aside>
+<div class="main">
+  <header class="top">
+    <button class="burger" id="burger" aria-label="Menu"><svg class="ic" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <h1 id="title">Dashboard</h1><div class="grow"></div>
+    <div class="search hide"><svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input placeholder="Search anything..." id="gs"></div>
+    <div class="av">AD</div>
+  </header>
+  <main class="page" id="page"></main>
+</div>
+<div class="modal" id="modal"><div class="dlg" id="dlg"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const ICON={
+ dash:'<path d="M3 13h8V3H3zM13 21h8V11h-8zM13 3v6h8V3zM3 21h8v-6H3z"/>',
+ book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5zM4 19.5V21h16"/>',
+ quiz:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
+ users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
+ chart:'<path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',edit:'<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+ trash:'<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+ help:'<circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/>'
+};
+const ic=n=>`<svg class="ic" viewBox="0 0 24 24">${ICON[n]}</svg>`;
+const NAV=[['dashboard','Dashboard','dash'],['chapters','Chapters','book'],['tests','Tests & Quizzes','quiz'],['users','Users','users'],['analytics','Analytics','chart']];
+
+/* ---------- data ---------- */
+const seedCh=[
+ [1,'Introduction to Algebra','Maths',12,'published','Basics of variables, expressions and equations.'],
+ [2,'Newton\'s Laws of Motion','Physics',9,'published','Force, inertia and real-life applications.'],
+ [3,'Chemical Reactions','Chemistry',14,'published','Types of reactions and balancing equations.'],
+ [4,'Cell Structure','Biology',8,'published','Organelles and their functions.'],
+ [5,'Trigonometry','Maths',15,'draft','Ratios, identities and heights & distances.'],
+ [6,'Electricity','Physics',11,'published','Current, voltage, resistance and circuits.']];
+const seedUs=[['Aarav Sharma','aarav@mail.com',92,6,'2026-01-12','active'],['Diya Verma','diya@mail.com',88,5,'2026-02-03','active'],['Rohan Gupta','rohan@mail.com',76,4,'2026-02-18','active'],['Ananya Singh','ananya@mail.com',95,6,'2026-03-01','active'],['Kabir Mehta','kabir@mail.com',61,2,'2026-03-14','inactive'],['Ishita Rao','ishita@mail.com',83,5,'2026-04-02','active'],['Vihaan Joshi','vihaan@mail.com',54,1,'2026-05-20','inactive'],['Saanvi Kapoor','saanvi@mail.com',79,4,'2026-06-08','active'],['Arjun Nair','arjun@mail.com',68,3,'2026-07-15','active'],['Meera Iyer','meera@mail.com',90,6,'2026-08-21','active'],['Yash Malhotra','yash@mail.com',47,1,'2026-09-05','blocked'],['Tara Bose','tara@mail.com',72,3,'2026-09-28','active']];
+const mkQ=(q,o,c)=>({q,o,c});
+const seedTs=[
+ {id:1,ch:1,title:'Algebra Basics Quiz',dur:15,pass:40,attempts:412,avg:78,qs:[mkQ('Solve: 2x + 4 = 10',['x=2','x=3','x=4','x=5'],1)]},
+ {id:2,ch:2,title:'Laws of Motion Test',dur:20,pass:50,attempts:356,avg:71,qs:[mkQ('SI unit of force?',['Joule','Newton','Watt','Pascal'],1),mkQ('Inertia depends on?',['Speed','Mass','Colour','Shape'],1)]},
+ {id:3,ch:3,title:'Balancing Equations',dur:25,pass:50,attempts:298,avg:64,qs:[mkQ('Rusting is a?',['Physical change','Chemical change','Nuclear change','None'],1)]},
+ {id:4,ch:4,title:'Cell Organelles Quiz',dur:10,pass:40,attempts:274,avg:82,qs:[mkQ('Powerhouse of the cell?',['Nucleus','Ribosome','Mitochondria','Golgi'],2)]},
+ {id:5,ch:6,title:'Electricity Chapter Test',dur:30,pass:50,attempts:233,avg:69,qs:[mkQ('Unit of resistance?',['Ohm','Volt','Ampere','Watt'],0)]}];
+let S;
+try{S=JSON.parse(localStorage.getItem('ld_admin'))}catch(e){}
+if(!S)S={chapters:seedCh.map(a=>({id:a[0],title:a[1],subject:a[2],lessons:a[3],status:a[4],desc:a[5]})),users:seedUs.map((u,i)=>({id:i+1,name:u[0],email:u[1],score:u[2],done:u[3],joined:u[4],status:u[5]})),tests:seedTs};
+const save=()=>{try{localStorage.setItem('ld_admin',JSON.stringify(S))}catch(e){}};
+const chName=id=>(S.chapters.find(c=>c.id==id)||{title:'—'}).title;
+const nid=a=>a.reduce((m,x)=>Math.max(m,x.id),0)+1;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ini=n=>n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+const fdate=d=>new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+const sb=s=>`<span class="badge ${{published:'b-ok',active:'b-ok',draft:'b-warn',inactive:'b-warn',blocked:'b-bad'}[s]}">${s[0].toUpperCase()+s.slice(1)}</span>`;
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)};
+
+/* ---------- charts ---------- */
+function line(vals,labels,color='#2f4bd8'){
+ const W=620,H=220,p=32,max=Math.max(...vals)*1.15,x=i=>p+i*(W-p-10)/(vals.length-1),y=v=>H-24-(v/max)*(H-44);
+ const pts=vals.map((v,i)=>[x(i),y(v)]),d=pts.map((q,i)=>(i?'L':'M')+q[0]+' '+q[1]).join(' ');
+ let g='';for(let i=0;i<=4;i++){const yy=H-24-i*(H-44)/4;g+=`<line x1="${p}" x2="${W-10}" y1="${yy}" y2="${yy}" stroke="#e6eaf2"/><text x="0" y="${yy+4}">${Math.round(max*i/4)}</text>`}
+ return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img">${g}<path d="${d} L${x(vals.length-1)} ${H-24} L${p} ${H-24}Z" fill="${color}" opacity=".08"/><path d="${d}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>${pts.map(q=>`<circle cx="${q[0]}" cy="${q[1]}" r="3.5" fill="#fff" stroke="${color}" stroke-width="2"/>`).join('')}${labels.map((l,i)=>`<text x="${x(i)}" y="${H-5}" text-anchor="middle">${l}</text>`).join('')}</svg>`;
+}
+function donut(parts){
+ const tot=parts.reduce((a,b)=>a+b[1],0)||1;let a0=-Math.PI/2,out='';
+ parts.forEach(([n,v,c])=>{const a1=a0+v/tot*2*Math.PI,r=62,cx=80,cy=80,big=a1-a0>Math.PI?1:0;
+  out+=`<path d="M${cx+r*Math.cos(a0)} ${cy+r*Math.sin(a0)} A${r} ${r} 0 ${big} 1 ${cx+r*Math.cos(a1)} ${cy+r*Math.sin(a1)}" fill="none" stroke="${c}" stroke-width="22"/>`;a0=a1});
+ return `<div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap"><svg viewBox="0 0 160 160" width="150">${out}<text x="80" y="78" text-anchor="middle" style="font-size:22px;font-weight:800;fill:#14213d">${tot}</text><text x="80" y="95" text-anchor="middle">users</text></svg><div>${parts.map(([n,v,c])=>`<div style="margin-bottom:8px"><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${c};margin-right:8px"></i>${n} <b>${v}</b></div>`).join('')}</div></div>`;
+}
+
+/* ---------- views ---------- */
+const stat=(l,v,t,c,bg,i)=>`<div class="card stat"><div class="ico" style="background:${bg};color:${c}">${ic(i)}</div><div><b>${v}</b><span>${l}</span> <span class="trend">${t}</span></div></div>`;
+const totals=()=>({att:S.tests.reduce((a,t)=>a+t.attempts,0),avg:Math.round(S.users.reduce((a,u)=>a+u.score,0)/(S.users.length||1))});
+const WEEKS=['W1','W2','W3','W4','W5','W6','W7'];
+
+function dashboard(){
+ const t=totals(),act=S.users.filter(u=>u.status=='active').length;
+ return `<div class="head"><div><h2>Welcome back, Admin</h2><p>Here's how your learners are doing this month.</p></div><button class="btn pri" onclick="chapterModal()">${ic('plus')}Add chapter</button></div>
+ <div class="grid g4" style="margin-bottom:18px">
+  ${stat('Total users',S.users.length,'+12%','#2f4bd8','#eaeefe','users')}
+  ${stat('Chapters',S.chapters.length,'+2','#12a36b','#e3f6ee','book')}
+  ${stat('Test attempts',t.att.toLocaleString(),'+18%','#d98a0b','#fdf2dc','quiz')}
+  ${stat('Average score',t.avg+'%','+3%','#d64545','#fce8e8','chart')}
+ </div>
+ <div class="grid g2" style="margin-bottom:18px">
+  <div class="card"><h3>Test attempts</h3><p class="sub">Last 7 weeks</p>${line([180,240,210,320,290,410,480],WEEKS)}</div>
+  <div class="card"><h3>User status</h3><p class="sub">${act} active right now</p>${donut([['Active',act,'#12a36b'],['Inactive',S.users.filter(u=>u.status=='inactive').length,'#d98a0b'],['Blocked',S.users.filter(u=>u.status=='blocked').length,'#d64545']])}</div>
+ </div>
+ <div class="card tc"><div style="padding:18px 20px 6px"><h3>Recently joined</h3></div><div class="tw"><table><thead><tr><th>User</th><th>Joined</th><th>Chapters done</th><th>Status</th></tr></thead><tbody>
+ ${[...S.users].sort((a,b)=>b.joined.localeCompare(a.joined)).slice(0,5).map(u=>`<tr><td><div class="cell"><div class="av">${ini(u.name)}</div><div><b>${esc(u.name)}</b><small>${esc(u.email)}</small></div></div></td><td>${fdate(u.joined)}</td><td>${u.done}/${S.chapters.length}</td><td>${sb(u.status)}</td></tr>`).join('')}</tbody></table></div></div>`;
+}
+
+function chapters(){
+ const q=(window._cq||'').toLowerCase(),sub=window._cs||'';
+ const subs=[...new Set(S.chapters.map(c=>c.subject))];
+ const rows=S.chapters.filter(c=>c.title.toLowerCase().includes(q)&&(!sub||c.subject==sub));
+ return `<div class="head"><div><h2>Chapters</h2><p>${S.chapters.length} chapters across ${subs.length} subjects</p></div><button class="btn pri" onclick="chapterModal()">${ic('plus')}Add chapter</button></div>
+ <div class="tools"><div class="search"><svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="cq" placeholder="Search chapters" value="${esc(window._cq||'')}" oninput="window._cq=this.value;rerender('cq')"></div>
+ <select onchange="window._cs=this.value;rerender()"><option value="">All subjects</option>${subs.map(s=>`<option ${s==sub?'selected':''}>${esc(s)}</option>`).join('')}</select></div>
+ <div class="card tc"><div class="tw"><table><thead><tr><th>Chapter</th><th>Subject</th><th>Lessons</th><th>Tests</th><th>Status</th><th></th></tr></thead><tbody>
+ ${rows.map(c=>`<tr><td><div class="cell"><div class="av" style="border-radius:10px">${c.id}</div><div><b>${esc(c.title)}</b><small>${esc((c.desc||'').slice(0,50))}</small></div></div></td><td><span class="badge b-info">${esc(c.subject)}</span></td><td>${c.lessons}</td><td>${S.tests.filter(t=>t.ch==c.id).length}</td><td>${sb(c.status)}</td>
+ <td><div class="acts"><button class="btn sm" onclick="viewChapter(${c.id})">View</button><button class="btn sm" onclick="chapterModal(${c.id})">${ic('edit')}Edit</button><button class="btn sm dng" onclick="delChapter(${c.id})">${ic('trash')}</button></div></td></tr>`).join('')||''}</tbody></table>
+ ${rows.length?'':'<div class="empty">No chapters found. Add your first chapter to get started.</div>'}</div></div>`;
+}
+
+function tests(){
+ const f=window._tf||'';const list=S.tests.filter(t=>!f||t.ch==f);
+ return `<div class="head"><div><h2>Tests & Quizzes</h2><p>Create chapter-wise tests and track how learners perform.</p></div><button class="btn pri" onclick="testModal()">${ic('plus')}Create test</button></div>
+ <div class="tools"><select onchange="window._tf=this.value;rerender()"><option value="">All chapters</option>${S.chapters.map(c=>`<option value="${c.id}" ${c.id==f?'selected':''}>${esc(c.title)}</option>`).join('')}</select></div>
+ ${list.length?`<div class="tests">${list.map(t=>`<div class="card test"><span class="badge b-info">${esc(chName(t.ch))}</span><h3 style="margin-top:12px;font-size:16px">${esc(t.title)}</h3>
+ <div class="meta"><span>${ic('help')}${t.qs.length} questions</span><span>${ic('clock')}${t.dur} min</span><span>Pass ${t.pass}%</span></div>
+ <div class="row" style="margin-bottom:6px"><div class="bar ok"><i style="width:${t.avg}%"></i></div><div class="v">${t.avg}%</div></div><small style="color:var(--mute)">Avg score · ${t.attempts} attempts</small>
+ <div class="acts" style="margin-top:16px"><button class="btn sm" onclick="testModal(${t.id})">${ic('edit')}Edit</button><button class="btn sm dng" onclick="delTest(${t.id})">${ic('trash')}</button></div></div>`).join('')}</div>`:'<div class="card empty">No tests yet. Create a test and add questions to a chapter.</div>'}`;
+}
+
+function users(){
+ const q=(window._uq||'').toLowerCase(),st=window._us||'';
+ const rows=S.users.filter(u=>(u.name+u.email).toLowerCase().includes(q)&&(!st||u.status==st));
+ return `<div class="head"><div><h2>Users</h2><p>${S.users.length} registered learners</p></div></div>
+ <div class="tools"><div class="search"><svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="uq" placeholder="Search by name or email" value="${esc(window._uq||'')}" oninput="window._uq=this.value;rerender('uq')"></div>
+ <select onchange="window._us=this.value;rerender()">${['','active','inactive','blocked'].map(s=>`<option value="${s}" ${s==st?'selected':''}>${s?s[0].toUpperCase()+s.slice(1):'All statuses'}</option>`).join('')}</select></div>
+ <div class="card tc"><div class="tw"><table><thead><tr><th>User</th><th>Joined</th><th>Progress</th><th>Avg score</th><th>Status</th><th></th></tr></thead><tbody>
+ ${rows.map(u=>`<tr><td><div class="cell"><div class="av">${ini(u.name)}</div><div><b>${esc(u.name)}</b><small>${esc(u.email)}</small></div></div></td><td>${fdate(u.joined)}</td>
+ <td><div class="cell"><div class="bar" style="flex:1"><i style="width:${u.done/S.chapters.length*100}%"></i></div><small>${u.done}/${S.chapters.length}</small></div></td><td><b>${u.score}%</b></td><td>${sb(u.status)}</td>
+ <td><div class="acts"><button class="btn sm" onclick="toggleBlock(${u.id})">${u.status=='blocked'?'Unblock':'Block'}</button></div></td></tr>`).join('')}</tbody></table>
+ ${rows.length?'':'<div class="empty">No users match your search.</div>'}</div></div>`;
+}
+
+function analytics(){
+ const t=totals(),pass=Math.round(S.users.filter(u=>u.score>=50).length/S.users.length*100);
+ const dist=[['0-40',S.users.filter(u=>u.score<40).length],['40-60',S.users.filter(u=>u.score>=40&&u.score<60).length],['60-80',S.users.filter(u=>u.score>=60&&u.score<80).length],['80-100',S.users.filter(u=>u.score>=80).length]];
+ const top=[...S.users].sort((a,b)=>b.score-a.score).slice(0,5);
+ return `<div class="head"><div><h2>Analytics</h2><p>Complete picture of engagement, learning and test results.</p></div></div>
+ <div class="grid g4" style="margin-bottom:18px">
+  ${stat('Active users',S.users.filter(u=>u.status=='active').length,'+8%','#2f4bd8','#eaeefe','users')}
+  ${stat('Pass rate',pass+'%','+4%','#12a36b','#e3f6ee','quiz')}
+  ${stat('Avg score',t.avg+'%','+3%','#d98a0b','#fdf2dc','chart')}
+  ${stat('Completion',Math.round(S.users.reduce((a,u)=>a+u.done,0)/(S.users.length*S.chapters.length)*100)+'%','+6%','#d64545','#fce8e8','book')}
+ </div>
+ <div class="grid g2" style="margin-bottom:18px">
+  <div class="card"><h3>New signups</h3><p class="sub">Last 7 weeks</p>${line([12,19,15,28,24,35,41],WEEKS,'#12a36b')}</div>
+  <div class="card"><h3>Score distribution</h3><p class="sub">Users by average score</p>${dist.map(([n,v])=>`<div class="row"><div class="n" style="width:70px">${n}%</div><div class="bar"><i style="width:${v/S.users.length*100}%"></i></div><div class="v">${v}</div></div>`).join('')}</div>
+ </div>
+ <div class="grid g2e">
+  <div class="card"><h3>Chapter performance</h3><p class="sub">Average test score per chapter</p>${S.chapters.map(c=>{const ts=S.tests.filter(t=>t.ch==c.id),a=ts.length?Math.round(ts.reduce((s,t)=>s+t.avg,0)/ts.length):0;return `<div class="row"><div class="n">${esc(c.title)}</div><div class="bar ok"><i style="width:${a}%"></i></div><div class="v">${a?a+'%':'—'}</div></div>`}).join('')}</div>
+  <div class="card"><h3>Top performers</h3><p class="sub">Highest average score</p>${top.map((u,i)=>`<div class="row"><div class="av">${ini(u.name)}</div><div class="n" style="flex:1">${esc(u.name)}<small style="display:block;color:var(--mute);font-weight:400">${u.done} chapters done</small></div><div class="v" style="width:auto"><span class="badge b-ok">${u.score}%</span></div></div>`).join('')}</div>
+ </div>`;
+}
+
+/* ---------- modals & actions ---------- */
+const VIEWS={dashboard,chapters,tests,users,analytics};
+let editor=null;
+const openM=(h,wide)=>{killEditor();$('#dlg').className='dlg'+(wide?' wide':'');$('#dlg').innerHTML=h;$('#modal').classList.add('show')};
+const killEditor=()=>{if(editor){editor.destroy().catch(()=>{});editor=null}};
+const closeM=()=>{killEditor();$('#modal').classList.remove('show')};
+$('#modal').addEventListener('click',e=>{if(e.target.id=='modal')closeM()});
+document.addEventListener('keydown',e=>{if(e.key=='Escape')closeM()});
+
+function chapterModal(id){
+ const c=S.chapters.find(x=>x.id==id)||{title:'',subject:'',lessons:1,status:'draft',desc:''};
+ openM(`<div class="dh"><h3>${id?'Edit chapter':'Add chapter'}</h3><button class="x" onclick="closeM()" aria-label="Close">×</button></div>
+ <div class="db"><div class="f"><label>Chapter title</label><input id="c_t" value="${esc(c.title)}" placeholder="e.g. Quadratic Equations"></div>
+ <div class="two"><div class="f"><label>Subject</label><input id="c_s" list="subs" value="${esc(c.subject)}" placeholder="e.g. Maths"><datalist id="subs">${[...new Set(S.chapters.map(x=>x.subject))].map(s=>`<option>${esc(s)}`).join('')}</datalist></div>
+ <div class="f"><label>Number of lessons</label><input id="c_l" type="number" min="1" value="${c.lessons}"></div></div>
+ <div class="f"><label>Description</label><textarea id="c_d" rows="3" placeholder="What will learners study in this chapter?">${esc(c.desc||'')}</textarea></div>
+ <div class="f"><label>Chapter content</label><textarea id="c_c">${esc(c.content||'')}</textarea></div>
+ <div class="f"><label>Status</label><select id="c_st"><option value="published" ${c.status=='published'?'selected':''}>Published</option><option value="draft" ${c.status=='draft'?'selected':''}>Draft</option></select></div></div>
+ <div class="df"><button class="btn" onclick="closeM()">Cancel</button><button class="btn pri" onclick="saveChapter(${id||0})">${id?'Save changes':'Add chapter'}</button></div>`,true);
+ initEditor();
+}
+function initEditor(){
+ if(!window.ClassicEditor){$('#c_c').style.minHeight='220px';return toast('Editor could not load. Check your internet connection.')}
+ ClassicEditor.create($('#c_c'),{placeholder:'Write the full chapter content here...',
+  toolbar:['heading','|','bold','italic','underline','link','|','bulletedList','numberedList','outdent','indent','|','blockQuote','insertTable','mediaEmbed','|','undo','redo'],
+  mediaEmbed:{previewsInData:true}}).then(e=>{editor=e}).catch(console.error);
+}
+function viewChapter(id){
+ const c=S.chapters.find(x=>x.id==id);
+ openM(`<div class="dh"><div><h3>${esc(c.title)}</h3><small style="color:var(--mute)">${esc(c.subject)} · ${c.lessons} lessons</small></div><button class="x" onclick="closeM()" aria-label="Close">×</button></div>
+ <div class="db content">${c.content||'<div class="empty">No content added yet. Edit this chapter to write its content.</div>'}</div>
+ <div class="df"><button class="btn" onclick="closeM()">Close</button><button class="btn pri" onclick="chapterModal(${id})">Edit content</button></div>`,true);
+}
+function saveChapter(id){
+ const title=$('#c_t').value.trim(),subject=$('#c_s').value.trim();
+ if(!title||!subject)return toast('Enter a title and subject');
+ const d={title,subject,lessons:+$('#c_l').value||1,desc:$('#c_d').value.trim(),content:editor?editor.getData():$('#c_c').value,status:$('#c_st').value};
+ if(id)Object.assign(S.chapters.find(c=>c.id==id),d);else S.chapters.push({id:nid(S.chapters),...d});
+ save();closeM();rerender();toast(id?'Chapter updated':'Chapter added');
+}
+function delChapter(id){
+ if(!confirm('Delete this chapter and its tests?'))return;
+ S.chapters=S.chapters.filter(c=>c.id!=id);S.tests=S.tests.filter(t=>t.ch!=id);save();rerender();toast('Chapter deleted');
+}
+
+let draft=[];
+function qHTML(){
+ return draft.map((q,i)=>`<div class="q"><div class="qt"><input placeholder="Question ${i+1}" value="${esc(q.q)}" oninput="draft[${i}].q=this.value"><button class="btn sm dng" onclick="draft.splice(${i},1);$('#qs').innerHTML=qHTML()" aria-label="Remove question">${ic('trash')}</button></div>
+ ${q.o.map((o,j)=>`<div class="opt"><input type="radio" name="r${i}" ${q.c==j?'checked':''} onchange="draft[${i}].c=${j}" title="Correct answer"><input type="text" placeholder="Option ${j+1}" value="${esc(o)}" oninput="draft[${i}].o[${j}]=this.value"></div>`).join('')}</div>`).join('')||'<div class="empty" style="padding:20px">No questions yet.</div>';
+}
+function addQ(){draft.push({q:'',o:['','','',''],c:0});$('#qs').innerHTML=qHTML()}
+function testModal(id){
+ const t=S.tests.find(x=>x.id==id)||{ch:S.chapters[0]?.id,title:'',dur:15,pass:40,qs:[]};
+ draft=JSON.parse(JSON.stringify(t.qs));
+ openM(`<div class="dh"><h3>${id?'Edit test':'Create test'}</h3><button class="x" onclick="closeM()" aria-label="Close">×</button></div>
+ <div class="db"><div class="two"><div class="f"><label>Chapter</label><select id="t_c">${S.chapters.map(c=>`<option value="${c.id}" ${c.id==t.ch?'selected':''}>${esc(c.title)}</option>`).join('')}</select></div>
+ <div class="f"><label>Test title</label><input id="t_t" value="${esc(t.title)}" placeholder="e.g. Chapter 1 Quiz"></div>
+ <div class="f"><label>Duration (minutes)</label><input id="t_d" type="number" min="1" value="${t.dur}"></div>
+ <div class="f"><label>Passing score (%)</label><input id="t_p" type="number" min="1" max="100" value="${t.pass}"></div></div>
+ <div style="display:flex;justify-content:space-between;align-items:center;margin:6px 0 12px"><b>Questions</b><button class="btn sm" onclick="addQ()">${ic('plus')}Add question</button></div>
+ <p style="color:var(--mute);font-size:12.5px;margin-bottom:10px">Select the radio button next to the correct option.</p><div id="qs">${qHTML()}</div></div>
+ <div class="df"><button class="btn" onclick="closeM()">Cancel</button><button class="btn pri" onclick="saveTest(${id||0})">${id?'Save changes':'Create test'}</button></div>`,true);
+}
+function saveTest(id){
+ const title=$('#t_t').value.trim();if(!title)return toast('Enter a test title');
+ const qs=draft.filter(q=>q.q.trim()&&q.o.every(o=>o.trim()));
+ if(!qs.length)return toast('Add at least one complete question');
+ const d={ch:+$('#t_c').value,title,dur:+$('#t_d').value||15,pass:+$('#t_p').value||40,qs};
+ if(id)Object.assign(S.tests.find(t=>t.id==id),d);else S.tests.push({id:nid(S.tests),attempts:0,avg:0,...d});
+ save();closeM();rerender();toast(id?'Test updated':'Test created');
+}
+function delTest(id){if(!confirm('Delete this test?'))return;S.tests=S.tests.filter(t=>t.id!=id);save();rerender();toast('Test deleted')}
+function toggleBlock(id){const u=S.users.find(x=>x.id==id);u.status=u.status=='blocked'?'active':'blocked';save();rerender();toast(u.status=='blocked'?'User blocked':'User unblocked')}
+
+/* ---------- router ---------- */
+let cur='dashboard';
+function rerender(focusId){
+ $('#page').innerHTML=VIEWS[cur]();
+ if(focusId){const el=document.getElementById(focusId);el.focus();el.setSelectionRange(el.value.length,el.value.length)}
+}
+function go(v){
+ cur=v;$('#title').textContent=NAV.find(n=>n[0]==v)[1];
+ $('#nav').innerHTML=NAV.map(n=>`<button class="${n[0]==v?'on':''}" onclick="go('${n[0]}')">${ic(n[2])}${n[1]}</button>`).join('');
+ $('#side').classList.remove('open');rerender();scrollTo(0,0);
+}
+$('#burger').onclick=()=>$('#side').classList.toggle('open');
+go('dashboard');
+</script>
+</body>
+</html>

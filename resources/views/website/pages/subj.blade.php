@@ -1,0 +1,14 @@
+<main id="subj" hidden>
+  <div class="phero"><div class="wrap">
+    <div class="crumb"><a href="/">Home</a><span>/</span><a href="#subjects">Subjects</a><span>/</span><b id="sbc"></b></div>
+    <div class="ph-row"><div class="ic" id="sic"></div><div><h1 id="sn"></h1><p id="sd"></p></div></div>
+    <div class="ph-stats" id="ss"></div>
+  </div></div>
+  <div class="wrap lay">
+    <div>
+      <div class="lh"><h2>Chapters</h2><input id="cf" type="search" placeholder="Search chapters" aria-label="Search chapters"></div>
+      <div id="cl"></div>
+    </div>
+    <aside class="box side"><h3>All subjects</h3><div id="sl"></div></aside>
+  </div>
+</main>

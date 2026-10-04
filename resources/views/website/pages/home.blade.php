@@ -1,0 +1,63 @@
+<main id="home">
+<div class="hero"><div class="wrap">
+  <div>
+    <h1>Practice any subject. Know where you stand.</h1>
+    <p>Chapter quizzes in history, geography, science and more. Get instant answers with explanations, and track your progress topic by topic.</p>
+    <div class="hs"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" placeholder="Search a subject, e.g. History" aria-label="Search subjects"><a href="#subjects" class="btn btn-o">Search</a></div>
+    <div class="pop"><span>Popular:</span><a href="#subjects" data-s="history">History</a><a href="#subjects" data-s="geography">Geography</a><a href="#subjects" data-s="biology">Biology</a><a href="#subjects" data-s="mathematics">Mathematics</a></div>
+  </div>
+  <div class="demo" aria-live="polite">
+    <div class="demo-h"><span id="dq">Question 1 of 3</span><span id="dsub">History</span></div>
+    <h3 id="dt"></h3>
+    <div id="do"></div>
+    <div class="fb" id="fb"></div>
+    <div class="demo-f"><span id="ds" style="font-size:14px;color:var(--muted)">Score: 0</span><button id="dn" hidden>Next question</button></div>
+  </div>
+</div></div>
+
+<div class="wrap strip"><div class="box">
+  <div><strong data-n="{{ $chapterCount }}">0</strong><span>Chapters</span></div>
+  <div><strong data-n="{{ $subjectCount }}">0</strong><span>Subjects</span></div>
+  <div><strong data-n="{{ count($popular) }}">0</strong><span>Quizzes ready</span></div>
+  <div><strong data-n="{{ $questionCount }}">0</strong><span>Practice questions</span></div>
+</div></div>
+
+<section id="subjects"><div class="wrap">
+  <h2>Choose a subject</h2>
+  <p class="sub">Pick a subject to start a quiz. Every subject has topic-wise sets, timed tests and previous-style questions.</p>
+  <div class="filters" id="fl"></div>
+  <div class="grid" id="gr"></div>
+  <p class="empty" id="em">No subjects match your search. Try a different word.</p>
+</div></section>
+
+<section class="alt"><div class="wrap dqb">
+  <div><span class="pill">Daily quiz</span><h2>Today's practice challenge</h2><p class="sub">A published chapter quiz selected each day. Practice and save your result.</p><a href="/daily-quiz" class="btn btn-o" style="height:44px;padding:0 24px">Start today's quiz</a></div>
+  <div class="dqd"><small id="dw">Today</small><b id="dd">1</b><span id="dm"></span></div>
+</div></section>
+
+<section id="popular"><div class="wrap"><h2>Popular quizzes</h2><p class="sub">Published quizzes, ready to practice.</p><div class="g4">@forelse(array_slice($popular,0,8) as $test)<a class="card q" href="{{ $test['url'] }}" style="--c:#0078d4"><h3>{{ $test['title'] }}</h3><p>{{ $test['count'] }} questions · {{ $test['duration'] }} minutes</p><div class="card-f"><span>Pass {{ $test['pass'] }}%</span><b>Start →</b></div></a>@empty<p>No quizzes published yet.</p>@endforelse</div></div></section>
+
+<section class="alt" id="exams"><div class="wrap"><h2>Practice by exam</h2><p class="sub">Find question sets built for the exam you are preparing for.</p><div class="g4"><a href="/exams/upsc" class="card ex"><div><h3>UPSC</h3><p>Prelims and CSAT</p></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><a href="/exams/ssc" class="card ex"><div><h3>SSC</h3><p>CGL, CHSL and MTS</p></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><a href="/exams/banking" class="card ex"><div><h3>Banking</h3><p>IBPS, SBI and RBI</p></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><a href="/exams/railways" class="card ex"><div><h3>Railways</h3><p>RRB NTPC and Group D</p></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><a href="/exams/neet" class="card ex"><div><h3>NEET</h3><p>Biology, Physics, Chemistry</p></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><a href="/exams/jee" class="card ex"><div><h3>JEE</h3><p>Maths, Physics, Chemistry</p></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><a href="/exams/cbse-board" class="card ex"><div><h3>CBSE Board</h3><p>Class 9 to 12</p></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><a href="/exams/state-psc" class="card ex"><div><h3>State PSC</h3><p>State-level exams</p></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></div></div></section>
+
+<section><div class="wrap"><h2>Why practice on QuizHub</h2><p class="sub">Everything you need to learn from your mistakes and improve every week.</p><div class="g3"><div class="feat"><div class="fi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div><h3>Instant explanations</h3><p>See the correct answer and why, right after each question.</p></div><div class="feat"><div class="fi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><h3>Timed mock tests</h3><p>Practice under real exam time pressure and get a full report.</p></div><div class="feat"><div class="fi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10M18 20V4M6 20v-4"/></svg></div><h3>Progress tracking</h3><p>Spot weak topics with subject-wise scores and daily streaks.</p></div><div class="feat"><div class="fi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></div><h3>Review your answers</h3><p>Review every answer and revisit chapter notes after each quiz.</p></div><div class="feat"><div class="fi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div><h3>Topic-wise sets</h3><p>Study one chapter at a time or mix topics together.</p></div><div class="feat"><div class="fi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg></div><h3>Works on any device</h3><p>Practice on phone, tablet or laptop without installing anything.</p></div></div></div></section>
+
+<section class="alt" id="how"><div class="wrap">
+  <h2>How it works</h2>
+  <p class="sub">From first question to full mock test in four steps.</p>
+  <div class="steps">
+    <div><h3>Pick a subject</h3><p>Choose from history, geography, science and other subjects.</p></div>
+    <div><h3>Learn the chapter</h3><p>Read short notes and key points for each topic.</p></div>
+    <div><h3>Answer and learn</h3><p>See the right answer and a short explanation after each question.</p></div>
+    <div><h3>Track progress</h3><p>Review your score, weak topics and streaks.</p></div>
+  </div>
+</div></section>
+
+<section id="faq"><div class="wrap faqw"><div><h2>Frequently asked questions</h2><p class="sub">Quick answers before you start.</p><a href="/contact" class="btn btn-l">Contact support</a></div><div><details><summary>Is QuizHub free to use?</summary><p>Yes. Daily quizzes and subject practice are free. Create an account to save scores and streaks.</p></details><details><summary>Do I get explanations for answers?</summary><p>Yes. Every question shows the correct answer with a short explanation.</p></details><details><summary>Can I practice only one topic?</summary><p>Yes. Pick a subject, then choose a topic, or take a mixed set of all topics.</p></details><details><summary>How often are new questions added?</summary><p>New content appears when an administrator publishes chapters and quizzes.</p></details><details><summary>Can I use it on my phone?</summary><p>Yes. The site works in any mobile browser, no app needed.</p></details></div></div></section>
+
+<section><div class="wrap">
+  <div class="band">
+    <div><h2>Ready for your first quiz?</h2><p>Create a free account to save scores and build a daily streak.</p></div>
+    <a href="/register" class="btn btn-o" id="gb" style="height:46px;padding:0 26px">Create free account</a>
+  </div>
+</div></section>
+</main>
