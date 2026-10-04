@@ -26,6 +26,8 @@ Route::view('/upcoming', 'website.upcoming')->name('upcoming');
 Route::get('/site-logo/{filename}', [SiteSettingsController::class, 'logo'])->where('filename', '[A-Za-z0-9]+\.(jpg|jpeg|png|webp|gif)')->name('site.logo');
 Route::get('/exams/{exam}', [PageController::class, 'exam'])->name('exam');
 Route::get('/progress', fn (Request $request) => app(PageController::class)->show($request, 'progress'))->middleware('auth')->name('progress');
+Route::get('/feedback', fn (Request $request) => app(PageController::class)->show($request, 'feedback'))->name('feedback');
+Route::post('/feedback', [PageController::class, 'feedback'])->middleware('throttle:5,1')->name('feedback.send');
 Route::post('/contact', [PageController::class, 'contact'])->middleware('throttle:5,1')->name('contact.send');
 Route::post('/forgot-password', [PageController::class, 'forgot'])->middleware('throttle:5,1')->name('password.email');
 Route::get('/reset-password/{token}', [PageController::class, 'resetForm'])->name('password.reset');

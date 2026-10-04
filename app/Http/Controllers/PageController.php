@@ -28,6 +28,7 @@ class PageController extends Controller
             'privacy' => ['Privacy', 'We store your name, email, securely hashed password, quiz answers and results to provide your account and learning history. Contact form messages are stored for administrators to review.'],
             'terms' => ['Terms of use', 'Use '.$settings['site_title'].' for personal study and practice. Content is provided for learning and does not guarantee an exam result. Do not misuse accounts or submit abusive content.'],
             'cookies' => ['Cookies', $settings['site_title'].' uses a session cookie for login and request security. A remember-me cookie is used when you choose to stay logged in. Your theme preference is stored in your browser.'],
+            'feedback' => ['Share your feedback', 'Help us make your learning experience better. Tell us what you liked and what we can improve.'],
             'contact' => ['Contact us', $settings['contact_description']],
             'leaderboard' => ['Leaderboard', 'Registered learners ranked by average practice score.'],
             'progress' => ['My progress', 'Your saved practice attempts and chapter results.'],
@@ -47,6 +48,19 @@ class PageController extends Controller
         Message::create($request->validate(['name' => 'required|string|max:100', 'email' => 'required|email|max:255', 'message' => 'required|string|min:10|max:5000']));
 
         return back()->with('status', 'Your message has been saved. An administrator can review it.');
+    }
+
+    public function feedback(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|max:255',
+            'rating' => 'required|integer|between:1,5',
+            'message' => 'required|string|min:10|max:5000',
+        ]);
+        Message::create([...$data, 'type' => 'feedback']);
+
+        return redirect()->route('feedback')->with('status', 'Thank you! Your feedback has been submitted.');
     }
 
     public function exam(string $exam): View|RedirectResponse

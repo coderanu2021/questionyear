@@ -5,7 +5,16 @@
 <main class="wrap" style="min-height:60vh;padding-top:48px;padding-bottom:64px"><div class="crumb"><a href="{{ route('home') }}">Home</a><span>/</span><b>{{ $title }}</b></div><h1>{{ $title }}</h1><p class="sub" style="white-space:pre-line">{{ $description }}</p>
 @if(session('status'))<p class="box" role="status" style="padding:20px">{{ session('status') }}</p>@endif
 @if($errors->any())<div class="box" role="alert" style="padding:20px">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>@endif
-@if($page === 'contact')
+@if($page === 'feedback')
+<div class="feedback-layout"><aside class="feedback-intro"><span class="daily-label">YOUR VOICE MATTERS</span><h2>Let's make learning better, together.</h2><p>Have an idea, found a problem or enjoyed a quiz? We'd love to hear from you.</p><div class="box feedback-note"><h3>What happens next?</h3><p>Our team reviews your feedback in the admin panel. Your feedback and email stay private.</p></div><p class="site-contact-line">Email us at <a href="mailto:{{ $siteSettings['contact_email'] }}">{{ $siteSettings['contact_email'] }}</a>.</p></aside>
+<form class="box content-form feedback-form" method="POST" action="{{ route('feedback.send') }}">@csrf
+<label for="feedback-name">Your name<input id="feedback-name" name="name" value="{{ old('name', auth()->user()?->name) }}" required maxlength="100" autocomplete="name"></label>
+<label for="feedback-email">Email address<input id="feedback-email" type="email" name="email" value="{{ old('email', auth()->user()?->email) }}" required maxlength="255" autocomplete="email"></label>
+<fieldset class="feedback-rating"><legend>How was your experience?</legend><div class="feedback-rating-options">@foreach([1 => 'Poor', 2 => 'Fair', 3 => 'Good', 4 => 'Great', 5 => 'Excellent'] as $rating => $label)<label><input type="radio" name="rating" value="{{ $rating }}" required @checked((string) old('rating') === (string) $rating)><span>{{ $rating }} ★</span><small>{{ $label }}</small></label>@endforeach</div></fieldset>
+<label for="feedback-message">Your feedback<textarea id="feedback-message" name="message" required minlength="10" maxlength="5000" rows="6" placeholder="Share a suggestion or tell us what worked well…">{{ old('message') }}</textarea></label>
+<button class="btn btn-o" type="submit">Send feedback →</button>
+</form></div>
+@elseif($page === 'contact')
 <p class="site-contact-line">Email us at <a href="mailto:{{ $siteSettings['contact_email'] }}">{{ $siteSettings['contact_email'] }}</a></p>
 <form class="box content-form" method="POST" action="{{ route('contact.send') }}">@csrf<label>Your name<input name="name" value="{{ old('name', auth()->user()?->name) }}" required maxlength="100"></label><label>Email<input type="email" name="email" value="{{ old('email', auth()->user()?->email) }}" required></label><label>Message<textarea name="message" required minlength="10" maxlength="5000" rows="6">{{ old('message') }}</textarea></label><button class="btn btn-o">Send message</button></form>
 @elseif($page === 'forgot-password')
