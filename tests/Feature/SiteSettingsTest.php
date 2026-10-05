@@ -90,11 +90,50 @@ class SiteSettingsTest extends TestCase
         $this->assertCount(0, Storage::disk('local')->allFiles());
     }
 
+    public function test_favicon_can_be_uploaded_replaced_and_removed_across_all_pages(): void
+    {
+        Storage::fake('local');
+        $this->actingAs(User::factory()->create(['role' => 'admin']));
+        $this->get('/admin/settings')->assertOk()->assertSee('name="favicon"', false);
+        $this->put(route('admin.settings.update'), [...$this->payload(), 'favicon' => UploadedFile::fake()->image('favicon.png', 32, 32)])->assertRedirect();
+        $settings = SiteSettings::values();
+        $originalFavicon = $settings['favicon_path'];
+        $url = SiteSettings::faviconUrl($settings);
+        Storage::disk('local')->assertExists($originalFavicon);
+        $this->get($url)->assertOk()->assertHeader('Content-Type', 'image/png')->assertHeader('X-Content-Type-Options', 'nosniff');
+        foreach (['/', '/about', '/daily-quiz', '/upcoming', '/missing-page', '/admin/settings'] as $page) {
+            $this->get($page)->assertSee('<link rel="icon" href="'.$url.'">', false);
+        }
+        $this->put(route('admin.settings.update'), [...$this->payload(), 'favicon_path' => '../private-file'])->assertRedirect();
+        $this->assertSame($originalFavicon, SiteSettings::values()['favicon_path']);
+        $this->put(route('admin.settings.update'), [...$this->payload(), 'favicon' => UploadedFile::fake()->image('replacement.png', 64, 64)])->assertRedirect();
+        $replacementFavicon = SiteSettings::values()['favicon_path'];
+        $this->assertNotSame($originalFavicon, $replacementFavicon);
+        Storage::disk('local')->assertMissing($originalFavicon);
+        Storage::disk('local')->assertExists($replacementFavicon);
+        $this->get($url)->assertNotFound();
+        $this->put(route('admin.settings.update'), [...$this->payload(), 'remove_favicon' => '1'])->assertRedirect();
+        $this->assertNull(SiteSettings::values()['favicon_path']);
+        Storage::disk('local')->assertMissing($replacementFavicon);
+        $this->get(route('home'))->assertDontSee('<link rel="icon"', false);
+        $this->get('/site-favicon/config.php')->assertNotFound();
+    }
+
+    public function test_unsafe_and_oversized_favicons_are_rejected(): void
+    {
+        Storage::fake('local');
+        $this->actingAs(User::factory()->create(['role' => 'admin']));
+        $this->put(route('admin.settings.update'), [...$this->payload(), 'favicon' => UploadedFile::fake()->create('unsafe.svg', 1, 'image/svg+xml')])->assertSessionHasErrors('favicon');
+        $this->put(route('admin.settings.update'), [...$this->payload(), 'favicon' => UploadedFile::fake()->image('too-large.png')->size(1025)])->assertSessionHasErrors('favicon');
+        $this->assertNull(SiteSettings::values()['favicon_path']);
+        $this->assertCount(0, Storage::disk('local')->allFiles());
+    }
+
     /** @return array<string, string> */
     private function payload(): array
     {
         $settings = SiteSettings::values();
-        unset($settings['logo_path']);
+        unset($settings['logo_path'], $settings['favicon_path']);
 
         return $settings;
     }

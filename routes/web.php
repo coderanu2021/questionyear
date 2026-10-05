@@ -26,6 +26,7 @@ Route::get('/daily-quiz', [DailyQuizController::class, 'index'])->name('daily')-
 Route::post('/daily-quiz', [DailyQuizController::class, 'submit'])->name('daily.submit')->middleware('throttle:10,1')->block(10, 10);
 Route::view('/upcoming', 'website.upcoming')->name('upcoming');
 Route::get('/site-logo/{filename}', [SiteSettingsController::class, 'logo'])->where('filename', '[A-Za-z0-9]+\.(jpg|jpeg|png|webp|gif)')->name('site.logo');
+Route::get('/site-favicon/{filename}', [SiteSettingsController::class, 'favicon'])->where('filename', '[A-Za-z0-9]+\.(ico|jpg|jpeg|png|webp|gif)')->name('site.favicon');
 Route::get('/exams/{exam}', [PageController::class, 'exam'])->name('exam');
 Route::get('/progress', fn (Request $request) => app(PageController::class)->show($request, 'progress'))->middleware('auth')->name('progress');
 Route::get('/feedback', fn (Request $request) => app(PageController::class)->show($request, 'feedback'))->name('feedback');

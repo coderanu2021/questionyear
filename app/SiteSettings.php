@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 
 class SiteSettings
 {
-    /** @return array{site_title: string, site_description: string, contact_email: string, home_title: string, home_description: string, footer_description: string, about_content: string, contact_description: string, logo_path: ?string} */
+    /** @return array{site_title: string, site_description: string, contact_email: string, home_title: string, home_description: string, footer_description: string, about_content: string, contact_description: string, logo_path: ?string, favicon_path: ?string} */
     public static function values(): array
     {
         $stored = DB::table('site_settings')->where('id', 1)->value('values');
@@ -21,6 +21,7 @@ class SiteSettings
             'about_content' => 'Chapter notes and practice quizzes together. Choose a subject, study the available notes and practice with immediate feedback.',
             'contact_description' => 'Send a question, report an issue or suggest a correction.',
             'logo_path' => null,
+            'favicon_path' => null,
         ], $stored ? json_decode($stored, true, flags: JSON_THROW_ON_ERROR) : []);
     }
 
@@ -28,5 +29,11 @@ class SiteSettings
     public static function logoUrl(array $settings): ?string
     {
         return $settings['logo_path'] ? route('site.logo', ['filename' => basename($settings['logo_path'])]) : null;
+    }
+
+    /** @param array{favicon_path: ?string} $settings */
+    public static function faviconUrl(array $settings): ?string
+    {
+        return $settings['favicon_path'] ? route('site.favicon', ['filename' => basename($settings['favicon_path'])]) : null;
     }
 }

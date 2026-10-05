@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
 <link rel="stylesheet" href="{{ asset("css/admin.css") }}"><meta name="csrf-token" content="{{ csrf_token() }}">
+@include('website.partials.favicon')
 </head>
 <body>
 <aside class="side" id="side">

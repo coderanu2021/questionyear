@@ -17,7 +17,7 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer(['website.*', 'errors.*', 'errors::*', 'admin.index', 'admin.pages.settings'], function (\Illuminate\View\View $view): void {
             $settings = SiteSettings::values();
-            $view->with('siteSettings', $settings)->with('siteLogoUrl', SiteSettings::logoUrl($settings));
+            $view->with('siteSettings', $settings)->with('siteLogoUrl', SiteSettings::logoUrl($settings))->with('siteFaviconUrl', SiteSettings::faviconUrl($settings));
         });
     }
 }

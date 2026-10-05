@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="csrf-token" content="{{ csrf_token() }}"><title>Daily quiz – {{ $siteSettings['site_title'] }}</title><meta name="description" content="Take today's daily quiz, earn marks and review your answers. Practice 50 questions as a guest or up to 150 with an account."><link rel="stylesheet" href="{{ asset('css/website.css') }}"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="csrf-token" content="{{ csrf_token() }}"><title>Daily quiz – {{ $siteSettings['site_title'] }}</title><meta name="description" content="Take today's daily quiz, earn marks and review your answers. Practice 50 questions as a guest or up to 150 with an account."><link rel="stylesheet" href="{{ asset('css/website.css') }}">@include('website.partials.favicon')
+</head>
 <body>
 @include('website.partials.header')
 <script>window.CURRENT_USER={{ Illuminate\Support\Js::from(auth()->user()?->only('name', 'email')) }};</script>

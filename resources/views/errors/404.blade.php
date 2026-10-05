@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Page not found – {{ $siteSettings['site_title'] }}</title><link rel="stylesheet" href="{{ asset('css/website.css') }}"></head><body>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Page not found – {{ $siteSettings['site_title'] }}</title><link rel="stylesheet" href="{{ asset('css/website.css') }}">@include('website.partials.favicon')
+</head><body>
 <header><div class="wrap top"><a class="logo" href="{{ route('home') }}">@include('website.partials.brand-logo'){{ $siteSettings['site_title'] }}</a><span class="sp"></span><a class="btn btn-l" href="{{ route('home') }}">Home</a></div></header>
 <main class="wrap destination-page error-page"><div class="error-number" aria-hidden="true">4<span>?</span>4</div><span class="daily-label">PAGE NOT FOUND</span><h1>A wrong turn. A fresh start.</h1><p>The page you're looking for may have moved or doesn't exist.<br>Let's get you back to learning.</p><div class="destination-actions"><a class="btn btn-o" href="{{ route('home') }}">Back to home →</a><a class="btn btn-l" href="{{ route('daily') }}">Take the daily quiz</a></div><p class="error-tip">One missing page shouldn't stop your progress.</p></main>
 </body></html>

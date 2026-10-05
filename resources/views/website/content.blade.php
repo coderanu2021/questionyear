@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="csrf-token" content="{{ csrf_token() }}"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ $title }} – {{ $siteSettings['site_title'] }}</title><link rel="stylesheet" href="{{ asset('css/website.css') }}"></head><body>
+<html lang="en"><head><meta charset="utf-8"><meta name="csrf-token" content="{{ csrf_token() }}"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ $title }} – {{ $siteSettings['site_title'] }}</title><link rel="stylesheet" href="{{ asset('css/website.css') }}">@include('website.partials.favicon')
+</head><body>
 @include('website.partials.header')
 @if(auth()->check())<script>window.CURRENT_USER={{ Illuminate\Support\Js::from(auth()->user()->only('name','email')) }};</script>@endif
 <main class="wrap" style="min-height:60vh;padding-top:48px;padding-bottom:64px"><div class="crumb"><a href="{{ route('home') }}">Home</a><span>/</span><b>{{ $title }}</b></div><h1>{{ $title }}</h1><p class="sub" style="white-space:pre-line">{{ $description }}</p>
