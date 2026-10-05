@@ -64,7 +64,7 @@ linkify(".mega a");linkify("footer .fcols>div:nth-child(2) a");
 /* chapter list: opens the Learn page first */
 function renderChaps(){
   const x=curSub,f=$("cf").value.trim().toLowerCase();
-  const it=x.ch.map((t,i)=>({t,i})).filter(o=>o.t.toLowerCase().includes(f));
+  const it=x.ch.map((t,i)=>({t,i})).filter(o=>o.t.toLowerCase().includes(f)&&(!$("chapter-category").value||window.CURRICULUM.categories[x.id+":"+o.i]===$("chapter-category").value));
   $("cl").innerHTML=it.length?it.map(({t,i})=>{const b=QB[x.id+":"+i],n=LN[x.id+":"+i];
     return (n||b)?`<a class="chap" style="--c:${x.c}" href="/${n?"learn":"quiz"}/${x.id}/${i}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>${n?"Chapter notes":"Practice quiz"}${b?" + "+b.length+" practice questions":""}</small></div><span class="go"><i class="fa-solid fa-book-open"></i> ${n?"Read chapter":"Start quiz"}</span></a>`
     :`<div class="chap off" style="--c:${x.c}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>Notes and questions are being added</small></div><span class="soon">Coming soon</span></div>`}).map((markup,k)=>{const index=it[k].i;const tests=window.CURRICULUM.tests[x.id+":"+index]||[];return markup+tests.map(t=>`<a class="chap" href="/quiz/${x.id}/${index}?test=${t.id}"><span class="cn"><i class="fa-solid fa-play"></i></span><div><h3>${esc(t.title)}</h3><small>${t.count} questions · ${t.duration} minutes · Pass ${t.pass}%</small></div></a>`).join("")}).join(""):`<p class="empty" style="display:block">No chapters match your search.</p>`;
@@ -75,10 +75,12 @@ function subjectPage(x){
   const ic=$("sic");ic.textContent=mono(x.n);ic.style.setProperty("--c",x.c);
   const ready=x.ch.filter((_,i)=>LN[x.id+":"+i]||QB[x.id+":"+i]).length;
   $("ss").innerHTML=`<div><b>${x.ch.length}</b>chapters</div><div><b>${ready}</b>ready to learn and practice</div>`;
+  $("chapter-categories").hidden=x.id!=="history";$("chapter-category").value="";
   $("cf").value="";renderChaps();
   $("sl").innerHTML=SUB.map(o=>`<a href="/subject/${o.id}" class="${o.id===x.id?"on":""}" style="--c:${o.c}"><i></i>${esc(o.n)}</a>`).join("");
 }
 $("cf").oninput=renderChaps;
+$("chapter-category").onchange=renderChaps;
 
 /* learn page: book-style chapter */
 const CO={tip:["fa-lightbulb","Exam tip"],key:["fa-key","Key point"],note:["fa-circle-info","Did you know?"]};

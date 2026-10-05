@@ -21,12 +21,13 @@ class WebsiteController extends Controller
         }
 
         $subjects = Subject::with(['chapters' => fn ($q) => $q->where('status', 'published')->orderBy('id'), 'chapters.quizzes'])->orderBy('id')->get();
-        $curriculum = ['S' => [], 'QB' => [], 'LN' => [], 'tests' => []];
+        $curriculum = ['S' => [], 'QB' => [], 'LN' => [], 'tests' => [], 'categories' => []];
         $quizIds = [];
         foreach ($subjects as $item) {
             $curriculum['S'][] = [$item->name, $item->category, $item->description ?? '', $item->chapters->pluck('title')->all()];
             foreach ($item->chapters as $index => $entry) {
                 $key = $item->slug.':'.$index;
+                $curriculum['categories'][$key] = $entry->category;
                 if ($entry->content) {
                     $curriculum['LN'][$key] = ['sub' => $entry->description ?? '', 'icon' => 'fa-book', 'time' => $entry->lessons.' lessons', 's' => [['h' => $entry->title, 'i' => 'fa-book', 'p' => [$entry->content]]], 'sum' => []];
                 } elseif ($entry->notes) {

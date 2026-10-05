@@ -13,7 +13,7 @@
 <script>window.SITE_TITLE={{ Illuminate\Support\Js::from($siteSettings['site_title']) }};</script>
 <header>
   <div class="wrap top">
-    <a href="/" class="logo">@include('website.partials.brand-logo'){{ $siteSettings['site_title'] }}</a>
+    <a href="/" class="logo">@include('website.partials.brand-logo')</a>
     <nav id="nav"><ul>
       <li><button id="sb" aria-expanded="false" aria-controls="mega">Subjects <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button></li>
       <li><a href="/#popular">Quizzes</a></li><li><a href="{{ route('daily') }}">Daily quiz</a></li>

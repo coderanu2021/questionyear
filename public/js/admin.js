@@ -63,7 +63,7 @@ function renderChapterForm(id){
  <div class="db"><div class="f"><label>Chapter title</label><input id="c_t" value="${esc(c.title)}" placeholder="e.g. Quadratic Equations"></div>
  <div class="two"><div class="f"><label>Subject</label><input id="c_s" list="subs" value="${esc(c.subject)}" placeholder="e.g. Maths"><datalist id="subs">${[...new Set(S.chapters.map(x=>x.subject))].map(s=>`<option>${esc(s)}`).join('')}</datalist></div>
  <div class="f"><label>Number of lessons</label><input id="c_l" type="number" min="1" value="${c.lessons}"></div></div>
- <div class="f"><label>Description</label><textarea id="c_d" rows="3" placeholder="What will learners study in this chapter?">${esc(c.desc||'')}</textarea></div>
+ <div class="f"><label for="c_cat">History category (History chapters only)</label><select id="c_cat"><option value="">Select category</option>${['Ancient History','Medieval History','Modern History'].map(category=>`<option ${c.category===category?'selected':''}>${esc(category)}</option>`).join('')}</select></div><div class="f"><label>Description</label><textarea id="c_d" rows="3" placeholder="What will learners study in this chapter?">${esc(c.desc||'')}</textarea></div>
  <div class="f"><label for="c_mt">Meta title</label><input id="c_mt" maxlength="255" value="${esc(c.meta_title||'')}" placeholder="SEO title (ideally 50–60 characters)"></div><div class="f"><label for="c_md">Meta description</label><textarea id="c_md" maxlength="1000" rows="3" placeholder="A short search result description">${esc(c.meta_description||'')}</textarea></div><div class="f"><label for="c_mk">Meta keywords</label><input id="c_mk" maxlength="1000" value="${esc(c.meta_keywords||'')}" placeholder="Comma-separated keywords"></div><div class="f"><label>Chapter content</label><textarea id="c_c">${esc(c.content||'')}</textarea></div>
  <div class="f"><label>Status</label><select id="c_st"><option value="published" ${c.status=='published'?'selected':''}>Published</option><option value="draft" ${c.status=='draft'?'selected':''}>Draft</option></select></div></div>
  <div class="df"><button class="btn" onclick="closeM()">Cancel</button><button class="btn pri" onclick="saveChapter(${id||0})">${id?'Save changes':'Add chapter'}</button></div>`,true);
@@ -87,7 +87,7 @@ function renderChapterPreview(id){
 async function saveChapter(id){
  const title=$('#c_t').value.trim(),subject=$('#c_s').value.trim();
  if(!title||!subject)return toast('Enter a title and subject');
- const d={title,subject,lessons:+$('#c_l').value||1,desc:$('#c_d').value.trim(),content:editor?editor.getData():$('#c_c').value,status:$('#c_st').value,meta_title:$('#c_mt').value.trim(),meta_description:$('#c_md').value.trim(),meta_keywords:$('#c_mk').value.trim()};
+ const d={title,subject,category:subject.toLowerCase()==='history'?$('#c_cat').value:null,lessons:+$('#c_l').value||1,desc:$('#c_d').value.trim(),content:editor?editor.getData():$('#c_c').value,status:$('#c_st').value,meta_title:$('#c_mt').value.trim(),meta_description:$('#c_md').value.trim(),meta_keywords:$('#c_mk').value.trim()};
  if(id)Object.assign(S.chapters.find(c=>c.id==id),d);else S.chapters.push({id:nid(S.chapters),...d});
  if(!await save()){return;}location.href='/admin/chapters';
 }
