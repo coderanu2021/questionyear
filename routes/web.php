@@ -41,3 +41,8 @@ Route::middleware('auth')->group(function () {
     Route::put('/admin/settings', [SiteSettingsController::class, 'update'])->name('admin.settings.update');
     Route::get('/admin/{page?}', [AdminController::class, 'index'])->name('admin');
 });
+
+Route::get('/{category}/{chapterSlug}', [WebsiteController::class, 'historyChapter'])
+    ->whereIn('category', ['ancient-history', 'medieval-history', 'modern-history'])
+    ->where('chapterSlug', '[a-z0-9]+(?:-[a-z0-9]+)*')
+    ->name('chapter');

@@ -10,10 +10,21 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class WebsiteController extends Controller
 {
+    public function historyChapter(Request $request, string $category, string $chapterSlug): View|RedirectResponse
+    {
+        $subject = Subject::where('slug', 'history')->firstOrFail();
+        $chapters = $subject->chapters()->where('status', 'published')->orderBy('id')->get();
+        $matches = $chapters->filter(fn ($entry) => Str::slug($entry->category ?? '') === $category && Str::slug($entry->title) === $chapterSlug);
+        abort_unless($matches->count() === 1, 404);
+
+        return $this->index($request, $subject->slug, $matches->keys()->first());
+    }
+
     public function index(Request $request, ?string $subject = null, ?int $chapter = null): View|RedirectResponse
     {
         if ($request->routeIs('login', 'register') && $request->user()) {
@@ -21,13 +32,15 @@ class WebsiteController extends Controller
         }
 
         $subjects = Subject::with(['chapters' => fn ($q) => $q->where('status', 'published')->orderBy('id'), 'chapters.quizzes'])->orderBy('id')->get();
-        $curriculum = ['S' => [], 'QB' => [], 'LN' => [], 'tests' => [], 'categories' => []];
+        $curriculum = ['S' => [], 'QB' => [], 'LN' => [], 'tests' => [], 'categories' => [], 'chapterUrls' => []];
         $quizIds = [];
         foreach ($subjects as $item) {
             $curriculum['S'][] = [$item->name, $item->category, $item->description ?? '', $item->chapters->pluck('title')->all()];
             foreach ($item->chapters as $index => $entry) {
                 $key = $item->slug.':'.$index;
                 $curriculum['categories'][$key] = $entry->category;
+                $entry->setRelation('subject', $item);
+                $curriculum['chapterUrls'][$key] = $entry->readingUrl($index);
                 if ($entry->content) {
                     $curriculum['LN'][$key] = ['sub' => $entry->description ?? '', 'icon' => 'fa-book', 'time' => $entry->lessons.' lessons', 's' => [['h' => $entry->title, 'i' => 'fa-book', 'p' => [$entry->content]]], 'sum' => []];
                 } elseif ($entry->notes) {
@@ -47,8 +60,11 @@ class WebsiteController extends Controller
             if ($chapter !== null) {
                 abort_unless(isset($selected->chapters[$chapter]), 404);
                 $key = $subject.':'.$chapter;
-                abort_if($request->is('learn/*') && ! isset($curriculum['LN'][$key]), 404);
+                abort_if($request->routeIs('learn', 'chapter') && ! isset($curriculum['LN'][$key]), 404);
                 abort_if($request->is('quiz/*') && ! isset($curriculum['QB'][$key]), 404);
+                if ($request->routeIs('learn') && $selected->slug === 'history' && in_array($selected->chapters[$chapter]->category, ['Ancient History', 'Medieval History', 'Modern History'], true)) {
+                    return redirect()->to($selected->chapters[$chapter]->readingUrl($chapter), 301);
+                }
             }
         }
         $seoChapter = isset($selected) && $chapter !== null ? $selected->chapters[$chapter] : null;

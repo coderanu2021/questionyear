@@ -66,7 +66,7 @@ function renderChaps(){
   const x=curSub,f=$("cf").value.trim().toLowerCase();
   const it=x.ch.map((t,i)=>({t,i})).filter(o=>o.t.toLowerCase().includes(f)&&(!$("chapter-category").value||window.CURRICULUM.categories[x.id+":"+o.i]===$("chapter-category").value));
   $("cl").innerHTML=it.length?it.map(({t,i})=>{const b=QB[x.id+":"+i],n=LN[x.id+":"+i];
-    return (n||b)?`<a class="chap" style="--c:${x.c}" href="/${n?"learn":"quiz"}/${x.id}/${i}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>${n?"Chapter notes":"Practice quiz"}${b?" + "+b.length+" practice questions":""}</small></div><span class="go"><i class="fa-solid fa-book-open"></i> ${n?"Read chapter":"Start quiz"}</span></a>`
+    return (n||b)?`<a class="chap" style="--c:${x.c}" href="${n?esc(window.CURRICULUM.chapterUrls[x.id+":"+i]):`/quiz/${x.id}/${i}`}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>${n?"Chapter notes":"Practice quiz"}${b?" + "+b.length+" practice questions":""}</small></div><span class="go"><i class="fa-solid fa-book-open"></i> ${n?"Read chapter":"Start quiz"}</span></a>`
     :`<div class="chap off" style="--c:${x.c}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>Notes and questions are being added</small></div><span class="soon">Coming soon</span></div>`}).map((markup,k)=>{const index=it[k].i;const tests=window.CURRICULUM.tests[x.id+":"+index]||[];return markup+tests.map(t=>`<a class="chap" href="/quiz/${x.id}/${index}?test=${t.id}"><span class="cn"><i class="fa-solid fa-play"></i></span><div><h3>${esc(t.title)}</h3><small>${t.count} questions · ${t.duration} minutes · Pass ${t.pass}%</small></div></a>`).join("")}).join(""):`<p class="empty" style="display:block">No chapters match your search.</p>`;
 }
 function subjectPage(x){
@@ -92,7 +92,7 @@ function learnPage(x,i){
     const tb=s.t?`<div class="bk-t"><table><thead><tr>${s.t.h.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${s.t.r.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:"";
     const c=s.n?`<div class="co co-${s.n.type}"><i class="fa-solid ${CO[s.n.type][0]}"></i><div><strong>${CO[s.n.type][1]}</strong>${s.n.x}</div></div>`:"";
     return `<section class="bk-s" id="bk${n}"><div class="bk-h"><span class="bk-no">SECTION ${String(n+1).padStart(2,"0")}</span><h2><i class="fa-solid ${s.i}"></i>${esc(s.h)}</h2></div>${ps}${tb}${c}</section>`}).join("");
-  const sib=k=>LN[x.id+":"+k]?`/learn/${x.id}/${k}`:null,pv=sib(i-1),nx=sib(i+1);
+  const sib=k=>LN[x.id+":"+k]?window.CURRICULUM.chapterUrls[x.id+":"+k]:null,pv=sib(i-1),nx=sib(i+1);
   $("learn").innerHTML=`<div class="rp"><i id="rpi"></i></div>
   <div class="bk-hero"><div class="wrap"><div class="crumb"><a href="/">Home</a><span>/</span><a href="/subject/${x.id}">${esc(x.n)}</a><span>/</span><b>${esc(t)}</b></div>
   <span class="bk-lab">Chapter ${i+1} &middot; ${esc(x.n)}</span><h1>${esc(t)}</h1><p class="bk-sub">${esc(d.sub)}</p>
@@ -186,7 +186,8 @@ document.addEventListener("click",e=>{if(!e.target.closest("#um"))$("umd").hidde
 renderUser();
 
 function route(){
-  const h="#"+location.pathname,m=h.match(/^#\/(subject|quiz|learn)\/([^/]+)(?:\/(\d+))?$/);
+  const h="#"+location.pathname;let m=h.match(/^#\/(subject|quiz|learn)\/([^/]+)(?:\/(\d+))?$/);
+  if(!m){const entry=Object.entries(window.CURRICULUM.chapterUrls).find(([key,url])=>new URL(url,location.origin).pathname===location.pathname);if(entry){const [subject,index]=entry[0].split(":");m=["","learn",subject,index]}}
   clearInterval(tmr);mg.classList.remove("open");sb.setAttribute("aria-expanded","false");nav.classList.remove("show");
   const P=$("home"),SP=$("subj"),QP=$("quiz"),LP=$("learn"),AP=$("auth");P.hidden=SP.hidden=QP.hidden=LP.hidden=AP.hidden=true;
   if(h==="#/login"||h==="#/register"){if(CU){location.href="/";return}authPage(h.slice(2));AP.hidden=false;scrollTo(0,0);return}
