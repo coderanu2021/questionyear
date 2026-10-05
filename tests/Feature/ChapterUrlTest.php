@@ -33,4 +33,17 @@ class ChapterUrlTest extends TestCase
         $this->get('/ancient-history/private-chapter')->assertNotFound();
         $this->get('/ancient-history/missing-chapter')->assertNotFound();
     }
+
+    public function test_existing_prehistoric_chapter_receives_a_category_without_overwriting_admin_choices(): void
+    {
+        $subject = Subject::factory()->create(['name' => 'History', 'slug' => 'history']);
+        $chapter = Chapter::factory()->for($subject)->create(['title' => 'Prehistoric Period', 'category' => null]);
+        $assigned = Chapter::factory()->for($subject)->create(['title' => 'Freedom Struggle', 'category' => 'Ancient History']);
+        $migration = require database_path('migrations/2026_10_05_154302_assign_categories_to_existing_history_chapters.php');
+        $migration->up();
+        $this->assertSame('Ancient History', $chapter->fresh()->category);
+        $this->assertSame('Ancient History', $assigned->fresh()->category);
+        $this->get('/learn/history/0')->assertStatus(301)->assertRedirect(url('/ancient-history/prehistoric-period'));
+        $this->get('/ancient-history/prehistoric-period')->assertOk();
+    }
 }

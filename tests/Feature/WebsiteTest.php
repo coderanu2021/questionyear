@@ -7,8 +7,10 @@ use App\Models\Chapter;
 use App\Models\Quiz;
 use App\Models\User;
 use Database\Seeders\CurriculumSeeder;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class WebsiteTest extends TestCase
@@ -32,15 +34,20 @@ class WebsiteTest extends TestCase
 
     public function test_registration_hashes_password_and_prevents_admin_role_injection(): void
     {
+        Notification::fake();
         $this->postJson('/account/register', ['name' => 'Learner', 'email' => 'learner@example.com', 'password' => 'StrongPassword123', 'role' => 'admin'])->assertCreated();
         $user = User::where('email', 'learner@example.com')->firstOrFail();
         $this->assertTrue(Hash::check('StrongPassword123', $user->password));
         $this->assertSame('student', $user->role);
-        $this->assertAuthenticatedAs($user);
-        $this->get('/admin')->assertForbidden();
+        $this->assertGuest();
+        Notification::assertSentTo($user, VerifyEmail::class);
+        $this->get('/admin')->assertRedirect(route('login'));
         $this->postJson('/account/logout')->assertOk();
         $this->assertGuest();
         $this->postJson('/account/login', ['email' => $user->email, 'password' => 'wrong'])->assertUnprocessable();
+        $this->postJson('/account/login', ['email' => $user->email, 'password' => 'StrongPassword123'])->assertForbidden()->assertJsonPath('code', 'EMAIL_NOT_VERIFIED');
+        $this->assertGuest();
+        $user->markEmailAsVerified();
         $this->postJson('/account/login', ['email' => $user->email, 'password' => 'StrongPassword123'])->assertOk();
     }
 

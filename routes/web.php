@@ -17,6 +17,8 @@ Route::get('/learn/{subject}/{chapter}', [WebsiteController::class, 'index'])->w
 Route::get('/quiz/{subject}/{chapter}', [WebsiteController::class, 'index'])->whereNumber('chapter')->name('quiz');
 Route::post('/account/register', [AccountController::class, 'register'])->middleware('throttle:10,1');
 Route::post('/account/login', [AccountController::class, 'login'])->middleware('throttle:10,1');
+Route::get('/email/verify/{id}/{hash}', [AccountController::class, 'verify'])->whereNumber('id')->middleware(['signed', 'throttle:10,1'])->name('verification.verify');
+Route::post('/email/verification-notification', [AccountController::class, 'resendVerification'])->middleware('throttle:3,1')->name('verification.send');
 Route::post('/account/logout', [AccountController::class, 'logout'])->name('logout');
 Route::post('/quizzes/{quiz}/answer', [WebsiteController::class, 'answer'])->middleware('throttle:120,1')->block(10, 10);
 Route::post('/quizzes/{quiz}/attempts', [WebsiteController::class, 'attempt'])->middleware('throttle:30,1')->block(10, 10);

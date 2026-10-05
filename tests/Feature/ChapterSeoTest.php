@@ -12,6 +12,15 @@ class ChapterSeoTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_chapter_pages_have_only_one_h1_including_hidden_templates(): void
+    {
+        $chapter = Chapter::factory()->create(['title' => 'Prehistoric Period']);
+        foreach ([route('home'), route('subject', ['subject' => $chapter->subject->slug]), route('learn', ['subject' => $chapter->subject->slug, 'chapter' => 0])] as $url) {
+            $response = $this->get($url)->assertOk();
+            $this->assertSame(1, preg_match_all('/<h1\b/i', $response->getContent()));
+        }
+    }
+
     public function test_chapter_seo_is_saved_edited_and_rendered_in_the_page_head(): void
     {
         $chapter = Chapter::factory()->create();

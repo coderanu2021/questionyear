@@ -88,7 +88,7 @@ function learnPage(x,i){
   const d=LN[x.id+":"+i],t=x.ch[i],q=QB[x.id+":"+i];
   document.title=window.CHAPTER_SEO_TITLE||t+" – "+x.n+" – "+SITE_TITLE;
   const secs=d.s.map((s,n)=>{
-    const ps=s.p.map((p,k)=>`<p${n===0&&k===0?' class="drop"':""}>${p}</p>`).join("");
+    const ps=s.p.map((p,k)=>/<\/?(?:p|h[1-6]|ul|ol|table|div|section|figure|blockquote)\b/i.test(p)?p:`<p${n===0&&k===0?' class="drop"':""}>${p}</p>`).join("");
     const tb=s.t?`<div class="bk-t"><table><thead><tr>${s.t.h.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${s.t.r.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:"";
     const c=s.n?`<div class="co co-${s.n.type}"><i class="fa-solid ${CO[s.n.type][0]}"></i><div><strong>${CO[s.n.type][1]}</strong>${s.n.x}</div></div>`:"";
     return `<section class="bk-s" id="bk${n}"><div class="bk-h"><span class="bk-no">SECTION ${String(n+1).padStart(2,"0")}</span><h2><i class="fa-solid ${s.i}"></i>${esc(s.h)}</h2></div>${ps}${tb}${c}</section>`}).join("");
@@ -104,12 +104,25 @@ function learnPage(x,i){
   </article>
   <aside class="bk-toc box"><h3><i class="fa-solid fa-book-open"></i> In this chapter</h3>${d.s.map((s,n)=>`<button data-go="bk${n}"><i class="fa-solid ${s.i}"></i>${esc(s.h)}</button>`).join("")}<button data-go="bkend"><i class="fa-solid fa-list-check"></i>Chapter summary</button>${q?`<a class="btn btn-o" href="/quiz/${x.id}/${i}" style="width:100%;margin-top:14px"><i class="fa-solid fa-play"></i> Practice quiz</a>`:""}</aside></div>`;
   const sm=document.querySelector(".bk-sum");if(sm)sm.id="bkend";
+  const article=$("learn").querySelector(".bk-art");
+  article.querySelectorAll("h1").forEach(heading=>{const replacement=document.createElement("h2");replacement.innerHTML=heading.innerHTML;heading.replaceWith(replacement)});
+  const toc=$("learn").querySelector(".bk-toc");
+  toc.querySelectorAll("button[data-go]").forEach(button=>button.remove());
+  const headings=[...article.querySelectorAll(".bk-s h2, .bk-s h3, .bk-s h4")];
+  const contentHeadings=headings.filter(heading=>!heading.closest(".bk-h"));
+  (contentHeadings.length?contentHeadings:headings).forEach((heading,index)=>{
+    heading.id="chapter-heading-"+index;heading.style.scrollMarginTop="100px";
+    const button=document.createElement("button");button.type="button";button.dataset.go=heading.id;
+    const icon=document.createElement("i");icon.className="fa-solid fa-book";button.append(icon,document.createTextNode(heading.textContent.trim()));
+    toc.insertBefore(button,toc.querySelector("a"));
+  });
+  if(d.sum.length){const button=document.createElement("button");button.type="button";button.dataset.go="bkend";button.textContent="Chapter summary";sm.style.scrollMarginTop="100px";toc.insertBefore(button,toc.querySelector("a"))}else if(sm){sm.remove()}
   upd();
 }
 function upd(){const L=$("learn"),b=$("rpi");if(!b||L.hidden)return;const a=document.querySelector(".bk-art");if(!a)return;
   const r=a.getBoundingClientRect(),h=r.height-innerHeight*.6;b.style.width=Math.max(0,Math.min(100,(-r.top+innerHeight*.2)/h*100))+"%"}
 addEventListener("scroll",upd,{passive:true});
-$("learn").addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(b){const el=document.getElementById(b.dataset.go);el&&el.scrollIntoView({behavior:"smooth"})}});
+$("learn").addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(b){const el=document.getElementById(b.dataset.go);if(el){history.replaceState(null,"","#"+el.id);el.scrollIntoView({behavior:"smooth"})}}});
 
 const fmt=(sec=Math.round((Date.now()-t0)/1000))=>Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0");
 function quizSettings(){return (window.CURRICULUM.tests[curId+":"+curIdx]||[]).find(t=>t.id===window.QUIZ_IDS[curId+":"+curIdx])}
@@ -161,9 +174,11 @@ function authPage(mode){
   <form id="af" novalidate>${L?"":field("an","Full name","fa-user","text","Your name","name")}${field("ae","Email address","fa-envelope","email","you@example.com","email")}${field("ap","Password","fa-lock","password",L?"Your password":"At least 8 characters",L?"current-password":"new-password")}
   ${L?`<div class="rowf"><label class="ck"><input type="checkbox" id="ar" checked> Keep me logged in</label><a href="/forgot-password">Forgot password?</a></div>`:`<label class="ck"><input type="checkbox" id="at"> I agree to the <a href="/terms">Terms of use</a> and <a href="/privacy">Privacy policy</a></label>`}
   <div class="msg" id="am" role="alert" aria-live="polite"></div>
+  <button class="btn btn-l" id="verification-resend" type="button" hidden>Resend verification email</button>
   <button class="btn btn-o au-go" type="submit">${L?"Log in":"Create account"}</button></form>
   <p class="sw">${L?'New to '+esc(SITE_TITLE)+'? <a href="/register">Create an account</a>':'Already have an account? <a href="/login">Log in</a>'}</p></div></div></div>`;
 
+  if(L&&new URLSearchParams(location.search).get("verified")==="1")amsg("Email verified. You can now log in.",true);
 }
 function amsg(t,ok){const e=$("am");e.textContent=t;e.className="msg"+(t?(ok?" ok":" bad"):"")}
 function renderUser(){
@@ -176,10 +191,27 @@ function renderUser(){
 }
 async function logout(){await api('/account/logout',{});location.href='/';}
 $("auth").addEventListener("click",e=>{
+  const resend=e.target.closest("#verification-resend");
+  if(resend){resendVerification(resend);return}
   const eye=e.target.closest("[data-eye]");
   if(eye){const i=eye.previousElementSibling,s=i.type==="password";i.type=s?"text":"password";eye.innerHTML=`<i class="fa-regular fa-eye${s?"-slash":""}"></i>`;return}
 });
-$("auth").addEventListener("submit",async e=>{e.preventDefault();amsg("");try{if(amode==="register"&&!$("at").checked)throw Error("Please accept the terms.");const user=await api('/account/'+amode,{email:$("ae").value,password:$("ap").value,name:$("an")?.value,remember:$("ar")?.checked});CU=user;location.href=user.redirect||'/';}catch(error){amsg(error.message)}});
+async function resendVerification(button){
+  button.disabled=true;
+  try{const result=await api('/email/verification-notification',{email:$("ae").value,password:$("ap").value});amsg(result.message,true)}catch(error){amsg(error.message)}finally{button.disabled=false}
+}
+$("auth").addEventListener("submit",async e=>{
+  e.preventDefault();amsg("");$("verification-resend").hidden=true;
+  try{
+    if(amode==="register"&&!$("at").checked)throw Error("Please accept the terms.");
+    const user=await api('/account/'+amode,{email:$("ae").value,password:$("ap").value,name:$("an")?.value,remember:$("ar")?.checked});
+    if(user.code==="VERIFICATION_REQUIRED"){
+      const email=$("ae").value,password=$("ap").value;
+      authPage("login");$("ae").value=email;$("ap").value=password;amsg(user.message,true);$("verification-resend").hidden=false;return;
+    }
+    CU=user;location.href=user.redirect||'/';
+  }catch(error){amsg(error.message);$("verification-resend").hidden=error.code!=="EMAIL_NOT_VERIFIED"}
+});
 $("umb").onclick=()=>{const d=$("umd");d.hidden=!d.hidden;$("umb").setAttribute("aria-expanded",!d.hidden)};
 $("lo").onclick=logout;
 document.addEventListener("click",e=>{if(!e.target.closest("#um"))$("umd").hidden=true});

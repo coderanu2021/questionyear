@@ -1,7 +1,11 @@
 <main id="home">
 <div class="hero"><div class="wrap">
   <div>
+    @if(request()->routeIs('home'))
     <h1>{{ $siteSettings['home_title'] }}</h1>
+    @else
+    <h2>{{ $siteSettings['home_title'] }}</h2>
+    @endif
     <p>{{ $siteSettings['home_description'] }}</p>
     <div class="hs"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="search" placeholder="Search a subject, e.g. History" aria-label="Search subjects"><a href="#subjects" class="btn btn-o">Search</a></div>
     <div class="pop"><span>Popular:</span><a href="#subjects" data-s="history">History</a><a href="#subjects" data-s="geography">Geography</a><a href="#subjects" data-s="biology">Biology</a><a href="#subjects" data-s="mathematics">Mathematics</a></div>

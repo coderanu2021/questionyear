@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\MessageSubmitted;
 use App\Models\Attempt;
 use App\Models\Message;
 use App\Models\Quiz;
@@ -13,8 +14,10 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Throwable;
 
 class PageController extends Controller
 {
@@ -45,7 +48,8 @@ class PageController extends Controller
 
     public function contact(Request $request): RedirectResponse
     {
-        Message::create($request->validate(['name' => 'required|string|max:100', 'email' => 'required|email|max:255', 'message' => 'required|string|min:10|max:5000']));
+        $message = Message::create($request->validate(['name' => 'required|string|max:100', 'email' => 'required|email|max:255', 'message' => 'required|string|min:10|max:5000']));
+        $this->emailAdministrator($message);
 
         return back()->with('status', 'Your message has been saved. An administrator can review it.');
     }
@@ -58,9 +62,19 @@ class PageController extends Controller
             'rating' => 'required|integer|between:1,5',
             'message' => 'required|string|min:10|max:5000',
         ]);
-        Message::create([...$data, 'type' => 'feedback']);
+        $message = Message::create([...$data, 'type' => 'feedback']);
+        $this->emailAdministrator($message);
 
         return redirect()->route('feedback')->with('status', 'Thank you! Your feedback has been submitted.');
+    }
+
+    private function emailAdministrator(Message $message): void
+    {
+        try {
+            Mail::to(SiteSettings::values()['contact_email'])->send(new MessageSubmitted($message));
+        } catch (Throwable $exception) {
+            report($exception);
+        }
     }
 
     public function exam(string $exam): View|RedirectResponse
