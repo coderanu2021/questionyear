@@ -187,6 +187,7 @@ nav.show{display:block}nav ul{flex-direction:column}.mega{max-height:70vh;overfl
 .bk-toc h3{margin:0 0 12px;font:600 15px Poppins,"Segoe UI",system-ui,sans-serif;display:flex;gap:10px;align-items:center}.bk-toc h3 i{color:var(--link)}
 .bk-toc button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:9px 10px;font:14px/1.35 Poppins,"Segoe UI",system-ui,sans-serif;color:var(--text);cursor:pointer}
 .bk-toc button:hover{background:var(--bg);color:var(--link)}.bk-toc button i{width:18px;text-align:center;color:var(--link);flex:none}
+.bk-toc button[aria-current="location"]{background:color-mix(in srgb,var(--accent) 14%,var(--card));color:var(--link);font-weight:600;box-shadow:inset 3px 0 0 var(--link)}
 @media (max-width:900px){.bk-lay{grid-template-columns:1fr}.bk-toc{display:none}.bk-wm{font-size:140px;right:-10px}.bk-nav{grid-template-columns:1fr}}
 @media (max-width:560px){.bk-art{font-size:17px}.bk-art p.drop::first-letter{font-size:56px}}
 /* auth pages + user menu */

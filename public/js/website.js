@@ -117,12 +117,28 @@ function learnPage(x,i){
     toc.insertBefore(button,toc.querySelector("a"));
   });
   if(d.sum.length){const button=document.createElement("button");button.type="button";button.dataset.go="bkend";button.textContent="Chapter summary";sm.style.scrollMarginTop="100px";toc.insertBefore(button,toc.querySelector("a"))}else if(sm){sm.remove()}
-  upd();
+  requestAnimationFrame(upd);
+}
+function highlightChapterSection(id){
+  $("learn").querySelectorAll(".bk-toc button[data-go]").forEach(button=>{
+    if(button.dataset.go===id)button.setAttribute("aria-current","location");else button.removeAttribute("aria-current");
+  });
 }
 function upd(){const L=$("learn"),b=$("rpi");if(!b||L.hidden)return;const a=document.querySelector(".bk-art");if(!a)return;
-  const r=a.getBoundingClientRect(),h=r.height-innerHeight*.6;b.style.width=Math.max(0,Math.min(100,(-r.top+innerHeight*.2)/h*100))+"%"}
-addEventListener("scroll",upd,{passive:true});
-$("learn").addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(b){const el=document.getElementById(b.dataset.go);if(el){history.replaceState(null,"","#"+el.id);el.scrollIntoView({behavior:"smooth"})}}});
+  const r=a.getBoundingClientRect(),h=r.height-innerHeight*.6;b.style.width=Math.max(0,Math.min(100,(-r.top+innerHeight*.2)/h*100))+"%";
+  const headings=[...L.querySelectorAll(".bk-toc button[data-go]")].map(button=>document.getElementById(button.dataset.go)).filter(Boolean);
+  if(!headings.length)return;
+  const threshold=Math.max(120,document.querySelector("header").getBoundingClientRect().bottom+24);
+  let current=headings[0];
+  for(const heading of headings){if(heading.getBoundingClientRect().top<=threshold)current=heading;else break}
+  if(scrollY+innerHeight>=document.documentElement.scrollHeight-2)current=headings[headings.length-1];
+  highlightChapterSection(current.id);
+}
+let chapterScrollFrame=null;
+function scheduleChapterUpdate(){if(chapterScrollFrame!==null)return;chapterScrollFrame=requestAnimationFrame(()=>{chapterScrollFrame=null;upd()})}
+addEventListener("scroll",scheduleChapterUpdate,{passive:true});
+addEventListener("resize",scheduleChapterUpdate);
+$("learn").addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(b){const el=document.getElementById(b.dataset.go);if(el){highlightChapterSection(el.id);history.replaceState(null,"","#"+el.id);el.scrollIntoView({behavior:"smooth"})}}});
 
 const fmt=(sec=Math.round((Date.now()-t0)/1000))=>Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0");
 function quizSettings(){return (window.CURRICULUM.tests[curId+":"+curIdx]||[]).find(t=>t.id===window.QUIZ_IDS[curId+":"+curIdx])}
