@@ -60,6 +60,8 @@ Route::get('/reset-password/{token}', [PageController::class, 'resetForm'])->nam
 Route::post('/reset-password', [PageController::class, 'reset'])->middleware('throttle:5,1')->name('password.update');
 Route::get('/{page}', [PageController::class, 'show'])->whereIn('page', ['about', 'contact', 'help', 'careers', 'privacy', 'terms', 'cookies', 'leaderboard', 'forgot-password'])->name('page');
 Route::middleware('auth')->group(function () {
+    Route::get('/admin/tests/create', [AdminController::class, 'testPage'])->name('admin.tests.create');
+    Route::get('/admin/tests/{quiz}/edit', [AdminController::class, 'testPage'])->whereNumber('quiz')->name('admin.tests.edit');
     Route::get('/admin/chapters/create', [AdminController::class, 'chapterPage'])->name('admin.chapters.create');
     Route::get('/admin/chapters/{chapter}/edit', [AdminController::class, 'chapterPage'])->name('admin.chapters.edit');
     Route::get('/admin/chapters/{chapter}', [AdminController::class, 'chapterPage'])->whereNumber('chapter')->name('admin.chapters.show');

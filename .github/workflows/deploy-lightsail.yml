@@ -120,6 +120,7 @@ jobs:
           composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
           composer check-platform-reqs --no-dev
           php artisan optimize:clear --no-interaction
+          php -r 'require "vendor/autoload.php"; $app = require "bootstrap/app.php"; $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap(); if (! $app->isProduction()) { fwrite(STDERR, "Deployment requires APP_ENV=production to protect live data.\n"); exit(1); }'
           php artisan migrate --force --no-interaction
           php artisan optimize --no-interaction
           php artisan queue:restart --no-interaction

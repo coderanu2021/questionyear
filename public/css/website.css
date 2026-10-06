@@ -14,7 +14,7 @@ header{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:va
 .top{display:flex;align-items:center;gap:8px;height:95px}
 .logo{font-weight:700;font-size:21px;letter-spacing:-.3px;display:flex;align-items:center;gap:10px;color:var(--text)}
 nav{margin-left:28px}nav ul{list-style:none;margin:0;padding:0;display:flex;gap:2px}
-nav a,nav button{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 14px;border-radius:6px;font:inherit;font-size:15px;color:var(--text);background:none;border:0;cursor:pointer}
+nav a,nav button{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 6px;font-weight:bold;border-radius:6px;font:inherit;font-size:15px;color:var(--text);background:none;border:0;cursor:pointer}
 nav a:hover,nav button:hover,nav button[aria-expanded=true]{background:var(--bg)}
 nav button svg{transition:transform .2s}nav button[aria-expanded=true] svg{transform:rotate(180deg)}
 .sp{flex:1}

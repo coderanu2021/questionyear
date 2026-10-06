@@ -41,6 +41,17 @@ class AdminController extends Controller
         ]);
     }
 
+    public function testPage(Request $request, ?Quiz $quiz = null): View
+    {
+        $this->authorizeAdmin($request);
+
+        return view('admin.index', [
+            'state' => $this->state(),
+            'page' => 'tests',
+            'testPage' => ['id' => $quiz?->id],
+        ]);
+    }
+
     private function state(): array
     {
         $attempts = Attempt::all();

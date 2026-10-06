@@ -47,9 +47,9 @@ const VIEWS=window.ADMIN_VIEWS;
 let editor=null;
 const openM=(h,wide)=>{killEditor();$('#dlg').className='dlg'+(wide?' wide':'');$('#dlg').innerHTML=h;$('#modal').classList.add('show')};
 const killEditor=()=>{if(editor){editor.destroy().catch(()=>{});editor=null}};
-const closeM=()=>{if(window.CHAPTER_PAGE){location.href='/admin/chapters';return}killEditor();$('#modal').classList.remove('show')};
+const closeM=()=>{if(window.TEST_PAGE){location.href=window.TEST_URLS.index;return}if(window.CHAPTER_PAGE){location.href='/admin/chapters';return}killEditor();$('#modal').classList.remove('show')};
 $('#modal').addEventListener('click',e=>{if(e.target.id=='modal')closeM()});
-document.addEventListener('keydown',e=>{if(e.key=='Escape'&&!window.CHAPTER_PAGE)closeM()});
+document.addEventListener('keydown',e=>{if(e.key=='Escape'&&!window.CHAPTER_PAGE&&!window.TEST_PAGE)closeM()});
 
 function chapterModal(id){
  location.href=id?`/admin/chapters/${id}/edit`:'/admin/chapters/create';
@@ -103,24 +103,28 @@ function qHTML(){
 }
 function addQ(){draft.push({q:'',o:['','','',''],c:0});$('#qs').innerHTML=qHTML()}
 function testModal(id){
+ location.href=id?window.TEST_URLS.edit[id]:window.TEST_URLS.create;
+}
+function renderTestForm(id){
  const t=S.tests.find(x=>x.id==id)||{ch:S.chapters[0]?.id,title:'',dur:15,pass:40,qs:[]};
  draft=JSON.parse(JSON.stringify(t.qs));
- openM(`<div class="dh"><h3>${id?'Edit test':'Create test'}</h3><button class="x" onclick="closeM()" aria-label="Close">×</button></div>
+ $('#page').innerHTML=`<div class="head"><a class="btn" href="${esc(window.TEST_URLS.index)}">← Back to tests</a></div><div class="card chapter-page"><div class="dh"><h3>${id?'Edit test':'Create test'}</h3></div>
  <div class="db"><div class="two"><div class="f"><label>Chapter</label><select id="t_c">${S.chapters.map(c=>`<option value="${c.id}" ${c.id==t.ch?'selected':''}>${esc(c.title)}</option>`).join('')}</select></div>
  <div class="f"><label>Test title</label><input id="t_t" value="${esc(t.title)}" placeholder="e.g. Chapter 1 Quiz"></div>
  <div class="f"><label>Duration (minutes)</label><input id="t_d" type="number" min="1" value="${t.dur}"></div>
  <div class="f"><label>Passing score (%)</label><input id="t_p" type="number" min="1" max="100" value="${t.pass}"></div></div>
  <div style="display:flex;justify-content:space-between;align-items:center;margin:6px 0 12px"><b>Questions</b><button class="btn sm" onclick="addQ()">${ic('plus')}Add question</button></div>
  <p style="color:var(--mute);font-size:12.5px;margin-bottom:10px">Select the radio button next to the correct option.</p><div id="qs">${qHTML()}</div></div>
- <div class="df"><button class="btn" onclick="closeM()">Cancel</button><button class="btn pri" onclick="saveTest(${id||0})">${id?'Save changes':'Create test'}</button></div>`,true);
+ <div class="df"><button class="btn" onclick="closeM()">Cancel</button><button class="btn pri" onclick="saveTest(${id||0})">${id?'Save changes':'Create test'}</button></div></div>`;
 }
 async function saveTest(id){
  const title=$('#t_t').value.trim();if(!title)return toast('Enter a test title');
- const qs=draft.filter(q=>q.q.trim()&&q.o.every(o=>o.trim()));
- if(!qs.length)return toast('Add at least one complete question');
+ if(!draft.length)return toast('Add at least one complete question');
+ if(draft.some(q=>!q.q.trim()||!q.o.every(o=>o.trim())))return toast('Complete every question and all four options');
+ const qs=draft;
  const d={ch:+$('#t_c').value,title,dur:+$('#t_d').value||15,pass:+$('#t_p').value||40,qs};
  if(id)Object.assign(S.tests.find(t=>t.id==id),d);else S.tests.push({id:nid(S.tests),attempts:0,avg:0,...d});
- if(!await save()){rerender();return;}closeM();rerender();toast(id?'Test updated':'Test created');
+ if(!await save()){return;}location.href=window.TEST_URLS.index;
 }
 async function delTest(id){if(!confirm('Delete this test?'))return;S.tests=S.tests.filter(t=>t.id!=id);if(!await save()){rerender();return;}rerender();toast('Test deleted')}
 async function toggleBlock(id){const u=S.users.find(x=>x.id==id);u.status=u.status=='blocked'?'active':'blocked';if(!await save()){rerender();return;}rerender();toast(u.status=='blocked'?'User blocked':'User unblocked')}
@@ -138,6 +142,10 @@ function go(v){
 }
 $('#burger').onclick=()=>$('#side').classList.toggle('open');
 go(window.ADMIN_PAGE);
+if(window.TEST_PAGE){
+ $('#title').textContent=window.TEST_PAGE.id?'Edit test & questions':'Add test & questions';
+ renderTestForm(window.TEST_PAGE.id);
+}
 if(window.CHAPTER_PAGE){
  const chapterId=window.CHAPTER_PAGE.id;
  $('#title').textContent=window.CHAPTER_PAGE.mode==='show'?'View chapter':chapterId?'Edit chapter':'Add chapter';

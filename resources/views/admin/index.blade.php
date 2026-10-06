@@ -31,4 +31,5 @@
 
 <script>window.ADMIN_STATE={{ Illuminate\Support\Js::from($state) }};window.ADMIN_PAGE={{ Illuminate\Support\Js::from($page) }};</script>@if($page !== 'settings')@include('admin.pages.' . $page)@endif
 <script>window.CHAPTER_PAGE={{ Illuminate\Support\Js::from($chapterPage ?? null) }};</script>
+<script>window.TEST_PAGE={{ Illuminate\Support\Js::from($testPage ?? null) }};window.TEST_URLS={{ Illuminate\Support\Js::from(['index' => route('admin', ['page' => 'tests']), 'create' => route('admin.tests.create'), 'edit' => collect($state['tests'])->mapWithKeys(fn ($test) => [$test['id'] => route('admin.tests.edit', ['quiz' => $test['id']])])->all()]) }};</script>
 <script src="{{ asset("js/admin.js") }}?v={{ filemtime(public_path('js/admin.js')) }}"></script></body></html>
