@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DailyQuizController;
+use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\SiteSettingsController;
 use App\Http\Controllers\WebsiteController;
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [WebsiteController::class, 'index'])->name('home');
 Route::get('/login', [WebsiteController::class, 'index'])->name('login');
 Route::get('/register', [WebsiteController::class, 'index'])->name('register');
+Route::get('/auth/google', [GoogleAuthController::class, 'redirect'])->middleware(['guest', 'throttle:10,1'])->name('google.redirect');
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->middleware(['guest', 'throttle:10,1'])->name('google.callback')->block(10, 10);
 Route::get('/subject/{subject}', [WebsiteController::class, 'index'])->name('subject');
 Route::get('/learn/{subject}/{chapter}', [WebsiteController::class, 'index'])->whereNumber('chapter')->name('learn');
 Route::get('/quiz/{subject}/{chapter}', [WebsiteController::class, 'index'])->whereNumber('chapter')->name('quiz');

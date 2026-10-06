@@ -187,6 +187,9 @@ function authPage(mode){
   $("auth").innerHTML=`<div class="au"><div class="au-side"><div><h2>Learn. Practice. Improve.</h2><p>${L?"Welcome back! Pick up your practice right where you left off.":"Join "+esc(SITE_TITLE)+" for free and start practicing in minutes."}</p>
   <ul><li><i class="fa-solid fa-book-open"></i>Chapter notes written like a textbook</li><li><i class="fa-solid fa-circle-check"></i>Instant answers with explanations</li><li><i class="fa-solid fa-chart-line"></i>Track your score topic by topic</li><li><i class="fa-solid fa-fire"></i>Build a daily practice streak</li></ul></div></div>
   <div class="au-main"><div class="au-card"><h1>${L?"Log in to "+esc(SITE_TITLE):"Create your account"}</h1><p class="lead">${L?"Enter your details to continue.":"It takes less than a minute."}</p>
+  <a class="btn btn-l au-go" href="${esc(window.GOOGLE_LOGIN_URL)}"><i class="fa-brands fa-google" aria-hidden="true"></i> Sign in with Google</a>
+  <p class="sw">Or continue with email</p>
+  ${L?'':'<p class="sw">By continuing with Google, you agree to the <a href="/terms">Terms of use</a> and <a href="/privacy">Privacy policy</a>.</p>'}
   <form id="af" novalidate>${L?"":field("an","Full name","fa-user","text","Your name","name")}${field("ae","Email address","fa-envelope","email","you@example.com","email")}${field("ap","Password","fa-lock","password",L?"Your password":"At least 8 characters",L?"current-password":"new-password")}
   ${L?`<div class="rowf"><label class="ck"><input type="checkbox" id="ar" checked> Keep me logged in</label><a href="/forgot-password">Forgot password?</a></div>`:`<label class="ck"><input type="checkbox" id="at"> I agree to the <a href="/terms">Terms of use</a> and <a href="/privacy">Privacy policy</a></label>`}
   <div class="msg" id="am" role="alert" aria-live="polite"></div>
@@ -195,6 +198,7 @@ function authPage(mode){
   <p class="sw">${L?'New to '+esc(SITE_TITLE)+'? <a href="/register">Create an account</a>':'Already have an account? <a href="/login">Log in</a>'}</p></div></div></div>`;
 
   if(L&&new URLSearchParams(location.search).get("verified")==="1")amsg("Email verified. You can now log in.",true);
+  if(window.GOOGLE_LOGIN_ERROR)amsg(window.GOOGLE_LOGIN_ERROR);
 }
 function amsg(t,ok){const e=$("am");e.textContent=t;e.className="msg"+(t?(ok?" ok":" bad"):"")}
 function renderUser(){
