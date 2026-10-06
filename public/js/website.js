@@ -66,8 +66,8 @@ function renderChaps(){
   const x=curSub,f=$("cf").value.trim().toLowerCase();
   const it=x.ch.map((t,i)=>({t,i})).filter(o=>o.t.toLowerCase().includes(f)&&(!$("chapter-category").value||window.CURRICULUM.categories[x.id+":"+o.i]===$("chapter-category").value));
   $("cl").innerHTML=it.length?it.map(({t,i})=>{const b=QB[x.id+":"+i],n=LN[x.id+":"+i];
-    return (n||b)?`<a class="chap" style="--c:${x.c}" href="${n?esc(window.CURRICULUM.chapterUrls[x.id+":"+i]):`/quiz/${x.id}/${i}`}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>${n?"Chapter notes":"Practice quiz"}${b?" + "+b.length+" practice questions":""}</small></div><span class="go"><i class="fa-solid fa-book-open"></i> ${n?"Read chapter":"Start quiz"}</span></a>`
-    :`<div class="chap off" style="--c:${x.c}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>Notes and questions are being added</small></div><span class="soon">Coming soon</span></div>`}).map((markup,k)=>{const index=it[k].i;const tests=window.CURRICULUM.tests[x.id+":"+index]||[];return markup+tests.map(t=>`<a class="chap" href="/quiz/${x.id}/${index}?test=${t.id}"><span class="cn"><i class="fa-solid fa-play"></i></span><div><h3>${esc(t.title)}</h3><small>${t.count} questions · ${t.duration} minutes · Pass ${t.pass}%</small></div></a>`).join("")}).join(""):`<p class="empty" style="display:block">No chapters match your search.</p>`;
+    return (n||b)?`<a class="chap" style="--c:${x.c}" href="${n?esc(window.CURRICULUM.chapterUrls[x.id+":"+i]):`${esc(window.CURRICULUM.quizUrls[x.id+":"+i])}`}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>${n?"Chapter notes":"Practice quiz"}${b?" + "+b.length+" practice questions":""}</small></div><span class="go"><i class="fa-solid fa-book-open"></i> ${n?"Read chapter":"Start quiz"}</span></a>`
+    :`<div class="chap off" style="--c:${x.c}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>Notes and questions are being added</small></div><span class="soon">Coming soon</span></div>`}).map((markup,k)=>{const index=it[k].i;const tests=window.CURRICULUM.tests[x.id+":"+index]||[];return markup+tests.map(t=>`<a class="chap" href="${esc(t.url)}"><span class="cn"><i class="fa-solid fa-play"></i></span><div><h3>${esc(t.title)}</h3><small>${t.count} questions · ${t.duration} minutes · Pass ${t.pass}%</small></div></a>`).join("")}).join(""):`<p class="empty" style="display:block">No chapters match your search.</p>`;
 }
 function subjectPage(x){
   curSub=x;document.title=x.n+" chapters – "+SITE_TITLE;
@@ -99,10 +99,10 @@ function learnPage(x,i){
   <div class="bk-meta"><span><i class="fa-regular fa-clock"></i>${esc(d.time)}</span><span><i class="fa-solid fa-list"></i>${d.s.length} sections</span>${q?`<span><i class="fa-solid fa-circle-question"></i>${q.length} practice questions</span>`:""}</div></div><i class="fa-solid ${d.icon} bk-wm"></i></div>
   <div class="wrap bk-lay"><article class="bk-art">${secs}
   <div class="bk-sum"><h2><i class="fa-solid fa-list-check"></i>Chapter summary</h2><ul>${d.sum.map(z=>`<li><i class="fa-solid fa-circle-check"></i><span>${z}</span></li>`).join("")}</ul></div>
-  ${q?`<div class="band bk-cta"><div><h2><i class="fa-solid fa-pen-to-square"></i> Ready to test yourself?</h2><p>${q.length} practice questions based on this chapter.</p></div><a class="btn btn-o" href="/quiz/${x.id}/${i}" style="height:46px;padding:0 26px">Start practice quiz</a></div>`:""}
+  ${q?`<div class="band bk-cta"><div><h2><i class="fa-solid fa-pen-to-square"></i> Ready to test yourself?</h2><p>${q.length} practice questions based on this chapter.</p></div><a class="btn btn-o" href="${esc(window.CURRICULUM.quizUrls[x.id+":"+i])}" style="height:46px;padding:0 26px">Start practice quiz</a></div>`:""}
   <div class="bk-nav">${pv?`<a href="${pv}"><small><i class="fa-solid fa-arrow-left"></i> Previous</small><b>${esc(x.ch[i-1])}</b></a>`:"<span></span>"}${nx?`<a href="${nx}" style="text-align:right"><small>Next <i class="fa-solid fa-arrow-right"></i></small><b>${esc(x.ch[i+1])}</b></a>`:"<span></span>"}</div>
   </article>
-  <aside class="bk-toc box"><h3><i class="fa-solid fa-book-open"></i> In this chapter</h3>${d.s.map((s,n)=>`<button data-go="bk${n}"><i class="fa-solid ${s.i}"></i>${esc(s.h)}</button>`).join("")}<button data-go="bkend"><i class="fa-solid fa-list-check"></i>Chapter summary</button>${q?`<a class="btn btn-o" href="/quiz/${x.id}/${i}" style="width:100%;margin-top:14px"><i class="fa-solid fa-play"></i> Practice quiz</a>`:""}</aside></div>`;
+  <aside class="bk-toc box"><h3><i class="fa-solid fa-book-open"></i> In this chapter</h3>${d.s.map((s,n)=>`<button data-go="bk${n}"><i class="fa-solid ${s.i}"></i>${esc(s.h)}</button>`).join("")}<button data-go="bkend"><i class="fa-solid fa-list-check"></i>Chapter summary</button>${q?`<a class="btn btn-o" href="${esc(window.CURRICULUM.quizUrls[x.id+":"+i])}" style="width:100%;margin-top:14px"><i class="fa-solid fa-play"></i> Practice quiz</a>`:""}</aside></div>`;
   const sm=document.querySelector(".bk-sum");if(sm)sm.id="bkend";
   const article=$("learn").querySelector(".bk-art");
   article.querySelectorAll("h1").forEach(heading=>{const replacement=document.createElement("h2");replacement.innerHTML=heading.innerHTML;heading.replaceWith(replacement)});
@@ -245,6 +245,7 @@ renderUser();
 function route(){
   const h="#"+location.pathname;let m=h.match(/^#\/(subject|quiz|learn)\/([^/]+)(?:\/(\d+))?$/);
   if(!m){const entry=Object.entries(window.CURRICULUM.chapterUrls).find(([key,url])=>new URL(url,location.origin).pathname===location.pathname);if(entry){const [subject,index]=entry[0].split(":");m=["","learn",subject,index]}}
+  if(!m){const entry=Object.entries(window.CURRICULUM.quizUrls).find(([key,url])=>new URL(url,location.origin).pathname===location.pathname);if(entry){const [subject,index]=entry[0].split(":");m=["","quiz",subject,index]}}
   clearInterval(tmr);mg.classList.remove("open");sb.setAttribute("aria-expanded","false");nav.classList.remove("show");
   const P=$("home"),SP=$("subj"),QP=$("quiz"),LP=$("learn"),AP=$("auth");P.hidden=SP.hidden=QP.hidden=LP.hidden=AP.hidden=true;
   if(h==="#/login"||h==="#/register"){if(CU){location.href="/";return}authPage(h.slice(2));AP.hidden=false;scrollTo(0,0);return}

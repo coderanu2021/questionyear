@@ -33,6 +33,7 @@ Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->
 Route::get('/subject/{subject}', [WebsiteController::class, 'index'])->name('subject');
 Route::get('/learn/{subject}/{chapter}', [WebsiteController::class, 'index'])->whereNumber('chapter')->name('learn');
 Route::get('/quiz/{subject}/{chapter}', [WebsiteController::class, 'index'])->whereNumber('chapter')->name('quiz');
+Route::get('/quiz/{subject}/{quiz}-{slug}', [WebsiteController::class, 'quizPage'])->whereNumber('quiz')->name('quiz.show');
 Route::post('/account/register', [AccountController::class, 'register'])->middleware('throttle:10,1');
 Route::post('/account/login', [AccountController::class, 'login'])->middleware('throttle:10,1');
 Route::get('/email/verify/{id}/{hash}', [AccountController::class, 'verify'])->whereNumber('id')->middleware(['signed', 'throttle:10,1'])->name('verification.verify');

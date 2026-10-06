@@ -26,14 +26,25 @@ class WebsiteController extends Controller
         return $this->index($request, $subject->slug, $matches->keys()->first());
     }
 
-    public function index(Request $request, ?string $subject = null, ?int $chapter = null): View|RedirectResponse
+    public function quizPage(Request $request, string $subject, Quiz $quiz, string $slug): View|RedirectResponse
+    {
+        abort_unless($quiz->chapter->status === 'published' && $quiz->chapter->subject->slug === $subject, 404);
+        if ($request->url() !== $quiz->publicUrl()) {
+            return redirect()->to($quiz->publicUrl(), 301);
+        }
+        $chapter = $quiz->chapter->subject->chapters()->where('status', 'published')->orderBy('id')->pluck('id')->search($quiz->chapter_id);
+
+        return $this->index($request, $subject, $chapter, $quiz->id);
+    }
+
+    public function index(Request $request, ?string $subject = null, ?int $chapter = null, ?int $test = null): View|RedirectResponse
     {
         if ($request->routeIs('login', 'register') && $request->user()) {
             return redirect()->route($request->user()->role === 'admin' ? 'admin' : 'home');
         }
 
         $subjects = Subject::with(['chapters' => fn ($q) => $q->where('status', 'published')->orderBy('id'), 'chapters.quizzes'])->orderBy('id')->get();
-        $curriculum = ['S' => [], 'QB' => [], 'LN' => [], 'tests' => [], 'categories' => [], 'chapterUrls' => []];
+        $curriculum = ['S' => [], 'QB' => [], 'LN' => [], 'tests' => [], 'categories' => [], 'chapterUrls' => [], 'quizUrls' => []];
         $quizIds = [];
         foreach ($subjects as $item) {
             $curriculum['S'][] = [$item->name, $item->category, $item->description ?? '', $item->chapters->pluck('title')->all()];
@@ -47,11 +58,13 @@ class WebsiteController extends Controller
                 } elseif ($entry->notes) {
                     $curriculum['LN'][$key] = $entry->notes;
                 }
-                $curriculum['tests'][$key] = $entry->quizzes->map(fn ($q) => ['id' => $q->id, 'title' => $q->title, 'duration' => $q->duration, 'pass' => $q->passing_score, 'count' => count($q->questions)])->all();
-                $quiz = $request->integer('test') && $request->is('quiz/'.$item->slug.'/'.$index) ? $entry->quizzes->firstWhere('id', $request->integer('test')) : $entry->quizzes->first();
+                $curriculum['tests'][$key] = $entry->quizzes->map(fn ($q) => ['id' => $q->id, 'title' => $q->title, 'duration' => $q->duration, 'pass' => $q->passing_score, 'count' => count($q->questions), 'url' => $q->publicUrl()])->all();
+                $selectedTest = $test ?? ($request->routeIs('quiz') ? $request->integer('test') : null);
+                $quiz = $selectedTest && $subject === $item->slug && $chapter === $index ? $entry->quizzes->firstWhere('id', $selectedTest) : $entry->quizzes->first();
                 if ($quiz) {
                     $curriculum['QB'][$key] = array_map(fn ($q) => [$q['q'], $q['o'], null, ''], $quiz->questions);
                     $quizIds[$key] = $quiz->id;
+                    $curriculum['quizUrls'][$key] = $quiz->publicUrl();
                 }
             }
         }
@@ -63,6 +76,9 @@ class WebsiteController extends Controller
                 $key = $subject.':'.$chapter;
                 abort_if($request->routeIs('learn', 'chapter') && ! isset($curriculum['LN'][$key]), 404);
                 abort_if($request->is('quiz/*') && ! isset($curriculum['QB'][$key]), 404);
+                if ($request->routeIs('quiz')) {
+                    return redirect()->to($curriculum['quizUrls'][$key], 301);
+                }
                 if ($request->routeIs('learn') && $selected->slug === 'history' && in_array($selected->chapters[$chapter]->category, ['Ancient History', 'Medieval History', 'Modern History'], true)) {
                     return redirect()->to($selected->chapters[$chapter]->readingUrl($chapter), 301);
                 }
@@ -76,8 +92,7 @@ class WebsiteController extends Controller
         $popular = [];
         foreach ($curriculum['tests'] as $key => $tests) {
             foreach ($tests as $test) {
-                [$slug, $index] = explode(':', $key);
-                $popular[] = [...$test, 'url' => route('quiz', ['subject' => $slug, 'chapter' => $index, 'test' => $test['id']])];
+                $popular[] = $test;
             }
         }
 

@@ -25,9 +25,12 @@ class WebsiteTest extends TestCase
 
     public function test_public_pages_render_and_missing_chapters_return_404(): void
     {
-        foreach (['/', '/login', '/register', '/subject/history', '/learn/history/0', '/quiz/history/0'] as $url) {
+        foreach (['/', '/login', '/register', '/subject/history', '/learn/history/0'] as $url) {
             $this->get($url)->assertOk()->assertSee('questionyear');
         }
+        $quiz = Quiz::firstOrFail();
+        $this->get('/quiz/history/0')->assertStatus(301)->assertRedirect($quiz->publicUrl());
+        $this->get($quiz->publicUrl())->assertOk()->assertSee('questionyear');
         $this->get('/subject/missing')->assertNotFound();
         $this->get('/learn/history/999')->assertNotFound();
     }
@@ -106,7 +109,12 @@ class WebsiteTest extends TestCase
         }
         $state = $this->putJson('/admin/state', $state)->assertOk()->json();
         $this->get('/subject/new-subject')->assertOk();
-        $this->get('/quiz/new-subject/0?test='.($quizId + 1))->assertOk()->assertViewHas('quizIds', fn ($ids) => $ids['new-subject:0'] === $quizId + 1);
+        $quizUrl = Quiz::findOrFail($quizId + 1)->publicUrl();
+        $this->get('/quiz/new-subject/0?test='.($quizId + 1))->assertStatus(301)->assertRedirect($quizUrl);
+        $this->get($quizUrl)->assertOk()->assertViewHas('quizIds', fn ($ids) => $ids['new-subject:0'] === $quizId + 1);
+        $this->get('/quiz/new-subject/0?test=999999')->assertNotFound();
+        $this->get('/quiz/history/'.($quizId + 1).'-test')->assertNotFound();
+        $this->get('/quiz/new-subject/'.($quizId + 1).'-old-title')->assertStatus(301)->assertRedirect($quizUrl);
         $this->putJson('/admin/state', [...$state, 'version' => 'stale'])->assertStatus(409);
         $state['chapters'] = array_values(array_filter($state['chapters'], fn ($c) => $c['id'] !== $chapterId));
         $state['tests'] = array_values(array_filter($state['tests'], fn ($t) => $t['ch'] !== $chapterId));
