@@ -44,7 +44,7 @@ class AccountController extends Controller
 
         return response()->json([
             ...$request->user()->only('name', 'email'),
-            'redirect' => $request->user()->role === 'admin' ? route('admin') : route('home'),
+            'redirect' => $request->user()->role === 'admin' ? route('admin') : $request->session()->pull('url.intended', route('home')),
         ]);
     }
 

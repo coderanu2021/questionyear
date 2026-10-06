@@ -77,9 +77,9 @@ class PracticeQuestionGenerator
                 }
             }
             DB::transaction(function () use ($fresh, $selected, $period, $date): void {
-                $questions = $selected->map(fn ($row): array => json_decode($row->question, true))->all();
+                $questions = $selected->map(fn ($row): array => [...json_decode($row->question, true), 'subject_id' => $row->subject_id])->all();
                 foreach ($fresh as $item) {
-                    $questions[] = $item['question'];
+                    $questions[] = [...$item['question'], 'subject_id' => $item['subject_id']];
                 }
                 shuffle($questions);
                 DB::table('practice_sets')->insert(['period' => $period, 'starts_on' => $date, 'questions' => json_encode($questions, JSON_THROW_ON_ERROR), 'created_at' => now(), 'updated_at' => now()]);

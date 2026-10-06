@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\LearningTracker;
 use App\Models\Attempt;
 use App\Models\Quiz;
 use App\Models\Subject;
@@ -93,6 +94,8 @@ class WebsiteController extends Controller
         if (! $request->user()) {
             $this->consumeGuestQuestions($request, 1);
             $request->session()->put('guest_answers.'.$quiz->id.'.'.$data['question'], $data['answer']);
+        } else {
+            app(LearningTracker::class)->record($request->user(), [$question], [$data['answer']], $quiz->chapter->subject_id);
         }
 
         return response()->json(['correct' => $question['c'], 'explanation' => $question['explanation'] ?? '', 'guest_remaining' => $request->user() ? null : max(0, 25 - $request->session()->get('guest_questions_used', 0))]);
@@ -125,6 +128,9 @@ class WebsiteController extends Controller
         }
         $percentage = (int) round($score / count($quiz->questions) * 100);
         Attempt::create(['quiz_id' => $quiz->id, 'user_id' => $request->user()?->id, 'answers' => $data['answers'], 'score' => $score, 'total' => count($quiz->questions), 'seconds' => $data['seconds'], 'percentage' => $percentage]);
+        if ($request->user()) {
+            app(LearningTracker::class)->record($request->user(), $quiz->questions, $data['answers'], $quiz->chapter->subject_id);
+        }
 
         $review = $quiz->questions;
         if (! $request->user()) {

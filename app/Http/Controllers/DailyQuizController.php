@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\LearningTracker;
 use App\PracticeQuestionGenerator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -37,6 +38,7 @@ class DailyQuizController extends Controller
 
         return view('website.daily', [
             'date' => $date,
+            'practiceSetId' => $stored?->id,
             'period' => $period,
             'questionCount' => PracticeQuestionGenerator::COUNTS[$period],
             'questions' => $snapshot,
@@ -67,7 +69,7 @@ class DailyQuizController extends Controller
             }
         }
         DB::transaction(function () use ($request, $period, $date, $participant, $data, $questions, $score): void {
-            DB::table('daily_quiz_attempts')->insertOrIgnore([
+            $inserted = DB::table('daily_quiz_attempts')->insertOrIgnore([
                 'user_id' => $request->user()?->id,
                 'participant' => $participant,
                 'quiz_date' => $date,
@@ -80,6 +82,9 @@ class DailyQuizController extends Controller
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
+            if ($inserted && $request->user()) {
+                app(LearningTracker::class)->record($request->user(), $questions, $data['answers']);
+            }
         });
 
         return redirect()->route($period)->with('status', 'Quiz submitted. Your marks and answer review are ready below.');

@@ -26,6 +26,7 @@
 @include('website.partials.footer')
 @include('website.partials.content-protection')
 <script>window.GUEST_QUESTIONS_USED={{ (int) session('guest_questions_used', 0) }};</script>
+@include('website.partials.learning-scripts')
 
 
 <script>window.CHAPTER_SEO_TITLE={{ Illuminate\Support\Js::from($chapterMetaTitle) }};window.CURRICULUM={{ Illuminate\Support\Js::from($curriculum) }};window.CURRENT_USER={{ Illuminate\Support\Js::from($currentUser) }};window.QUIZ_IDS={{ Illuminate\Support\Js::from($quizIds) }};</script><script src="{{ asset("js/website.js") }}"></script></body></html>

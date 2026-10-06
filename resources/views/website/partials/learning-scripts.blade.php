@@ -1,0 +1,2 @@
+<script>window.LEARNING_ENDPOINTS={{ Illuminate\Support\Js::from(['bookmark' => route('learning.bookmark'), 'report' => route('learning.report'), 'explanation' => route('learning.explanation')]) }};window.LEARNING_LANGUAGE=window.LEARNING_LANGUAGE||{{ Illuminate\Support\Js::from(auth()->check() ? (Illuminate\Support\Facades\DB::table('learning_preferences')->where('user_id', auth()->id())->value('language') ?? 'en') : 'en') }};</script>
+<script src="{{ asset('js/learning.js') }}"></script>

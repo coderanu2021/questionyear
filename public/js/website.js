@@ -142,11 +142,16 @@ $("learn").addEventListener("click",e=>{const b=e.target.closest("[data-go]");if
 
 const fmt=(sec=Math.round((Date.now()-t0)/1000))=>Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0");
 function quizSettings(){return (window.CURRICULUM.tests[curId+":"+curIdx]||[]).find(t=>t.id===window.QUIZ_IDS[curId+":"+curIdx])}
+function questionTools(index,canExplain=false){
+  if(!window.CURRENT_USER)return '<p><a href="/login">Sign in to save questions and report errors</a></p>';
+  const source='quiz:'+window.QUIZ_IDS[curId+":"+curIdx]+':'+index;
+  return `<div class="learning-tools" data-source="${esc(source)}"><button type="button" class="btn btn-l" data-bookmark="1">Save question</button>${canExplain?'<button type="button" class="btn btn-l" data-explanation="en">English explanation</button><button type="button" class="btn btn-l" data-explanation="hi">हिंदी व्याख्या</button>':''}<details><summary>Report wrong answer</summary><label>What needs correcting?<textarea data-report-reason rows="3" maxlength="2000"></textarea></label><button type="button" class="btn btn-l" data-report>Send report</button></details><p data-tool-message role="status" aria-live="polite"></p><p data-translated hidden></p></div>`;
+}
 function tick(){const remaining=Math.max(0,(quizSettings()?.duration||15)*60-Math.round((Date.now()-t0)/1000));const e=$("tm");if(e)e.textContent="Time left "+fmt(remaining);if(!remaining){for(let k=0;k<qs.length;k++)if(qans[k]===undefined)qans[k]=-1;results()}}
 function drawQ(){
   if(!window.CURRENT_USER&&window.GUEST_QUESTIONS_USED>=25){accountGate();return}
   const q=qs[qi];
-  $("qb").innerHTML=`<div class="qtop"><span>Question ${qi+1} of ${qs.length}</span><span id="tm">${fmt()}</span></div><div class="prog"><i style="width:${qi/qs.length*100}%"></i></div><h2 class="qt">${esc(q[0])}</h2>`+q[1].map((o,k)=>`<button class="qo" data-k="${k}"><b>${"ABCD"[k]}</b>${esc(o)}</button>`).join("")+`<div id="qe"></div><div class="qf"><a href="/subject/${curId}" class="btn btn-l">Exit quiz</a><button class="btn btn-o" id="qn" hidden>Next question</button></div>`;
+  $("qb").innerHTML=`<div class="qtop"><span>Question ${qi+1} of ${qs.length}</span><span id="tm">${fmt()}</span></div><div class="prog"><i style="width:${qi/qs.length*100}%"></i></div><h2 class="qt">${esc(q[0])}</h2>`+q[1].map((o,k)=>`<button class="qo" data-k="${k}"><b>${"ABCD"[k]}</b>${esc(o)}</button>`).join("")+`<div id="qe">${questionTools(qi)}</div><div class="qf"><a href="/subject/${curId}" class="btn btn-l">Exit quiz</a><button class="btn btn-o" id="qn" hidden>Next question</button></div>`;
 }
 function accountGate(){clearInterval(tmr);$("qb").innerHTML=`<div class="res"><h2>Create an account to continue</h2><p>You have completed your 25 free guest questions. Log in or create a free account to solve more questions.</p><div class="cta2"><a class="btn btn-o" href="/register">Create free account</a><a class="btn btn-l" href="/login">Log in</a></div></div>`}
 function startQuiz(){qi=0;qsc=0;qans=[];t0=Date.now();clearInterval(tmr);if(!window.CURRENT_USER&&window.GUEST_QUESTIONS_USED>=25){accountGate();return}tmr=setInterval(tick,1000);drawQ()}
@@ -162,7 +167,7 @@ async function grade(k){
   const q=qs[qi],all=[...document.querySelectorAll("#qb .qo")],ok=k===q[2];
   all.forEach(b=>b.disabled=true);all[q[2]].classList.add("ok");if(!ok)all[k].classList.add("bad");
   qans[qi]=k;if(ok)qsc++;
-  $("qe").innerHTML=`<div class="qe"><b>${ok?"Correct.":"Not quite."}</b> ${esc(q[3])}</div>`;
+  $("qe").innerHTML=`<div class="qe"><b>${ok?"Correct.":"Not quite."}</b> ${esc(q[3])}</div>${questionTools(qi,true)}`;
   const n=$("qn");n.textContent=qi<qs.length-1?"Next question":"See results";n.hidden=false;
 }
 async function results(){
@@ -171,7 +176,7 @@ async function results(){
   clearInterval(tmr);const pct=Math.round(qsc/qs.length*100);
   const msg=pct>=80?"Excellent work":pct>=50?"Good effort":"Keep practicing";
   const rev=LN[curId+":"+curIdx]?`<a class="btn btn-l" href="/learn/${curId}/${curIdx}">Revise notes</a>`:"";
-  $("qb").innerHTML=`<div class="res"><div class="sb">${qsc}<span>/${qs.length}</span></div><h2>${msg}</h2><p class="sub" style="margin:0 auto 20px">You scored ${pct}% in ${fmt()}.</p><div class="cta2"><button class="btn btn-o" id="qr">Try again</button>${rev}<a class="btn btn-l" href="/subject/${curId}">Back to chapters</a></div></div><div class="rv"><h3>Review answers</h3>`+qs.map((q,i)=>{const ok=qans[i]===q[2];return `<div><div class="t">${i+1}. ${esc(q[0])}</div><span style="color:var(--${ok?"ok":"bad"});font-weight:600">${ok?"Correct":"Your answer: "+esc(q[1][qans[i]]??"Not answered")}</span><div>Correct answer: ${esc(q[1][q[2]])}</div></div>`}).join("")+`</div>`;
+  $("qb").innerHTML=`<div class="res"><div class="sb">${qsc}<span>/${qs.length}</span></div><h2>${msg}</h2><p class="sub" style="margin:0 auto 20px">You scored ${pct}% in ${fmt()}.</p><div class="cta2"><button class="btn btn-o" id="qr">Try again</button>${rev}<a class="btn btn-l" href="/my-learning">Revise mistakes / Next 10 questions</a><a class="btn btn-l" href="/subject/${curId}">Back to chapters</a></div></div><div class="rv"><h3>Review answers</h3>`+qs.map((q,i)=>{const ok=qans[i]===q[2];return `<div><div class="t">${i+1}. ${esc(q[0])}</div><span style="color:var(--${ok?"ok":"bad"});font-weight:600">${ok?"Correct":"Your answer: "+esc(q[1][qans[i]]??"Not answered")}</span><div>Correct answer: ${esc(q[1][q[2]])}</div>${questionTools(i,true)}</div>`}).join("")+`</div>`;
 }
 $("qb").addEventListener("click",e=>{
   const o=e.target.closest(".qo");

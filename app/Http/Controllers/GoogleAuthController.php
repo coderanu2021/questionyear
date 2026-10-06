@@ -83,7 +83,7 @@ class GoogleAuthController extends Controller
             Auth::login($user);
             $request->session()->regenerate();
 
-            return redirect()->route($user->role === 'admin' ? 'admin' : 'home');
+            return $user->role === 'admin' ? redirect()->route('admin') : redirect()->intended(route('home'));
         } catch (Throwable) {
             return $this->failure('Google sign in is temporarily unavailable. Please try again.');
         }

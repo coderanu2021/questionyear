@@ -20,6 +20,7 @@
             <fieldset class="box daily-question"><legend><span>{{ $index + 1 }}</span> {{ $question['q'] }}</legend>
                 <input type="hidden" name="answers[{{ $index }}]" value="-1">
                 @foreach($question['o'] as $optionIndex => $option)<label class="daily-option"><input type="radio" name="answers[{{ $index }}]" value="{{ $optionIndex }}" @checked((string) old('answers.'.$index, '-1') === (string) $optionIndex)><span>{{ chr(65 + $optionIndex) }}</span>{{ $option }}</label>@endforeach
+                @if($practiceSetId)@include('website.partials.learning-tools', ['source' => 'practice:'.$practiceSetId.':'.$index, 'canExplain' => false])@endif
             </fieldset>
         @endforeach
         <div class="box daily-submit" id="daily-submit"><div><h3>Ready to see your marks?</h3><p>Unanswered questions earn 0 marks. You can submit each set once per period.</p></div><button class="btn btn-o" type="submit">Submit quiz →</button></div>
@@ -29,16 +30,18 @@
     @else
         <div class="box daily-empty"><span class="daily-label">{{ strtoupper($period) }} PRACTICE COMPLETE</span><h2>Great work. Come back next period!</h2><p>You earned {{ $attempts->sum('score') }} out of {{ $attempts->sum('total') }} marks.</p>@guest<a href="{{ route('register') }}" class="btn btn-o">Create an account to track your results</a>@else<a href="{{ route('progress') }}" class="btn btn-o">View my progress</a>@endguest</div>
     @endif
+    @auth<p><a class="btn btn-o" href="{{ route('learning') }}">Revise wrong answers and choose your next 10 questions</a> <a class="btn btn-l" href="{{ route('learning.leaderboard') }}">Weekly leaderboard</a></p>@endauth
     @if($lastAttempt)
         <details class="box daily-review" @if(session('status')) open @endif><summary>Review set {{ $lastAttempt->set_number }} · {{ $lastAttempt->score }}/{{ $lastAttempt->total }} marks</summary>
         @php($reviewQuestions = json_decode($lastAttempt->questions, true))
         @php($reviewAnswers = json_decode($lastAttempt->answers, true))
-        @foreach($reviewQuestions as $index => $question)<article class="daily-review-item"><h3>{{ $index + 1 }}. {{ $question['q'] }}</h3><p class="{{ $reviewAnswers[$index] === $question['c'] ? 'daily-correct' : 'daily-incorrect' }}">Your answer: {{ $reviewAnswers[$index] < 0 ? 'Skipped' : $question['o'][$reviewAnswers[$index]] }}</p><p>Correct answer: <strong>{{ $question['o'][$question['c']] }}</strong></p>@if(!empty($question['explanation']))<p class="sub">{{ $question['explanation'] }}</p>@endif</article>@endforeach
+        @foreach($reviewQuestions as $index => $question)<article class="daily-review-item"><h3>{{ $index + 1 }}. {{ $question['q'] }}</h3><p class="{{ $reviewAnswers[$index] === $question['c'] ? 'daily-correct' : 'daily-incorrect' }}">Your answer: {{ $reviewAnswers[$index] < 0 ? 'Skipped' : $question['o'][$reviewAnswers[$index]] }}</p><p>Correct answer: <strong>{{ $question['o'][$question['c']] }}</strong></p>@if(!empty($question['explanation']))<p class="sub">{{ $question['explanation'] }}</p>@endif @if($practiceSetId)@include('website.partials.learning-tools', ['source' => 'practice:'.$practiceSetId.':'.$index, 'canExplain' => true])@endif</article>@endforeach
         </details>
     @endif
 </main>
 @include('website.partials.footer')
 @include('website.partials.content-protection')
 <script src="{{ asset('js/navigation.js') }}"></script>
+@include('website.partials.learning-scripts')
 <script>document.getElementById('daily-form')?.addEventListener('submit', function () { this.querySelector('button[type="submit"]').disabled = true; });</script>
 </body></html>

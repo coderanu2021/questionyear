@@ -19,7 +19,7 @@
 <div class="main">
   <header class="top">
     <button class="burger" id="burger" aria-label="Menu"><svg class="ic" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-    <h1 id="title">Dashboard</h1><div class="grow"></div>
+    <h1 id="title">Dashboard</h1><div class="grow"></div><a class="btn" href="{{ route('learning.reports') }}">Question reports</a>
     <div class="search hide"><svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input placeholder="Search anything..." id="gs"></div>
     <a class="btn" href="/">View website</a><form method="POST" action="/account/logout">@csrf<button class="btn">Logout</button></form>
   </header>
