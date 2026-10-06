@@ -31,7 +31,7 @@ class AccountController extends Controller
         $data = $request->validate(['email' => 'required|email', 'password' => 'required|string', 'remember' => 'nullable|boolean']);
         $needsVerification = false;
         if (! Auth::attemptWhen(['email' => $data['email'], 'password' => $data['password'], 'status' => 'active'], function (User $user) use (&$needsVerification): bool {
-            $needsVerification = ! $user->hasVerifiedEmail();
+            $needsVerification = $user->role !== 'admin' && ! $user->hasVerifiedEmail();
 
             return ! $needsVerification;
         }, $data['remember'] ?? false)) {
@@ -65,6 +65,9 @@ class AccountController extends Controller
         $user = User::where('email', $data['email'])->where('status', 'active')->first();
         if (! $user || ! Hash::check($data['password'], $user->password)) {
             throw ValidationException::withMessages(['email' => 'Incorrect email or password, or account is blocked.']);
+        }
+        if ($user->role === 'admin') {
+            return response()->json(['message' => 'Admin accounts do not require email verification. You can log in.']);
         }
         if ($user->hasVerifiedEmail()) {
             return response()->json(['message' => 'Your email is already verified. You can log in.']);

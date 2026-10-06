@@ -35,7 +35,7 @@
 </div></section>
 
 <section class="alt"><div class="wrap dqb">
-  <div><span class="pill">Daily quiz</span><h2>Today's practice challenge</h2><p class="sub">Fresh daily sets of up to 50 questions. Sign in for up to 150 questions, earn marks and review your answers.</p><a href="/daily-quiz" class="btn btn-o" style="height:44px;padding:0 24px">Start today's quiz</a></div>
+  <div><span class="pill">Practice quizzes</span><h2>Today's practice challenge</h2><p class="sub">Practice 10 daily, 50 weekly, or 200 monthly questions across subjects. Sign up with email to save your scores and review your answers.</p><a href="{{ route('daily') }}" class="btn btn-o" style="height:44px;padding:0 24px">Start today's quiz</a> <a href="{{ route('weekly') }}" class="btn btn-l">Weekly quiz</a> <a href="{{ route('monthly') }}" class="btn btn-l">Monthly quiz</a></div>
   <div class="dqd"><small id="dw">Today</small><b id="dd">1</b><span id="dm"></span></div>
 </div></section>
 

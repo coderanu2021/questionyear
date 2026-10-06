@@ -53,7 +53,7 @@ class WebsiteTest extends TestCase
 
     public function test_admin_login_returns_dashboard_and_progress_has_visible_admin_link(): void
     {
-        $admin = User::factory()->create(['role' => 'admin', 'password' => 'StrongPassword123']);
+        $admin = User::factory()->unverified()->create(['role' => 'admin', 'password' => 'StrongPassword123']);
         $this->postJson('/account/login', ['email' => $admin->email, 'password' => 'StrongPassword123'])
             ->assertOk()->assertJsonPath('redirect', route('admin'));
         $this->get('/admin')->assertOk()->assertViewIs('admin.index');

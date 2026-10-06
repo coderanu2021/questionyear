@@ -59,4 +59,31 @@ class EmailVerificationTest extends TestCase
         Notification::assertSentTo($user, VerifyEmail::class);
         $this->assertGuest();
     }
+
+    public function test_unverified_admin_can_login_without_verification_and_no_verification_email_is_sent(): void
+    {
+        Notification::fake();
+        $admin = User::factory()->unverified()->create(['role' => 'admin', 'password' => 'StrongPassword123']);
+        $credentials = ['email' => $admin->email, 'password' => 'StrongPassword123'];
+        $this->postJson(route('verification.send'), $credentials)->assertOk()->assertJsonPath('message', 'Admin accounts do not require email verification. You can log in.');
+        Notification::assertNothingSent();
+        $this->postJson('/account/login', $credentials)->assertOk()->assertJsonPath('redirect', route('admin'));
+        $this->assertAuthenticatedAs($admin);
+        $this->get(route('admin'))->assertOk();
+        $this->assertFalse($admin->fresh()->hasVerifiedEmail());
+    }
+
+    public function test_admin_verification_exemption_does_not_bypass_password_or_blocked_status(): void
+    {
+        $admin = User::factory()->unverified()->create(['role' => 'admin', 'password' => 'StrongPassword123']);
+        $this->postJson('/account/login', ['email' => $admin->email, 'password' => 'incorrect'])->assertUnprocessable();
+        $this->assertGuest();
+        $admin->status = 'blocked';
+        $admin->save();
+        $credentials = ['email' => $admin->email, 'password' => 'StrongPassword123'];
+        $this->postJson('/account/login', $credentials)->assertUnprocessable();
+        $this->postJson(route('verification.send'), $credentials)->assertUnprocessable();
+        $this->assertGuest();
+        $this->actingAs($admin)->get(route('admin'))->assertForbidden();
+    }
 }

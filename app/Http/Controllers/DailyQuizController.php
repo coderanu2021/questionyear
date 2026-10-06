@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Quiz;
+use App\PracticeQuestionGenerator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,31 +15,30 @@ class DailyQuizController extends Controller
     public function index(Request $request): View
     {
         abort_if($request->user() && $request->user()->status !== 'active', 403);
-        $date = now('Asia/Kolkata')->toDateString();
+        $period = $request->route()->defaults['period'] ?? 'daily';
+        $generator = app(PracticeQuestionGenerator::class);
+        $date = $generator->date($period);
         $participant = $this->participant($request);
-        $maximumSets = $request->user() ? 3 : 1;
-        $attempts = DB::table('daily_quiz_attempts')->where('participant', $participant)->where('quiz_date', $date)->orderBy('set_number')->get();
-        $questions = [];
-        foreach (Quiz::whereHas('chapter', fn ($query) => $query->where('status', 'published'))->orderBy('id')->get() as $quiz) {
-            foreach ($quiz->questions as $index => $question) {
-                $questions[$quiz->id.':'.$index] = $question;
-            }
-        }
-        uksort($questions, fn (string $a, string $b): int => strcmp(hash('sha256', $date.':'.$a), hash('sha256', $date.':'.$b)));
-        $availableSets = min($maximumSets, (int) ceil(count($questions) / 50));
+        $maximumSets = 1;
+        $attempts = DB::table('daily_quiz_attempts')->where('period', $period)->where('participant', $participant)->where('quiz_date', $date)->orderBy('set_number')->get();
+        $stored = DB::table('practice_sets')->where('period', $period)->where('starts_on', $date)->first();
+        $questions = $stored ? json_decode($stored->questions, true) : [];
+        $availableSets = count($questions) ? 1 : 0;
         $setNumber = $attempts->count() + 1;
-        $snapshotKey = 'daily_quiz.'.$date.'.'.$participant.'.'.$setNumber;
+        $snapshotKey = 'practice_quiz.'.$period.'.'.$date.'.'.$participant.'.'.$setNumber;
         $snapshot = [];
         if ($setNumber <= $availableSets) {
             $snapshot = $request->session()->get($snapshotKey);
             if ($snapshot === null) {
-                $snapshot = array_slice(array_values($questions), ($setNumber - 1) * 50, 50);
+                $snapshot = $questions;
                 $request->session()->put($snapshotKey, $snapshot);
             }
         }
 
         return view('website.daily', [
             'date' => $date,
+            'period' => $period,
+            'questionCount' => PracticeQuestionGenerator::COUNTS[$period],
             'questions' => $snapshot,
             'setNumber' => $setNumber,
             'maximumSets' => $maximumSets,
@@ -52,10 +51,11 @@ class DailyQuizController extends Controller
     public function submit(Request $request): RedirectResponse
     {
         abort_if($request->user() && $request->user()->status !== 'active', 403);
-        $date = now('Asia/Kolkata')->toDateString();
-        $data = $request->validate(['date' => 'required|date_format:Y-m-d|in:'.$date, 'set_number' => 'required|integer|between:1,'.($request->user() ? 3 : 1), 'answers' => 'required|array', 'answers.*' => 'required|integer|between:-1,3']);
+        $period = $request->route()->defaults['period'] ?? 'daily';
+        $date = app(PracticeQuestionGenerator::class)->date($period);
+        $data = $request->validate(['date' => 'required|date_format:Y-m-d|in:'.$date, 'set_number' => 'required|integer|in:1', 'answers' => 'required|array', 'answers.*' => 'required|integer|between:-1,3']);
         $participant = $this->participant($request);
-        $snapshotKey = 'daily_quiz.'.$date.'.'.$participant.'.'.$data['set_number'];
+        $snapshotKey = 'practice_quiz.'.$period.'.'.$date.'.'.$participant.'.'.$data['set_number'];
         $questions = $request->session()->get($snapshotKey);
         if (! $questions || ! array_is_list($data['answers']) || count($data['answers']) !== count($questions)) {
             throw ValidationException::withMessages(['answers' => 'Open today’s quiz and submit one answer for each question.']);
@@ -66,11 +66,12 @@ class DailyQuizController extends Controller
                 $score++;
             }
         }
-        DB::transaction(function () use ($request, $date, $participant, $data, $questions, $score): void {
+        DB::transaction(function () use ($request, $period, $date, $participant, $data, $questions, $score): void {
             DB::table('daily_quiz_attempts')->insertOrIgnore([
                 'user_id' => $request->user()?->id,
                 'participant' => $participant,
                 'quiz_date' => $date,
+                'period' => $period,
                 'set_number' => $data['set_number'],
                 'answers' => json_encode(array_map('intval', $data['answers'])),
                 'questions' => json_encode($questions),
@@ -81,7 +82,7 @@ class DailyQuizController extends Controller
             ]);
         });
 
-        return redirect()->route('daily')->with('status', 'Quiz submitted. Your marks and answer review are ready below.');
+        return redirect()->route($period)->with('status', 'Quiz submitted. Your marks and answer review are ready below.');
     }
 
     private function participant(Request $request): string
