@@ -12,7 +12,7 @@ use RuntimeException;
 
 class PracticeQuestionGenerator
 {
-    public const COUNTS = ['daily' => 10, 'weekly' => 50, 'monthly' => 200];
+    public const COUNTS = ['daily' => 20, 'weekly' => 50, 'monthly' => 200];
 
     public function date(string $period): string
     {

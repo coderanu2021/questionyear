@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="csrf-token" content="{{ csrf_token() }}"><title>{{ ucfirst($period) }} quiz – {{ $siteSettings['site_title'] }}</title><meta name="description" content="Take today's daily quiz, earn marks and review your answers. Practice 10 daily, 50 weekly, or 200 monthly questions."><link rel="stylesheet" href="{{ asset('css/website.css') }}">@include('website.partials.favicon')
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="csrf-token" content="{{ csrf_token() }}"><title>{{ ucfirst($period) }} quiz – {{ $siteSettings['site_title'] }}</title><meta name="description" content="Take today's daily quiz, earn marks and review your answers. Practice 20 daily, 50 weekly, or 200 monthly questions."><link rel="stylesheet" href="{{ asset('css/website.css') }}">@include('website.partials.favicon')
 </head>
 <body>
 @include('website.partials.header')

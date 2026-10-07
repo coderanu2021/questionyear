@@ -8,12 +8,17 @@ use App\Models\Message;
 use App\Models\Quiz;
 use App\Models\Subject;
 use App\Models\User;
+use App\PracticeQuestionGenerator;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use RuntimeException;
 
 class AdminController extends Controller
 {
@@ -25,9 +30,34 @@ class AdminController extends Controller
     public function index(Request $request, string $page = 'dashboard'): View
     {
         $this->authorizeAdmin($request);
-        abort_unless(in_array($page, ['dashboard', 'chapters', 'tests', 'users', 'analytics', 'messages', 'settings']), 404);
+        abort_unless(in_array($page, ['dashboard', 'chapters', 'tests', 'users', 'analytics', 'messages', 'settings', 'practice']), 404);
 
-        return view('admin.index', ['state' => $this->state(), 'page' => $page]);
+        $practicePeriods = [];
+        if ($page === 'practice') {
+            $generator = app(PracticeQuestionGenerator::class);
+            foreach (PracticeQuestionGenerator::COUNTS as $period => $count) {
+                $date = $generator->date($period);
+                $set = DB::table('practice_sets')->where('period', $period)->where('starts_on', $date)->first();
+                $practicePeriods[] = ['period' => $period, 'date' => $date, 'target' => $count, 'count' => $set ? count(json_decode($set->questions, true)) : 0, 'created_at' => $set?->created_at, 'ready' => $set !== null];
+            }
+        }
+
+        return view('admin.index', ['state' => $this->state(), 'page' => $page, 'practicePeriods' => $practicePeriods]);
+    }
+
+    public function generatePractice(Request $request, PracticeQuestionGenerator $generator): RedirectResponse
+    {
+        $this->authorizeAdmin($request);
+        $data = $request->validate(['period' => 'required|in:daily,weekly,monthly']);
+        try {
+            $generator->generate($data['period']);
+        } catch (RuntimeException|ConnectionException|LockTimeoutException $exception) {
+            report($exception);
+
+            return redirect()->route('admin', ['page' => 'practice'])->withErrors(['generation' => 'Generation could not complete. Check the Gemini API configuration and try again. Existing quizzes are preserved.']);
+        }
+
+        return redirect()->route('admin', ['page' => 'practice'])->with('status', ucfirst($data['period']).' quiz is ready. An existing quiz is kept without another API call.');
     }
 
     public function chapterPage(Request $request, ?Chapter $chapter = null): View

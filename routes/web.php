@@ -66,6 +66,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/chapters/{chapter}/edit', [AdminController::class, 'chapterPage'])->name('admin.chapters.edit');
     Route::get('/admin/chapters/{chapter}', [AdminController::class, 'chapterPage'])->whereNumber('chapter')->name('admin.chapters.show');
     Route::put('/admin/state', [AdminController::class, 'save'])->name('admin.save');
+    Route::post('/admin/practice/generate', [AdminController::class, 'generatePractice'])->middleware('throttle:6,1')->name('admin.practice.generate');
     Route::put('/admin/settings', [SiteSettingsController::class, 'update'])->name('admin.settings.update');
     Route::get('/admin/{page?}', [AdminController::class, 'index'])->name('admin');
 });

@@ -53,10 +53,10 @@ class DailyQuizTest extends TestCase
         $this->post(route('daily.submit'), $payload)->assertSessionHasErrors('answers');
         $questions = $this->get(route('daily'))->viewData('questions');
         $this->post(route('daily.submit'), $payload)->assertSessionHasErrors('answers');
-        $this->post(route('daily.submit'), [...$payload, 'answers' => array_fill(0, 10, 4)])->assertSessionHasErrors('answers.0');
+        $this->post(route('daily.submit'), [...$payload, 'answers' => array_fill(0, 20, 4)])->assertSessionHasErrors('answers.0');
         $this->post(route('daily.submit'), [...$payload, 'set_number' => 2])->assertSessionHasErrors('set_number');
         $this->post(route('daily.submit'), [...$payload, 'answers' => array_column($questions, 'c')])->assertRedirect(route('daily'));
-        $this->assertDatabaseHas('daily_quiz_attempts', ['user_id' => null, 'score' => 10]);
+        $this->assertDatabaseHas('daily_quiz_attempts', ['user_id' => null, 'score' => 20]);
         $this->actingAs(User::factory()->create(['status' => 'blocked']))->get(route('daily'))->assertForbidden();
         $this->post(route('daily.submit'), $payload)->assertForbidden();
     }

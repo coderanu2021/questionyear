@@ -13,16 +13,16 @@ class PracticeGenerationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_generation_reuses_seven_questions_and_saves_three_new_questions_once(): void
+    public function test_generation_reuses_fourteen_questions_and_saves_six_new_questions_once(): void
     {
         config(['services.gemini.key' => 'test-key']);
-        Quiz::factory()->create(['questions' => $this->questions(10, 'Saved')]);
-        Http::fake(['*' => Http::response(['candidates' => [['content' => ['parts' => [['text' => json_encode($this->questions(3, 'New'))]]]]]])]);
+        Quiz::factory()->create(['questions' => $this->questions(20, 'Saved')]);
+        Http::fake(['*' => Http::response(['candidates' => [['content' => ['parts' => [['text' => json_encode($this->questions(6, 'New'))]]]]]])]);
         $this->artisan('practice:generate daily')->assertSuccessful();
         $questions = json_decode(DB::table('practice_sets')->value('questions'), true);
-        $this->assertCount(10, $questions);
-        $this->assertCount(7, array_filter($questions, fn (array $q): bool => str_starts_with($q['q'], 'Saved')));
-        $this->assertSame(3, DB::table('practice_questions')->where('source', 'gemini')->count());
+        $this->assertCount(20, $questions);
+        $this->assertCount(14, array_filter($questions, fn (array $q): bool => str_starts_with($q['q'], 'Saved')));
+        $this->assertSame(6, DB::table('practice_questions')->where('source', 'gemini')->count());
         $this->artisan('practice:generate daily')->assertSuccessful();
         $this->get(route('daily'))->assertOk()->assertViewHas('questions', $questions)->assertDontSee('Secret explanation');
         $this->get(route('daily'))->assertOk();
@@ -46,7 +46,7 @@ class PracticeGenerationTest extends TestCase
     {
         config(['services.gemini.key' => 'test-key']);
         for ($index = 1; $index <= 10; $index++) {
-            Quiz::factory()->create(['questions' => $this->questions(2, 'Saved subject '.$index)]);
+            Quiz::factory()->create(['questions' => $this->questions(3, 'Saved subject '.$index)]);
         }
         $batch = 0;
         Http::fake(function () use (&$batch) {
@@ -54,15 +54,15 @@ class PracticeGenerationTest extends TestCase
         });
         $this->artisan('practice:generate daily')->assertSuccessful();
         $questions = json_decode(DB::table('practice_sets')->value('questions'), true);
-        $this->assertCount(7, array_filter($questions, fn (array $q): bool => str_starts_with($q['q'], 'Saved')));
-        Http::assertSentCount(3);
+        $this->assertCount(14, array_filter($questions, fn (array $q): bool => str_starts_with($q['q'], 'Saved')));
+        Http::assertSentCount(6);
     }
 
     public function test_duplicate_api_questions_are_not_published(): void
     {
         config(['services.gemini.key' => 'test-key']);
         Subject::factory()->create();
-        $questions = array_fill(0, 10, $this->questions(1, 'Duplicate')[0]);
+        $questions = array_fill(0, 20, $this->questions(1, 'Duplicate')[0]);
         Http::fake(['*' => Http::response(['candidates' => [['content' => ['parts' => [['text' => json_encode($questions)]]]]]])]);
         $this->artisan('practice:generate daily')->assertFailed();
         $this->assertDatabaseCount('practice_sets', 0);
@@ -84,11 +84,11 @@ class PracticeGenerationTest extends TestCase
         });
         $this->artisan('practice:generate daily')->assertFailed();
         $this->assertDatabaseCount('practice_sets', 0);
-        $this->assertDatabaseCount('practice_questions', 5);
+        $this->assertDatabaseCount('practice_questions', 10);
         $this->artisan('practice:generate daily')->assertSuccessful();
         $questions = json_decode(DB::table('practice_sets')->value('questions'), true);
-        $this->assertCount(10, $questions);
-        $this->assertCount(3, array_filter($questions, fn (array $question): bool => str_starts_with($question['q'], 'Completed')));
+        $this->assertCount(20, $questions);
+        $this->assertCount(7, array_filter($questions, fn (array $question): bool => str_starts_with($question['q'], 'Completed')));
     }
 
     public function test_weekly_and_monthly_generation_balances_subjects_and_exact_counts(): void
