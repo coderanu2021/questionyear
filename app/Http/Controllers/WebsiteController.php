@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\LearningTracker;
 use App\Models\Attempt;
+use App\Models\Post;
 use App\Models\Quiz;
 use App\Models\Subject;
 use App\SiteSettings;
@@ -39,6 +40,10 @@ class WebsiteController extends Controller
 
     public function index(Request $request, ?string $subject = null, ?int $chapter = null, ?int $test = null): View|RedirectResponse
     {
+        $latestBlogs = $request->routeIs('home')
+            ? Post::where('type', 'blog')->where('status', 'published')->where('published_at', '<=', now())->orderByDesc('published_at')->orderByDesc('id')->limit(8)->get()
+            : collect();
+
         if ($request->routeIs('login', 'register') && $request->user()) {
             return redirect()->route($request->user()->role === 'admin' ? 'admin' : 'home');
         }
@@ -96,7 +101,7 @@ class WebsiteController extends Controller
             }
         }
 
-        return view('website.index', ['chapterHeading' => $request->routeIs('learn', 'chapter') ? $seoChapter?->title : null, 'chapterMetaTitle' => $seoChapter?->meta_title, 'seoTitle' => $seoTitle, 'seoDescription' => $seoDescription, 'seoKeywords' => $seoKeywords, 'curriculum' => $curriculum, 'quizIds' => $quizIds, 'currentUser' => $request->user()?->only('name', 'email'), 'popular' => $popular, 'chapterCount' => $subjects->sum(fn ($s) => $s->chapters->count()), 'subjectCount' => $subjects->count(), 'questionCount' => Quiz::whereHas('chapter', fn ($q) => $q->where('status', 'published'))->get()->sum(fn ($q) => count($q->questions))]);
+        return view('website.index', ['latestBlogs' => $latestBlogs, 'chapterHeading' => $request->routeIs('learn', 'chapter') ? $seoChapter?->title : null, 'chapterMetaTitle' => $seoChapter?->meta_title, 'seoTitle' => $seoTitle, 'seoDescription' => $seoDescription, 'seoKeywords' => $seoKeywords, 'curriculum' => $curriculum, 'quizIds' => $quizIds, 'currentUser' => $request->user()?->only('name', 'email'), 'popular' => $popular, 'chapterCount' => $subjects->sum(fn ($s) => $s->chapters->count()), 'subjectCount' => $subjects->count(), 'questionCount' => Quiz::whereHas('chapter', fn ($q) => $q->where('status', 'published'))->get()->sum(fn ($q) => count($q->questions))]);
     }
 
     public function answer(Request $request, Quiz $quiz): JsonResponse

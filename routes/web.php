@@ -6,12 +6,15 @@ use App\Http\Controllers\DailyQuizController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\LearningController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\SiteSettingsController;
 use App\Http\Controllers\WebsiteController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [WebsiteController::class, 'index'])->name('home');
+Route::get('/blogs', [PostController::class, 'blogs'])->name('blogs.index');
+Route::get('/blogs/{slug}', [PostController::class, 'show'])->name('blogs.show');
 Route::get('/login', [WebsiteController::class, 'index'])->name('login');
 Route::get('/register', [WebsiteController::class, 'index'])->name('register');
 Route::get('/weekly-leaderboard', [LearningController::class, 'leaderboard'])->name('learning.leaderboard');
@@ -60,6 +63,12 @@ Route::get('/reset-password/{token}', [PageController::class, 'resetForm'])->nam
 Route::post('/reset-password', [PageController::class, 'reset'])->middleware('throttle:5,1')->name('password.update');
 Route::get('/{page}', [PageController::class, 'show'])->whereIn('page', ['about', 'contact', 'help', 'careers', 'privacy', 'terms', 'cookies', 'leaderboard', 'forgot-password'])->name('page');
 Route::middleware('auth')->group(function () {
+    Route::get('/admin/posts', [PostController::class, 'index'])->name('admin.posts.index');
+    Route::get('/admin/posts/create', [PostController::class, 'create'])->name('admin.posts.create');
+    Route::post('/admin/posts', [PostController::class, 'store'])->name('admin.posts.store');
+    Route::get('/admin/posts/{post}/edit', [PostController::class, 'edit'])->name('admin.posts.edit');
+    Route::put('/admin/posts/{post}', [PostController::class, 'update'])->name('admin.posts.update');
+    Route::delete('/admin/posts/{post}', [PostController::class, 'destroy'])->name('admin.posts.destroy');
     Route::get('/admin/tests/create', [AdminController::class, 'testPage'])->name('admin.tests.create');
     Route::get('/admin/tests/{quiz}/edit', [AdminController::class, 'testPage'])->whereNumber('quiz')->name('admin.tests.edit');
     Route::get('/admin/chapters/create', [AdminController::class, 'chapterPage'])->name('admin.chapters.create');

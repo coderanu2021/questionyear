@@ -64,4 +64,23 @@
     <a href="/register" class="btn btn-o" id="gb" style="height:46px;padding:0 26px">Create free account</a>
   </div>
 </div></section>
+@if(request()->routeIs('home'))
+<section id="blogs"><div class="wrap">
+  <h2>Latest blogs</h2>
+  <p class="sub">Ideas and study tips for your next step.</p>
+  <div class="home-blog-grid">
+    @forelse($latestBlogs as $blog)
+    <article class="box home-blog-card">
+      <time class="daily-label" datetime="{{ $blog->published_at->toDateString() }}">{{ $blog->published_at->format('d M Y') }}</time>
+      <h3><a href="{{ route('blogs.show', $blog->slug) }}">{{ $blog->title }}</a></h3>
+      <p>{{ $blog->excerpt ?: Illuminate\Support\Str::limit($blog->content, 160) }}</p>
+      <a class="btn btn-l" href="{{ route('blogs.show', $blog->slug) }}">Read blog →</a>
+    </article>
+    @empty
+    <div class="box home-blog-card"><h3>New blogs are on the way</h3><p>Check back soon for study tips and learning insights.</p></div>
+    @endforelse
+  </div>
+  <p style="margin-top:24px"><a class="btn btn-o" href="{{ route('blogs.index') }}">View all blogs</a></p>
+</div></section>
+@endif
 </main>
