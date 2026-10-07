@@ -105,11 +105,15 @@ function addQ(){draft.push({q:'',o:['','','',''],c:0});$('#qs').innerHTML=qHTML(
 function testModal(id){
  location.href=id?window.TEST_URLS.edit[id]:window.TEST_URLS.create;
 }
+function chapterOptionLabel(chapter){
+ return `${chapter.subject} — ${chapter.title} (#${chapter.id})`;
+}
 function renderTestForm(id){
  const t=S.tests.find(x=>x.id==id)||{ch:S.chapters[0]?.id,title:'',dur:15,pass:40,qs:[]};
+ const selectedChapter=S.chapters.find(c=>c.id==t.ch);
  draft=JSON.parse(JSON.stringify(t.qs));
  $('#page').innerHTML=`<div class="head"><a class="btn" href="${esc(window.TEST_URLS.index)}">← Back to tests</a></div><div class="card chapter-page"><div class="dh"><h3>${id?'Edit test':'Create test'}</h3></div>
- <div class="db"><div class="two"><div class="f"><label>Chapter</label><select id="t_c">${S.chapters.map(c=>`<option value="${c.id}" ${c.id==t.ch?'selected':''}>${esc(c.title)}</option>`).join('')}</select></div>
+ <div class="db"><div class="two"><div class="f"><label for="t_c">Chapter</label><input id="t_c" list="test-chapters" value="${selectedChapter?esc(chapterOptionLabel(selectedChapter)):''}" placeholder="Search chapter title or subject" autocomplete="off" aria-describedby="chapter-search-help"><datalist id="test-chapters">${S.chapters.map(c=>`<option value="${esc(chapterOptionLabel(c))}"></option>`).join('')}</datalist><small id="chapter-search-help">Type a chapter title or subject, then select a chapter from the suggestions.</small></div>
  <div class="f"><label>Test title</label><input id="t_t" value="${esc(t.title)}" placeholder="e.g. Chapter 1 Quiz"></div>
  <div class="f"><label>Duration (minutes)</label><input id="t_d" type="number" min="1" value="${t.dur}"></div>
  <div class="f"><label>Passing score (%)</label><input id="t_p" type="number" min="1" max="100" value="${t.pass}"></div></div>
@@ -119,10 +123,12 @@ function renderTestForm(id){
 }
 async function saveTest(id){
  const title=$('#t_t').value.trim();if(!title)return toast('Enter a test title');
+ const selectedChapter=S.chapters.find(c=>chapterOptionLabel(c)===$('#t_c').value.trim());
+ if(!selectedChapter)return toast('Select a chapter from the search suggestions');
  if(!draft.length)return toast('Add at least one complete question');
  if(draft.some(q=>!q.q.trim()||!q.o.every(o=>o.trim())))return toast('Complete every question and all four options');
  const qs=draft;
- const d={ch:+$('#t_c').value,title,dur:+$('#t_d').value||15,pass:+$('#t_p').value||40,qs};
+ const d={ch:selectedChapter.id,title,dur:+$('#t_d').value||15,pass:+$('#t_p').value||40,qs};
  if(id)Object.assign(S.tests.find(t=>t.id==id),d);else S.tests.push({id:nid(S.tests),attempts:0,avg:0,...d});
  if(!await save()){return;}location.href=window.TEST_URLS.index;
 }
