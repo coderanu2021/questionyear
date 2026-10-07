@@ -1,21 +1,32 @@
-<div class="head"><div><h2>Practice quiz generation</h2><p>Generate daily, weekly and monthly quizzes for the current period.</p></div></div>
-@if(session('status'))<div class="card settings-message" role="status">{{ session('status') }}</div>@endif
-@if($errors->any())<div class="card settings-message" role="alert">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>@endif
-<div id="generation-response" class="card settings-message" role="status" hidden></div>
-<div class="card settings-message"><h3>Automatic scheduler retained</h3><p>The scheduler checks every hour at :05 IST. Only one quiz is generated per period: 20 daily, 50 weekly and 200 monthly questions. If you generate it here first, scheduled generation skips it without calling the API again.</p><p>Manual generation uses the same question bank and Gemini API as the scheduler. Daily resets at midnight, weekly on Monday, and monthly on the first day (IST).</p></div>
+<div class="practice-workspace">
+<div class="practice-heading"><div><span class="practice-eyebrow">LEARNING, ONE QUIZ AT A TIME</span><h2>Practice quizzes</h2><p>A little preparation. A fresh challenge for your learners.</p></div><span class="practice-date">{{ now('Asia/Kolkata')->format('d M Y') }} <span>IST</span></span></div>
+@if(session('status'))<div class="practice-notice" role="status">{{ session('status') }}</div>@endif
+@if($errors->any())<div class="practice-notice" role="alert">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>@endif
+<div id="generation-response" class="practice-notice" role="status" hidden></div>
+<section class="practice-overview" aria-label="Generation overview"><div class="practice-overview-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z"/></svg></div><div><h3>Your next challenges, ready when you are.</h3><p>Generate a quiz now, or let the automatic schedule take care of it.</p></div><div class="practice-overview-count"><strong>{{ collect($practicePeriods)->where('ready', true)->count() }}<span> / {{ count($practicePeriods) }}</span></strong><span>quizzes ready</span></div></section>
+<div class="practice-section-heading"><h3>This period’s quizzes</h3><span>One quiz per period</span></div>
+<div class="practice-grid">
 @foreach($practicePeriods as $practice)
-<section class="card settings-message">
-    <h3>{{ ucfirst($practice['period']) }} quiz · {{ $practice['target'] }} questions</h3>
-    <p>Period starts: {{ $practice['date'] }} (IST)</p>
-    <p>Status: <strong>{{ $practice['ready'] ? 'Generated' : 'Pending generation' }}</strong> · {{ $practice['count'] }} / {{ $practice['target'] }} questions</p>
-    @if($practice['ready'])<p>Generated at: {{ \Carbon\Carbon::parse($practice['created_at'])->setTimezone('Asia/Kolkata')->format('d M Y, H:i') }} IST. Further generation is skipped.</p>@endif
+<section @class(['practice-quiz-card', 'is-ready' => $practice['ready']])>
+    <div class="practice-card-top"><span class="practice-period-icon" aria-hidden="true"><svg viewBox="0 0 24 24">@if($practice['period'] === 'daily')<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/>@elseif($practice['period'] === 'weekly')<rect x="4" y="5" width="16" height="16" rx="3"/><path d="M8 3v4m8-4v4M4 11h16m-12 4h3m2 0h3"/>@else<path d="M4 5h16v16H4zM8 3v4m8-4v4M4 11h16m-12 4h2m4 0h2m-8 3h2m4 0h2"/>@endif</svg></span><span @class(['practice-status', 'ready' => $practice['ready']])><i aria-hidden="true"></i>{{ $practice['ready'] ? 'Generated' : 'Pending generation' }}</span></div>
+    <h3>{{ ucfirst($practice['period']) }} quiz</h3>
+    <p class="practice-card-description">{{ match($practice['period']) { 'daily' => 'A small step forward, every day.', 'weekly' => 'Bring the week’s learning together.', default => 'A bigger challenge. A clearer picture.' } }}</p>
+    <div class="practice-question-total"><strong>{{ $practice['target'] }}</strong><span>questions<br>per {{ $practice['period'] === 'daily' ? 'day' : ($practice['period'] === 'weekly' ? 'week' : 'month') }}</span></div>
+    <div class="practice-progress-meta"><span>Questions prepared</span><strong>{{ $practice['count'] }} / {{ $practice['target'] }}</strong></div>
+    <progress class="practice-progress" value="{{ min($practice['count'], $practice['target']) }}" max="{{ $practice['target'] }}" aria-label="{{ ucfirst($practice['period']) }} questions prepared"></progress>
+    <dl class="practice-card-details"><div><dt>Period starts</dt><dd>{{ \Carbon\Carbon::parse($practice['date'])->format('d M Y') }}</dd></div><div><dt>Resets</dt><dd>{{ match($practice['period']) { 'daily' => 'Daily', 'weekly' => 'Monday', default => '1st of the month' } }} · 00:00 IST</dd></div></dl>
+    <p class="practice-generated-time">{{ $practice['ready'] ? 'Prepared '.\Carbon\Carbon::parse($practice['created_at'])->setTimezone('Asia/Kolkata')->format('d M, H:i').' IST' : 'Ready to generate for this period' }}</p>
     <form method="POST" action="{{ route('admin.practice.generate') }}" data-generation-form>
         @csrf<input type="hidden" name="period" value="{{ $practice['period'] }}">
-        <button class="btn pri" type="submit" @disabled($practice['ready'])>{{ $practice['ready'] ? 'Already generated' : 'Generate '.ucfirst($practice['period']).' Quiz' }}</button>
-        <a class="btn" href="{{ route($practice['period']) }}">View quiz</a>
+        <button class="practice-generate-button" type="submit" @disabled($practice['ready'])>{{ $practice['ready'] ? 'Already generated' : 'Generate '.ucfirst($practice['period']).' Quiz' }}</button>
+        <a class="practice-view-link" href="{{ route($practice['period']) }}">{{ $practice['ready'] ? 'View quiz' : 'Preview quiz page' }} <span aria-hidden="true">↗</span></a>
     </form>
 </section>
 @endforeach
+</div>
+<section class="practice-schedule"><div class="practice-schedule-heading"><span class="practice-schedule-dot" aria-hidden="true"></span><h3>Automatic schedule</h3><span>Enabled</span></div><p>Checked every hour at <strong>:05 IST</strong>. Each period gets one quiz. Generate it manually first and the scheduler will skip it—no duplicate quiz or extra API call.</p><div class="practice-schedule-footer"><span>20 daily · 50 weekly · 200 monthly</span><span>Manual and scheduled generation stay in sync</span></div></section>
+<p class="practice-bottom-note">A consistent practice routine starts with a well-prepared quiz.</p>
+</div>
 <script>
 document.querySelectorAll('[data-generation-form]').forEach(form => {
     form.addEventListener('submit', async event => {
