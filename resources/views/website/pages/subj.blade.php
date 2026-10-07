@@ -6,7 +6,7 @@
   </div></div>
   <div class="wrap lay">
     <div>
-      <div class="lh"><h2>Chapters</h2><input id="cf" type="search" placeholder="Search chapters" aria-label="Search chapters"></div>
+      <div class="lh"><h2 id="subject-list-title">{{ request()->route('subject') === 'current-affairs' ? 'Quizzes' : 'Chapters' }}</h2><input id="cf" type="search" placeholder="Search chapters" aria-label="Search chapters"></div>
       <div id="chapter-categories" hidden><label for="chapter-category">History category</label><select id="chapter-category"><option value="">All categories</option><option>Ancient History</option><option>Medieval History</option><option>Modern History</option></select></div>
       <div id="cl"></div>
     </div>

@@ -8,12 +8,14 @@ use App\Http\Controllers\LearningController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PageSeoController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SiteSettingsController;
 use App\Http\Controllers\WebsiteController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [WebsiteController::class, 'index'])->name('home');
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/blogs', [PostController::class, 'blogs'])->name('blogs.index');
 Route::get('/blogs/{slug}', [PostController::class, 'show'])->name('blogs.show');
 Route::get('/login', [WebsiteController::class, 'index'])->name('login');

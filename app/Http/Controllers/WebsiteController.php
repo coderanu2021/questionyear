@@ -58,9 +58,9 @@ class WebsiteController extends Controller
                 $curriculum['categories'][$key] = $entry->category;
                 $entry->setRelation('subject', $item);
                 $curriculum['chapterUrls'][$key] = $entry->readingUrl($index);
-                if ($entry->content) {
+                if ($item->slug !== 'current-affairs' && $entry->content) {
                     $curriculum['LN'][$key] = ['sub' => $entry->description ?? '', 'icon' => 'fa-book', 'time' => $entry->lessons.' lessons', 's' => [['h' => $entry->title, 'i' => 'fa-book', 'p' => [$entry->content]]], 'sum' => []];
-                } elseif ($entry->notes) {
+                } elseif ($item->slug !== 'current-affairs' && $entry->notes) {
                     $curriculum['LN'][$key] = $entry->notes;
                 }
                 $curriculum['tests'][$key] = $entry->quizzes->map(fn ($q) => ['id' => $q->id, 'title' => $q->title, 'duration' => $q->duration, 'pass' => $q->passing_score, 'count' => count($q->questions), 'url' => $q->publicUrl()])->all();
@@ -95,7 +95,7 @@ class WebsiteController extends Controller
             $seoChapter !== null => $seoChapter->title.' – '.$settings['site_title'],
             $request->routeIs('login') => 'Log in – '.$settings['site_title'],
             $request->routeIs('register') => 'Create account – '.$settings['site_title'],
-            isset($selected) => $selected->name.' chapters – '.$settings['site_title'],
+            isset($selected) => $selected->name.($selected->slug === 'current-affairs' ? ' quizzes – ' : ' chapters – ').$settings['site_title'],
             default => $settings['site_title'],
         };
         $seoTitle = $seoChapter?->meta_title ?: $defaultTitle;

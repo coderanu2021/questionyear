@@ -4,6 +4,7 @@ const CH='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="cu
 const CC={"Humanities":"#0078d4","Science":"#107c10","Maths & Tech":"#8661c5","General":"#ca5010"};
 const slug=n=>n.toLowerCase().replace(/&/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 const SUB=S.map(x=>({n:x[0],cat:x[1],d:x[2],ch:x[3],c:CC[x[1]],id:slug(x[0])}));
+const subjectQuizzes=x=>x.ch.flatMap((_,i)=>window.CURRICULUM.tests[x.id+":"+i]||[]);
 const cats=["All",...new Set(SUB.map(x=>x.cat))];let cat="All",term="";
 const gr=document.getElementById("gr"),fl=document.getElementById("fl"),em=document.getElementById("em");
 function esc(t){return String(t??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
@@ -11,7 +12,7 @@ function mono(n){const w=n.replace("&","").split(/\s+/).filter(Boolean);return w
 function render(){
   fl.innerHTML=cats.map(c=>`<button class="chip" aria-pressed="${c===cat}" data-c="${c}">${esc(c)}</button>`).join("");
   const r=SUB.filter(x=>(cat==="All"||x.cat===cat)&&x.n.toLowerCase().includes(term));
-  gr.innerHTML=r.map(x=>`<a href="/subject/${x.id}" class="card" style="--c:${x.c}"><div class="card-h"><div class="ic">${mono(x.n)}</div><div><small>${esc(x.cat)}</small><h3>${esc(x.n)}</h3></div></div><p>${esc(x.d)}</p><div class="card-f"><span>${x.ch.length} chapters</span><b>View chapters ${CH}</b></div></a>`).join("");
+  gr.innerHTML=r.map(x=>`<a href="/subject/${x.id}" class="card" style="--c:${x.c}"><div class="card-h"><div class="ic">${mono(x.n)}</div><div><small>${esc(x.cat)}</small><h3>${esc(x.n)}</h3></div></div><p>${esc(x.d)}</p><div class="card-f"><span>${x.id==="current-affairs"?subjectQuizzes(x).length+" quizzes":x.ch.length+" chapters"}</span><b>View ${x.id==="current-affairs"?"quizzes":"chapters"} ${CH}</b></div></a>`).join("");
   em.style.display=r.length?"none":"block";
 }
 fl.onclick=e=>{const b=e.target.closest("[data-c]");if(b){cat=b.dataset.c;render()}};
@@ -64,17 +65,26 @@ linkify(".mega a");linkify("footer .fcols>div:nth-child(2) a");
 /* chapter list: opens the Learn page first */
 function renderChaps(){
   const x=curSub,f=$("cf").value.trim().toLowerCase();
+  if(x.id==="current-affairs"){
+    const quizzes=subjectQuizzes(x).filter(t=>t.title.toLowerCase().includes(f));
+    $("cl").innerHTML=quizzes.length?quizzes.map(t=>`<a class="chap" style="--c:${x.c}" href="${esc(t.url)}"><span class="cn"><i class="fa-solid fa-play"></i></span><div><h3>${esc(t.title)}</h3><small>${t.count} questions · ${t.duration} minutes · Pass ${t.pass}%</small></div><span class="go">Start quiz</span></a>`).join(""):`<p class="empty" style="display:block">No quizzes match your search.</p>`;
+    return;
+  }
   const it=x.ch.map((t,i)=>({t,i})).filter(o=>o.t.toLowerCase().includes(f)&&(!$("chapter-category").value||window.CURRICULUM.categories[x.id+":"+o.i]===$("chapter-category").value));
   $("cl").innerHTML=it.length?it.map(({t,i})=>{const b=QB[x.id+":"+i],n=LN[x.id+":"+i];
     return (n||b)?`<a class="chap" style="--c:${x.c}" href="${n?esc(window.CURRICULUM.chapterUrls[x.id+":"+i]):`${esc(window.CURRICULUM.quizUrls[x.id+":"+i])}`}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>${n?"Chapter notes":"Practice quiz"}${b?" + "+b.length+" practice questions":""}</small></div><span class="go"><i class="fa-solid fa-book-open"></i> ${n?"Read chapter":"Start quiz"}</span></a>`
     :`<div class="chap off" style="--c:${x.c}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>Notes and questions are being added</small></div><span class="soon">Coming soon</span></div>`}).map((markup,k)=>{const index=it[k].i;const tests=window.CURRICULUM.tests[x.id+":"+index]||[];return markup+tests.map(t=>`<a class="chap" href="${esc(t.url)}"><span class="cn"><i class="fa-solid fa-play"></i></span><div><h3>${esc(t.title)}</h3><small>${t.count} questions · ${t.duration} minutes · Pass ${t.pass}%</small></div></a>`).join("")}).join(""):`<p class="empty" style="display:block">No chapters match your search.</p>`;
 }
 function subjectPage(x){
-  curSub=x;document.title=window.PAGE_SEO_TITLE||x.n+" chapters – "+SITE_TITLE;
+  const quizOnly=x.id==="current-affairs";
+  curSub=x;document.title=window.PAGE_SEO_TITLE||x.n+(quizOnly?" quizzes – ":" chapters – ")+SITE_TITLE;
+  $("subject-list-title").textContent=quizOnly?"Quizzes":"Chapters";
+  $("cf").placeholder=quizOnly?"Search quizzes":"Search chapters";
+  $("cf").setAttribute("aria-label",$("cf").placeholder);
   $("sbc").textContent=x.n;$("sn").textContent=x.n;$("sd").textContent=x.d;
   const ic=$("sic");ic.textContent=mono(x.n);ic.style.setProperty("--c",x.c);
   const ready=x.ch.filter((_,i)=>LN[x.id+":"+i]||QB[x.id+":"+i]).length;
-  $("ss").innerHTML=`<div><b>${x.ch.length}</b>chapters</div><div><b>${ready}</b>ready to learn and practice</div>`;
+  $("ss").innerHTML=quizOnly?`<div><b>${subjectQuizzes(x).length}</b>quizzes</div>`:`<div><b>${x.ch.length}</b>chapters</div><div><b>${ready}</b>ready to learn and practice</div>`;
   $("chapter-categories").hidden=x.id!=="history";$("chapter-category").value="";
   $("cf").value="";renderChaps();
   $("sl").innerHTML=SUB.map(o=>`<a href="/subject/${o.id}" class="${o.id===x.id?"on":""}" style="--c:${o.c}"><i></i>${esc(o.n)}</a>`).join("");
@@ -176,7 +186,7 @@ async function results(){
   clearInterval(tmr);const pct=Math.round(qsc/qs.length*100);
   const msg=pct>=80?"Excellent work":pct>=50?"Good effort":"Keep practicing";
   const rev=LN[curId+":"+curIdx]?`<a class="btn btn-l" href="/learn/${curId}/${curIdx}">Revise notes</a>`:"";
-  $("qb").innerHTML=`<div class="res"><div class="sb">${qsc}<span>/${qs.length}</span></div><h2>${msg}</h2><p class="sub" style="margin:0 auto 20px">You scored ${pct}% in ${fmt()}.</p><div class="cta2"><button class="btn btn-o" id="qr">Try again</button>${rev}<a class="btn btn-l" href="/my-learning">Revise mistakes / Next 10 questions</a><a class="btn btn-l" href="/subject/${curId}">Back to chapters</a></div></div><div class="rv"><h3>Review answers</h3>`+qs.map((q,i)=>{const ok=qans[i]===q[2];return `<div><div class="t">${i+1}. ${esc(q[0])}</div><span style="color:var(--${ok?"ok":"bad"});font-weight:600">${ok?"Correct":"Your answer: "+esc(q[1][qans[i]]??"Not answered")}</span><div>Correct answer: ${esc(q[1][q[2]])}</div>${questionTools(i,true)}</div>`}).join("")+`</div>`;
+  $("qb").innerHTML=`<div class="res"><div class="sb">${qsc}<span>/${qs.length}</span></div><h2>${msg}</h2><p class="sub" style="margin:0 auto 20px">You scored ${pct}% in ${fmt()}.</p><div class="cta2"><button class="btn btn-o" id="qr">Try again</button>${rev}<a class="btn btn-l" href="/my-learning">Revise mistakes / Next 10 questions</a><a class="btn btn-l" href="/subject/${curId}">Back to ${curId==="current-affairs"?"quizzes":"chapters"}</a></div></div><div class="rv"><h3>Review answers</h3>`+qs.map((q,i)=>{const ok=qans[i]===q[2];return `<div><div class="t">${i+1}. ${esc(q[0])}</div><span style="color:var(--${ok?"ok":"bad"});font-weight:600">${ok?"Correct":"Your answer: "+esc(q[1][qans[i]]??"Not answered")}</span><div>Correct answer: ${esc(q[1][q[2]])}</div>${questionTools(i,true)}</div>`}).join("")+`</div>`;
 }
 $("qb").addEventListener("click",e=>{
   const o=e.target.closest(".qo");
