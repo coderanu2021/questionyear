@@ -53,8 +53,14 @@ class AdminController extends Controller
             $generator->generate($data['period']);
         } catch (RuntimeException|ConnectionException|LockTimeoutException $exception) {
             report($exception);
+            $message = match (true) {
+                $exception instanceof LockTimeoutException => 'Another quiz generation is already running. Wait for it to finish, then refresh this page.',
+                $exception instanceof ConnectionException => 'The server could not connect to Gemini or the API request timed out. Try again after checking server connectivity.',
+                get_class($exception) === RuntimeException::class => $exception->getMessage(),
+                default => 'Generation could not complete. Check the server logs for details. Existing quizzes are preserved.',
+            };
 
-            return redirect()->route('admin', ['page' => 'practice'])->withErrors(['generation' => 'Generation could not complete. Check the Gemini API configuration and try again. Existing quizzes are preserved.']);
+            return redirect()->route('admin', ['page' => 'practice'])->withErrors(['generation' => $message]);
         }
 
         return redirect()->route('admin', ['page' => 'practice'])->with('status', ucfirst($data['period']).' quiz is ready. An existing quiz is kept without another API call.');

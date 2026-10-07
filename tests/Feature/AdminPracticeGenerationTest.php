@@ -53,6 +53,19 @@ class AdminPracticeGenerationTest extends TestCase
         Http::fake(['*' => Http::response([], 429)]);
         $this->actingAs(User::factory()->create(['role' => 'admin']));
         $this->post(route('admin.practice.generate'), ['period' => 'daily'])->assertRedirect('/admin/practice')->assertSessionHasErrors('generation');
+        $this->get('/admin/practice')->assertSee('Gemini generation failed (HTTP 429).');
         $this->assertDatabaseCount('practice_sets', 0);
+    }
+
+    public function test_missing_api_key_shows_the_configuration_error(): void
+    {
+        config(['services.gemini.key' => null]);
+        Subject::factory()->create();
+        Http::preventStrayRequests();
+        $this->actingAs(User::factory()->create(['role' => 'admin']));
+        $this->post(route('admin.practice.generate'), ['period' => 'daily'])->assertRedirect('/admin/practice')->assertSessionHasErrors('generation');
+        $this->get('/admin/practice')->assertSee('Set GEMINI_API_KEY before generating practice questions.');
+        $this->assertDatabaseCount('practice_sets', 0);
+        Http::assertNothingSent();
     }
 }
