@@ -67,7 +67,7 @@ function renderChaps(){
   const x=curSub,f=$("cf").value.trim().toLowerCase();
   if(x.id==="current-affairs"){
     const quizzes=subjectQuizzes(x).filter(t=>t.title.toLowerCase().includes(f));
-    $("cl").innerHTML=quizzes.length?quizzes.map(t=>`<a class="chap" style="--c:${x.c}" href="${esc(t.url)}"><span class="cn"><i class="fa-solid fa-play"></i></span><div><h3>${esc(t.title)}</h3><small>${t.quiz_date?`<time datetime="${esc(t.quiz_date)}">${esc(t.date_label)}</time> · `:""}${t.count} questions · ${t.duration} minutes · Pass ${t.pass}%</small></div><span class="go">Start quiz</span></a>`).join(""):`<p class="empty" style="display:block">No quizzes match your search.</p>`;
+    $("cl").innerHTML=quizzes.length?quizzes.map(t=>`<a class="chap" style="--c:${x.c}" href="${esc(t.url)}"><span class="cn"><i class="fa-solid fa-play"></i></span><div><h3>${esc(t.title)}</h3><small>${t.quiz_date?`<time datetime="${esc(t.quiz_date)}">${esc(t.date_label)}</time> · `:""}${t.count} questions and answers</small></div><span class="go">Read answers</span></a>`).join(""):`<p class="empty" style="display:block">No quizzes match your search.</p>`;
     return;
   }
   const it=x.ch.map((t,i)=>({t,i})).filter(o=>o.t.toLowerCase().includes(f)&&(!$("chapter-category").value||window.CURRICULUM.categories[x.id+":"+o.i]===$("chapter-category").value));
@@ -169,7 +169,7 @@ function quizPage(x,i){
   curId=x.id;curIdx=i;qs=QB[x.id+":"+i];const settings=quizSettings(),t=x.id==="current-affairs"?settings?.title||x.ch[i]:x.ch[i];document.title=window.PAGE_SEO_TITLE||window.CHAPTER_SEO_TITLE||t+" quiz – "+SITE_TITLE;
   const ln=LN[x.id+":"+i]?`<span>/</span><a href="/learn/${x.id}/${i}">Notes</a>`:"";
   $("qc").innerHTML=`<a href="/">Home</a><span>/</span><a href="/subject/${x.id}">${esc(x.n)}</a>${ln}<span>/</span><b>${esc(t)}</b>${settings?.quiz_date?`<span>/</span><time datetime="${esc(settings.quiz_date)}">${esc(settings.date_label)}</time>`:''}`;
-  startQuiz();
+  if(x.id!=="current-affairs")startQuiz();
 }
 async function grade(k){
  document.querySelectorAll("#qb .qo").forEach(b=>b.disabled=true);

@@ -57,8 +57,8 @@ class WebsiteController extends Controller
                 $curriculum['S'][] = [$item->name, $item->category, $item->description ?? '', $quizzes->pluck('title')->all()];
                 foreach ($quizzes as $index => $quiz) {
                     $key = $item->slug.':'.$index;
-                    $curriculum['tests'][$key] = [['id' => $quiz->id, 'title' => $quiz->title, 'quiz_date' => $quiz->quiz_date?->toDateString(), 'date_label' => $quiz->quiz_date?->format('d M Y'), 'duration' => $quiz->duration, 'pass' => $quiz->passing_score, 'count' => count($quiz->questions), 'url' => $quiz->publicUrl()]];
-                    $curriculum['QB'][$key] = array_map(fn ($question) => [$question['q'], $question['o'], null, ''], $quiz->questions);
+                    $curriculum['tests'][$key] = [['id' => $quiz->id, 'title' => $quiz->title, 'quiz_date' => $quiz->quiz_date?->toDateString(), 'date_label' => $quiz->quiz_date?->format('d M Y'), 'current_affairs' => true, 'duration' => $quiz->duration, 'pass' => $quiz->passing_score, 'count' => count($quiz->questions), 'url' => $quiz->publicUrl()]];
+                    $curriculum['QB'][$key] = [];
                     $quizIds[$key] = $quiz->id;
                     $curriculum['quizUrls'][$key] = $quiz->publicUrl();
                 }
@@ -122,12 +122,12 @@ class WebsiteController extends Controller
             }
         }
 
-        return view('website.index', ['seoChapter' => $seoChapter, 'latestBlogs' => $latestBlogs, 'chapterHeading' => $request->routeIs('learn', 'chapter') ? $seoChapter?->title : null, 'chapterMetaTitle' => $seoChapter?->meta_title, 'seoTitle' => $seoTitle, 'seoDescription' => $seoDescription, 'seoKeywords' => $seoKeywords, 'curriculum' => $curriculum, 'quizIds' => $quizIds, 'currentUser' => $request->user()?->only('name', 'email'), 'popular' => $popular, 'chapterCount' => $subjects->sum(fn ($s) => $s->chapters->count()), 'subjectCount' => $subjects->count(), 'questionCount' => Quiz::published()->get()->sum(fn ($q) => count($q->questions))]);
+        return view('website.index', ['currentAffairsQuiz' => $subject === 'current-affairs' && $request->routeIs('quiz.show') ? $request->route('quiz') : null, 'seoChapter' => $seoChapter, 'latestBlogs' => $latestBlogs, 'chapterHeading' => $request->routeIs('learn', 'chapter') ? $seoChapter?->title : null, 'chapterMetaTitle' => $seoChapter?->meta_title, 'seoTitle' => $seoTitle, 'seoDescription' => $seoDescription, 'seoKeywords' => $seoKeywords, 'curriculum' => $curriculum, 'quizIds' => $quizIds, 'currentUser' => $request->user()?->only('name', 'email'), 'popular' => $popular, 'chapterCount' => $subjects->sum(fn ($s) => $s->chapters->count()), 'subjectCount' => $subjects->count(), 'questionCount' => Quiz::published()->multipleChoice()->get()->sum(fn ($q) => count($q->questions))]);
     }
 
     public function answer(Request $request, Quiz $quiz): JsonResponse
     {
-        abort_unless($quiz->isPublished(), 404);
+        abort_unless($quiz->isPublished() && ! $quiz->isCurrentAffairs(), 404);
         $data = $request->validate(['question' => 'required|integer|min:0', 'answer' => 'required|integer|between:0,3']);
         $question = $quiz->questions[$data['question']] ?? null;
         abort_unless($question, 404);
@@ -144,7 +144,7 @@ class WebsiteController extends Controller
 
     public function attempt(Request $request, Quiz $quiz): JsonResponse
     {
-        abort_unless($quiz->isPublished(), 404);
+        abort_unless($quiz->isPublished() && ! $quiz->isCurrentAffairs(), 404);
         abort_if($request->user()?->status === 'blocked', 403);
         $data = $request->validate(['answers' => 'required|array|size:'.count($quiz->questions), 'answers.*' => 'required|integer|between:-1,3', 'seconds' => 'required|integer|min:0|max:86400']);
         if (! array_is_list($data['answers'])) {

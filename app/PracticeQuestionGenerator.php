@@ -39,7 +39,7 @@ class PracticeQuestionGenerator
             if (DB::table('practice_sets')->where('period', $period)->where('starts_on', $date)->exists()) {
                 return;
             }
-            foreach (Quiz::with('chapter')->published()->get() as $quiz) {
+            foreach (Quiz::with('chapter')->published()->multipleChoice()->get() as $quiz) {
                 foreach ($quiz->questions as $question) {
                     $this->store($question, $quiz->learningSubject()->id, 'published');
                 }

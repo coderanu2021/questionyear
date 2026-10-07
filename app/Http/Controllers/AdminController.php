@@ -16,6 +16,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
@@ -116,7 +117,7 @@ class AdminController extends Controller
             'tests' => $quizzes->map(function ($q) use ($attempts) {
                 $results = $attempts->where('quiz_id', $q->id);
 
-                return ['id' => $q->id, 'ch' => $q->chapter_id, 'current_affairs' => $q->learningSubject()->slug === 'current-affairs', 'status' => $q->learningSubject()->slug === 'current-affairs' ? ($q->isPublished() ? 'published' : 'draft') : $q->chapter->status, 'title' => $q->title, 'quiz_date' => $q->quiz_date?->toDateString(), 'dur' => $q->duration, 'pass' => $q->passing_score, 'qs' => $q->questions, 'attempts' => $results->count(), 'avg' => (int) round($results->avg('percentage') ?? 0)];
+                return ['id' => $q->id, 'ch' => $q->chapter_id, 'current_affairs' => $q->learningSubject()->slug === 'current-affairs', 'status' => $q->learningSubject()->slug === 'current-affairs' ? ($q->isPublished() ? 'published' : 'draft') : $q->chapter->status, 'title' => $q->title, 'quiz_date' => $q->quiz_date?->toDateString(), 'dur' => $q->duration, 'pass' => $q->passing_score, 'qs' => $q->isCurrentAffairs() ? $q->questionAnswers() : $q->questions, 'attempts' => $results->count(), 'avg' => (int) round($results->avg('percentage') ?? 0)];
             })->all(),
             'users' => $users->map(function ($u) use ($attempts, $quizzes) {
                 $results = $attempts->where('user_id', $u->id);
@@ -158,9 +159,22 @@ class AdminController extends Controller
         $data = $request->validate([
             'version' => 'required|string', 'chapters' => 'present|array|max:1000', 'tests' => 'present|array|max:1000', 'users' => 'present|array',
             'chapters.*.id' => 'required|integer|min:1|distinct', 'chapters.*.title' => 'required|string|max:255', 'chapters.*.subject' => 'required|string|max:100', 'chapters.*.category' => 'nullable|in:Ancient History,Medieval History,Modern History', 'chapters.*.lessons' => 'required|integer|between:1,1000', 'chapters.*.status' => 'required|in:published,draft', 'chapters.*.desc' => 'nullable|string|max:10000', 'chapters.*.content' => 'nullable|string|max:500000', 'chapters.*.meta_title' => 'nullable|string|max:255', 'chapters.*.meta_description' => 'nullable|string|max:1000', 'chapters.*.meta_keywords' => 'nullable|string|max:1000',
-            'tests.*.id' => 'required|integer|min:1|distinct', 'tests.*.ch' => 'nullable|integer', 'tests.*.current_affairs' => 'sometimes|boolean', 'tests.*.status' => 'sometimes|in:published,draft', 'tests.*.title' => 'required|string|max:255', 'tests.*.quiz_date' => 'nullable|date_format:Y-m-d', 'tests.*.dur' => 'required|integer|between:1,240', 'tests.*.pass' => 'required|integer|between:1,100', 'tests.*.qs' => 'required|array|min:1|max:200', 'tests.*.qs.*.q' => 'required|string|max:5000', 'tests.*.qs.*.o' => 'required|array|size:4', 'tests.*.qs.*.o.*' => 'required|string|max:2000', 'tests.*.qs.*.c' => 'required|integer|between:0,3', 'tests.*.qs.*.explanation' => 'nullable|string|max:10000',
+            'tests.*.id' => 'required|integer|min:1|distinct', 'tests.*.ch' => 'nullable|integer', 'tests.*.current_affairs' => 'sometimes|boolean', 'tests.*.status' => 'sometimes|in:published,draft', 'tests.*.title' => 'required|string|max:255', 'tests.*.quiz_date' => 'nullable|date_format:Y-m-d', 'tests.*.dur' => 'sometimes|required|integer|between:1,240', 'tests.*.pass' => 'sometimes|required|integer|between:1,100', 'tests.*.qs' => 'required|array|min:1|max:200', 'tests.*.qs.*.q' => 'required|string|max:5000', 'tests.*.qs.*.answer' => 'sometimes|required|string|max:10000', 'tests.*.qs.*.o' => 'sometimes|array|size:4', 'tests.*.qs.*.o.*' => 'required|string|max:2000', 'tests.*.qs.*.c' => 'sometimes|integer|between:0,3', 'tests.*.qs.*.explanation' => 'nullable|string|max:10000',
             'users.*.id' => 'required|integer|exists:users,id', 'users.*.status' => 'required|in:active,inactive,blocked',
         ]);
+        foreach ($data['tests'] as $index => $test) {
+            $rules = ($test['current_affairs'] ?? false)
+                ? ['qs.*.answer' => 'required|string|max:10000', 'qs.*.o' => 'prohibited', 'qs.*.c' => 'prohibited', 'qs.*.explanation' => 'prohibited']
+                : ['dur' => 'required|integer|between:1,240', 'pass' => 'required|integer|between:1,100', 'qs.*.o' => 'required|array|size:4', 'qs.*.c' => 'required|integer|between:0,3'];
+            $validator = Validator::make($test, $rules);
+            if ($validator->fails()) {
+                $errors = [];
+                foreach ($validator->errors()->messages() as $key => $messages) {
+                    $errors['tests.'.$index.'.'.$key] = $messages;
+                }
+                throw ValidationException::withMessages($errors);
+            }
+        }
         DB::transaction(function () use ($data) {
             abort_unless(hash_equals($this->state()['version'], $data['version']), 409, 'Data changed in another tab. Reload before saving.');
             $chapterIds = array_column($data['chapters'], 'id');
@@ -171,6 +185,9 @@ class AdminController extends Controller
                 }
                 if (! ($test['current_affairs'] ?? false) && ! in_array($test['ch'] ?? null, $chapterIds, true)) {
                     throw ValidationException::withMessages(['tests' => 'Select an existing chapter for every test.']);
+                }
+                if (! ($test['current_affairs'] ?? false) && collect($data['chapters'])->contains(fn (array $chapter): bool => $chapter['id'] === $test['ch'] && Str::slug($chapter['subject']) === 'current-affairs')) {
+                    throw ValidationException::withMessages(['tests' => 'Add Current Affairs as questions and answers without a chapter.']);
                 }
             }
             Quiz::whereNotIn('id', array_column($data['tests'], 'id'))->delete();
@@ -187,7 +204,13 @@ class AdminController extends Controller
             foreach ($data['tests'] as $test) {
                 $record = Quiz::find($test['id']) ?? new Quiz;
                 $record->id = $test['id'];
-                $record->fill(['chapter_id' => ($test['current_affairs'] ?? false) ? ($record->chapter_id ?? null) : $test['ch'], 'subject_id' => ($test['current_affairs'] ?? false) && $record->chapter_id === null ? Subject::firstOrCreate(['slug' => 'current-affairs'], ['name' => 'Current Affairs', 'category' => 'General', 'description' => 'Daily current affairs quizzes'])->id : null, 'status' => $test['status'] ?? 'published', 'title' => $test['title'], 'quiz_date' => array_key_exists('quiz_date', $test) ? $test['quiz_date'] : $record->quiz_date, 'duration' => $test['dur'], 'passing_score' => $test['pass'], 'questions' => $test['qs']])->save();
+                if ($test['current_affairs'] ?? false) {
+                    $previousQuestions = $record->questions ?? [];
+                    foreach ($test['qs'] as $index => $question) {
+                        $test['qs'][$index] = array_merge($previousQuestions[$index] ?? [], ['q' => $question['q'], 'answer' => $question['answer']]);
+                    }
+                }
+                $record->fill(['chapter_id' => ($test['current_affairs'] ?? false) ? ($record->chapter_id ?? null) : $test['ch'], 'subject_id' => ($test['current_affairs'] ?? false) && $record->chapter_id === null ? Subject::firstOrCreate(['slug' => 'current-affairs'], ['name' => 'Current Affairs', 'category' => 'General', 'description' => 'Daily current affairs quizzes'])->id : null, 'status' => $test['status'] ?? 'published', 'title' => $test['title'], 'quiz_date' => array_key_exists('quiz_date', $test) ? $test['quiz_date'] : $record->quiz_date, 'duration' => $test['dur'] ?? $record->duration ?? 15, 'passing_score' => $test['pass'] ?? $record->passing_score ?? 40, 'questions' => $test['qs']])->save();
             }
             foreach ($data['users'] as $user) {
                 User::where('id', $user['id'])->where('role', 'student')->update(['status' => $user['status']]);

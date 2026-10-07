@@ -42,6 +42,26 @@ class Quiz extends Model
         return $this->subject ?? $this->chapter->subject;
     }
 
+    public function isCurrentAffairs(): bool
+    {
+        return $this->learningSubject()->slug === 'current-affairs';
+    }
+
+    /** @return array<int, array{q: string, answer: string}> */
+    public function questionAnswers(): array
+    {
+        return array_map(fn (array $question): array => [
+            'q' => $question['q'],
+            'answer' => $question['answer'] ?? ($question['o'][$question['c'] ?? -1] ?? ''),
+        ], $this->questions);
+    }
+
+    public function scopeMultipleChoice(Builder $query): void
+    {
+        $query->whereDoesntHave('subject', fn (Builder $subject) => $subject->where('slug', 'current-affairs'))
+            ->whereDoesntHave('chapter.subject', fn (Builder $subject) => $subject->where('slug', 'current-affairs'));
+    }
+
     public function isPublished(): bool
     {
         return $this->subject_id !== null
