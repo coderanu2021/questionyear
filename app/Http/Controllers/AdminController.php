@@ -45,7 +45,7 @@ class AdminController extends Controller
         return view('admin.index', ['state' => $this->state(), 'page' => $page, 'practicePeriods' => $practicePeriods]);
     }
 
-    public function generatePractice(Request $request, PracticeQuestionGenerator $generator): RedirectResponse
+    public function generatePractice(Request $request, PracticeQuestionGenerator $generator): RedirectResponse|JsonResponse
     {
         $this->authorizeAdmin($request);
         $data = $request->validate(['period' => 'required|in:daily,weekly,monthly']);
@@ -60,10 +60,19 @@ class AdminController extends Controller
                 default => 'Generation could not complete. Check the server logs for details. Existing quizzes are preserved.',
             };
 
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $message, 'errors' => ['generation' => [$message]]], 422);
+            }
+
             return redirect()->route('admin', ['page' => 'practice'])->withErrors(['generation' => $message]);
         }
 
-        return redirect()->route('admin', ['page' => 'practice'])->with('status', ucfirst($data['period']).' quiz is ready. An existing quiz is kept without another API call.');
+        $message = ucfirst($data['period']).' quiz is ready. An existing quiz is kept without another API call.';
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => $message]);
+        }
+
+        return redirect()->route('admin', ['page' => 'practice'])->with('status', $message);
     }
 
     public function chapterPage(Request $request, ?Chapter $chapter = null): View

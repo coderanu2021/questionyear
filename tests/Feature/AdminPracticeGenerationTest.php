@@ -79,4 +79,31 @@ class AdminPracticeGenerationTest extends TestCase
             ->assertOk()->assertSee('Gemini model is unavailable (HTTP 404).')->assertSee('GEMINI_MODEL');
         $this->assertDatabaseCount('practice_sets', 0);
     }
+
+    public function test_json_response_identifies_api_failures_without_exposing_the_key(): void
+    {
+        config(['services.gemini.key' => 'private-test-key']);
+        Subject::factory()->create();
+        $this->actingAs(User::factory()->create(['role' => 'admin']));
+        $failures = [
+            [400, ['error' => ['details' => [['reason' => 'API_KEY_INVALID']], 'message' => 'private-test-key']], 'rejected the API key'],
+            [401, [], 'rejected the API key'],
+            [403, [], 'access denied'],
+            [404, [], 'model or API URL was not found'],
+            [429, [], 'quota or rate limit exceeded'],
+            [503, [], 'temporarily unavailable'],
+        ];
+        $sequence = Http::fakeSequence();
+        foreach ($failures as [$status, $body]) {
+            $sequence->push($body, $status);
+        }
+        foreach ($failures as [$status, $body, $expected]) {
+            $response = $this->postJson(route('admin.practice.generate'), ['period' => 'daily'])
+                ->assertUnprocessable()->assertJsonPath('success', false);
+            $this->assertStringContainsString($expected, $response->json('message'));
+            $this->assertStringContainsString('HTTP '.$status, $response->json('message'));
+            $this->assertStringNotContainsString('private-test-key', $response->getContent());
+        }
+        $this->assertDatabaseCount('practice_sets', 0);
+    }
 }

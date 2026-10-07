@@ -119,10 +119,21 @@ class PracticeQuestionGenerator
                 'generationConfig' => ['responseMimeType' => 'application/json', 'responseSchema' => ['type' => 'ARRAY', 'items' => ['type' => 'OBJECT', 'properties' => ['q' => ['type' => 'STRING'], 'o' => ['type' => 'ARRAY', 'items' => ['type' => 'STRING']], 'c' => ['type' => 'INTEGER'], 'explanation' => ['type' => 'STRING']], 'required' => ['q', 'o', 'c', 'explanation']]]],
             ]);
         if (! $response->successful()) {
-            if ($response->status() === 404) {
-                throw new RuntimeException('Gemini model is unavailable (HTTP 404). Set GEMINI_MODEL to an available text generation model in the server environment, then run php artisan config:clear. Existing sets are preserved.');
-            }
-            throw new RuntimeException('Gemini generation failed (HTTP '.$response->status().'). Existing sets are preserved.');
+            $status = $response->status();
+            $details = $response->json('error.details', []);
+            $invalidKey = is_array($details) && collect($details)->contains(fn ($detail): bool => is_array($detail) && in_array($detail['reason'] ?? '', ['API_KEY_INVALID', 'API_KEY_EXPIRED'], true));
+            $message = match (true) {
+                $invalidKey, $status === 401 => 'Gemini rejected the API key (HTTP '.$status.'). Replace GEMINI_API_KEY with a valid key, then clear the configuration cache.',
+                $status === 403 => 'Gemini access denied (HTTP 403). The API key may be restricted or blocked, or this project cannot access the model. Check the key permissions and model access.',
+                $status === 404 => 'Gemini model is unavailable (HTTP 404). The model or API URL was not found, or is unavailable to this project. Set GEMINI_MODEL to an available text generation model, then run php artisan config:clear.',
+                $status === 429 => 'Gemini generation failed (HTTP 429). API quota or rate limit exceeded. Check your quota and billing, then retry later.',
+                $status === 400 => 'Gemini rejected the request (HTTP 400). Check the model and supported generation settings.',
+                $status === 402 => 'Gemini billing error (HTTP 402). Check your project billing and available credits.',
+                $status >= 500 => 'Gemini service error (HTTP '.$status.'). The API is temporarily unavailable. Retry later.',
+                default => 'Gemini generation failed (HTTP '.$status.'). Check the API configuration.',
+            };
+
+            throw new RuntimeException($message.' Existing sets are preserved.');
         }
         $questions = json_decode($response->json('candidates.0.content.parts.0.text', ''), true);
         if (! is_array($questions) || ! array_is_list($questions) || count($questions) !== $count) {
