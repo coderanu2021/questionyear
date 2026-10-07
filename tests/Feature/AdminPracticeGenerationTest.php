@@ -96,6 +96,9 @@ class AdminPracticeGenerationTest extends TestCase
         $sequence = Http::fakeSequence();
         foreach ($failures as [$status, $body]) {
             $sequence->push($body, $status);
+            if ($status === 404) {
+                $sequence->push(['models' => []]);
+            }
         }
         foreach ($failures as [$status, $body, $expected]) {
             $response = $this->postJson(route('admin.practice.generate'), ['period' => 'daily'])
@@ -105,5 +108,29 @@ class AdminPracticeGenerationTest extends TestCase
             $this->assertStringNotContainsString('private-test-key', $response->getContent());
         }
         $this->assertDatabaseCount('practice_sets', 0);
+    }
+
+    public function test_unavailable_model_falls_back_to_a_listed_text_model_and_preserves_idempotency(): void
+    {
+        config(['services.gemini.key' => 'test-key', 'services.gemini.model' => 'models/old-model']);
+        Subject::factory()->create();
+        $questions = array_map(fn (int $index): array => ['q' => 'Fallback question '.$index, 'o' => ['A', 'B', 'C', 'D'], 'c' => 0, 'explanation' => 'Explanation'], range(1, 20));
+        Http::fake([
+            '*/models/old-model:generateContent' => Http::response([], 404),
+            '*/models?pageSize=1000' => Http::response(['models' => [
+                ['name' => 'models/gemini-3.5-flash-lite', 'supportedGenerationMethods' => ['embedContent']],
+            ], 'nextPageToken' => 'next-page']),
+            '*/models?pageSize=1000&pageToken=next-page' => Http::response(['models' => [
+                ['name' => 'models/gemini-3.5-flash-lite', 'supportedGenerationMethods' => ['generateContent']],
+            ]]),
+            '*/models/gemini-3.5-flash-lite:generateContent' => Http::response(['candidates' => [['content' => ['parts' => [['text' => json_encode($questions)]]]]]]),
+        ]);
+        Http::preventStrayRequests();
+        $this->actingAs(User::factory()->create(['role' => 'admin']));
+        $this->postJson(route('admin.practice.generate'), ['period' => 'daily'])->assertOk()->assertJsonPath('success', true);
+        $this->assertCount(20, json_decode(DB::table('practice_sets')->value('questions'), true));
+        $this->artisan('practice:generate daily')->assertSuccessful();
+        $this->assertDatabaseCount('practice_sets', 1);
+        Http::assertSentCount(4);
     }
 }

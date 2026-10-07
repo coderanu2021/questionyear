@@ -14,6 +14,8 @@ class PracticeQuestionGenerator
 {
     public const COUNTS = ['daily' => 20, 'weekly' => 50, 'monthly' => 200];
 
+    private ?string $availableModel = null;
+
     public function date(string $period): string
     {
         $date = now('Asia/Kolkata');
@@ -113,11 +115,22 @@ class PracticeQuestionGenerator
         if (! $key) {
             throw new RuntimeException('Set GEMINI_API_KEY before generating practice questions.');
         }
-        $response = Http::withHeaders(['x-goog-api-key' => $key])->connectTimeout(10)->timeout(90)
-            ->post('https://generativelanguage.googleapis.com/v1beta/models/'.config('services.gemini.model').':generateContent', [
-                'contents' => [['parts' => [['text' => 'Generate exactly '.$count.' accurate English MCQs for '.$subject.'. Four distinct options, one correct answer (c is zero-based), and an explanation. Avoid ambiguous or time-sensitive facts. Do not repeat: '.json_encode($exclude)]]]],
-                'generationConfig' => ['responseMimeType' => 'application/json', 'responseSchema' => ['type' => 'ARRAY', 'items' => ['type' => 'OBJECT', 'properties' => ['q' => ['type' => 'STRING'], 'o' => ['type' => 'ARRAY', 'items' => ['type' => 'STRING']], 'c' => ['type' => 'INTEGER'], 'explanation' => ['type' => 'STRING']], 'required' => ['q', 'o', 'c', 'explanation']]]],
-            ]);
+        $model = $this->availableModel ?? preg_replace('#^models/#', '', trim((string) config('services.gemini.model')));
+        $payload = [
+            'contents' => [['parts' => [['text' => 'Generate exactly '.$count.' accurate English MCQs for '.$subject.'. Four distinct options, one correct answer (c is zero-based), and an explanation. Avoid ambiguous or time-sensitive facts. Do not repeat: '.json_encode($exclude)]]]],
+            'generationConfig' => ['responseMimeType' => 'application/json', 'responseSchema' => ['type' => 'ARRAY', 'items' => ['type' => 'OBJECT', 'properties' => ['q' => ['type' => 'STRING'], 'o' => ['type' => 'ARRAY', 'items' => ['type' => 'STRING']], 'c' => ['type' => 'INTEGER'], 'explanation' => ['type' => 'STRING']], 'required' => ['q', 'o', 'c', 'explanation']]]],
+        ];
+        $client = Http::withHeaders(['x-goog-api-key' => $key])->connectTimeout(10)->timeout(90);
+        $response = $client->post('https://generativelanguage.googleapis.com/v1beta/models/'.$model.':generateContent', $payload);
+        if ($response->status() === 404) {
+            $fallback = $this->findAvailableModel($key, $model);
+            if ($fallback !== null) {
+                $response = $client->post('https://generativelanguage.googleapis.com/v1beta/models/'.$fallback.':generateContent', $payload);
+                if ($response->successful()) {
+                    $this->availableModel = $fallback;
+                }
+            }
+        }
         if (! $response->successful()) {
             $status = $response->status();
             $details = $response->json('error.details', []);
@@ -146,5 +159,32 @@ class PracticeQuestionGenerator
         }
 
         return $questions;
+    }
+
+    private function findAvailableModel(string $key, string $unavailableModel): ?string
+    {
+        $pageToken = null;
+        do {
+            $parameters = ['pageSize' => 1000];
+            if ($pageToken !== null) {
+                $parameters['pageToken'] = $pageToken;
+            }
+            $response = Http::withHeaders(['x-goog-api-key' => $key])->connectTimeout(10)->timeout(20)
+                ->get('https://generativelanguage.googleapis.com/v1beta/models', $parameters);
+            if (! $response->successful()) {
+                return null;
+            }
+            $models = collect($response->json('models', []))->filter(fn ($model): bool => is_array($model)
+                && in_array('generateContent', $model['supportedGenerationMethods'] ?? [], true))
+                ->pluck('name')->map(fn (string $name): string => str_replace('models/', '', $name));
+            foreach (['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-2.5-flash-lite', 'gemini-2.5-flash'] as $candidate) {
+                if ($candidate !== $unavailableModel && $models->contains($candidate)) {
+                    return $candidate;
+                }
+            }
+            $pageToken = $response->json('nextPageToken');
+        } while (is_string($pageToken) && $pageToken !== '');
+
+        return null;
     }
 }
