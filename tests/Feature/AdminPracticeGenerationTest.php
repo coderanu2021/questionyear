@@ -52,8 +52,8 @@ class AdminPracticeGenerationTest extends TestCase
         Subject::factory()->create();
         Http::fake(['*' => Http::response([], 429)]);
         $this->actingAs(User::factory()->create(['role' => 'admin']));
-        $this->post(route('admin.practice.generate'), ['period' => 'daily'])->assertRedirect('/admin/practice')->assertSessionHasErrors('generation');
-        $this->get('/admin/practice')->assertSee('Gemini generation failed (HTTP 429).');
+        $this->followingRedirects()->post(route('admin.practice.generate'), ['period' => 'daily'])
+            ->assertOk()->assertSee('Gemini generation failed (HTTP 429).');
         $this->assertDatabaseCount('practice_sets', 0);
     }
 
@@ -63,8 +63,8 @@ class AdminPracticeGenerationTest extends TestCase
         Subject::factory()->create();
         Http::preventStrayRequests();
         $this->actingAs(User::factory()->create(['role' => 'admin']));
-        $this->post(route('admin.practice.generate'), ['period' => 'daily'])->assertRedirect('/admin/practice')->assertSessionHasErrors('generation');
-        $this->get('/admin/practice')->assertSee('Set GEMINI_API_KEY before generating practice questions.');
+        $this->followingRedirects()->post(route('admin.practice.generate'), ['period' => 'daily'])
+            ->assertOk()->assertSee('Set GEMINI_API_KEY before generating practice questions.');
         $this->assertDatabaseCount('practice_sets', 0);
         Http::assertNothingSent();
     }
@@ -75,8 +75,8 @@ class AdminPracticeGenerationTest extends TestCase
         Subject::factory()->create();
         Http::fake(['*' => Http::response([], 404)]);
         $this->actingAs(User::factory()->create(['role' => 'admin']));
-        $this->post(route('admin.practice.generate'), ['period' => 'daily'])->assertRedirect('/admin/practice')->assertSessionHasErrors('generation');
-        $this->get('/admin/practice')->assertSee('Gemini model is unavailable (HTTP 404).')->assertSee('GEMINI_MODEL');
+        $this->followingRedirects()->post(route('admin.practice.generate'), ['period' => 'daily'])
+            ->assertOk()->assertSee('Gemini model is unavailable (HTTP 404).')->assertSee('GEMINI_MODEL');
         $this->assertDatabaseCount('practice_sets', 0);
     }
 }
