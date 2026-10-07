@@ -65,12 +65,11 @@ linkify(".mega a");linkify("footer .fcols>div:nth-child(2) a");
 /* chapter list: opens the Learn page first */
 function renderChaps(){
   const x=curSub,f=$("cf").value.trim().toLowerCase();
-  if(x.id==="current-affairs"){
+  if(["current-affairs","general-knowledge"].includes(x.id)){
     const quizzes=subjectQuizzes(x).filter(t=>t.title.toLowerCase().includes(f));
     $("cl").innerHTML=quizzes.length?quizzes.map(t=>{const parts=t.date_label?.split(" ");return `<a class="ca-edition" href="${esc(t.url)}"><div class="ca-edition-date">${parts?`<strong>${esc(parts[0])}</strong><span>${esc(parts[1])}</span>`:`<i class="fa-regular fa-file-lines" aria-hidden="true"></i>`}</div><div class="ca-edition-body"><h3>${esc(t.title)}</h3><small>${t.count} questions and answers${t.date_label?` · ${esc(t.date_label)}`:""}</small></div><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>`}).join(""):`<p class="empty" style="display:block">No quizzes match your search.</p>`;
     return;
   }
-  if(x.id==="general-knowledge"){const quizzes=subjectQuizzes(x).filter(t=>t.title.toLowerCase().includes(f));$("cl").innerHTML=quizzes.length?quizzes.map(t=>`<a class="chap" href="${esc(t.url)}"><span class="cn"><i class="fa-solid fa-play"></i></span><div><h3>${esc(t.title)}</h3><small>${t.count} MCQs · ${t.duration} minutes · Pass ${t.pass}%</small></div><span class="go">Start quiz</span></a>`).join(""):`<p class="empty" style="display:block">No quizzes match your search.</p>`;return;}
   const it=x.ch.map((t,i)=>({t,i})).filter(o=>o.t.toLowerCase().includes(f)&&(!$("chapter-category").value||window.CURRICULUM.categories[x.id+":"+o.i]===$("chapter-category").value));
   $("cl").innerHTML=it.length?it.map(({t,i})=>{const b=QB[x.id+":"+i],n=LN[x.id+":"+i];
     return (n||b)?`<a class="chap" style="--c:${x.c}" href="${n?esc(window.CURRICULUM.chapterUrls[x.id+":"+i]):`${esc(window.CURRICULUM.quizUrls[x.id+":"+i])}`}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>${n?"Chapter notes":"Practice quiz"}${b?" + "+b.length+" practice questions":""}</small></div><span class="go"><i class="fa-solid fa-book-open"></i> ${n?"Read chapter":"Start quiz"}</span></a>`
@@ -170,7 +169,7 @@ function quizPage(x,i){
   curId=x.id;curIdx=i;qs=QB[x.id+":"+i];const settings=quizSettings(),t=["current-affairs","general-knowledge"].includes(x.id)?settings?.title||x.ch[i]:x.ch[i];document.title=window.PAGE_SEO_TITLE||window.CHAPTER_SEO_TITLE||t+" quiz – "+SITE_TITLE;
   const ln=LN[x.id+":"+i]?`<span>/</span><a href="/learn/${x.id}/${i}">Notes</a>`:"";
   $("qc").innerHTML=`<a href="/">Home</a><span>/</span><a href="/subject/${x.id}">${esc(x.n)}</a>${ln}<span>/</span><b>${esc(t)}</b>${settings?.quiz_date?`<span>/</span><time datetime="${esc(settings.quiz_date)}">${esc(settings.date_label)}</time>`:''}`;
-  if(x.id==="current-affairs")initCurrentAffairsReader();else startQuiz();
+  if(["current-affairs","general-knowledge"].includes(x.id))initCurrentAffairsReader();else startQuiz();
 }
 function initCurrentAffairsReader(){
   const input=$("ca-search");if(!input||input.dataset.ready)return;input.dataset.ready="true";

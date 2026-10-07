@@ -47,7 +47,7 @@ class LearningTracker
             $history = collect();
             foreach (Attempt::where('user_id', $user->id)->get() as $attempt) {
                 $quiz = Quiz::with('chapter')->find($attempt->quiz_id);
-                if ($quiz && ! $quiz->isCurrentAffairs() && count($quiz->questions) === count($attempt->answers)) {
+                if ($quiz && ! $quiz->isQuestionAnswer() && count($quiz->questions) === count($attempt->answers)) {
                     $history->push(['questions' => $quiz->questions, 'answers' => $attempt->answers, 'subject' => $quiz->learningSubject()->id, 'time' => $attempt->created_at]);
                 }
             }
@@ -76,7 +76,7 @@ class LearningTracker
         abort_unless(count($parts) === 3 && ctype_digit($parts[2]), 404);
         if ($parts[0] === 'quiz') {
             $quiz = Quiz::with('chapter')->findOrFail($parts[1]);
-            abort_unless($quiz->isPublished() && ! $quiz->isCurrentAffairs(), 404);
+            abort_unless($quiz->isPublished() && ! $quiz->isQuestionAnswer(), 404);
             $question = $quiz->questions[(int) $parts[2]] ?? null;
             abort_unless($question, 404);
 

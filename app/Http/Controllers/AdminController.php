@@ -117,7 +117,7 @@ class AdminController extends Controller
             'tests' => $quizzes->map(function ($q) use ($attempts) {
                 $results = $attempts->where('quiz_id', $q->id);
 
-                return ['id' => $q->id, 'ch' => $q->chapter_id, 'current_affairs' => $q->learningSubject()->slug === 'current-affairs', 'general_knowledge' => $q->learningSubject()->slug === 'general-knowledge', 'status' => in_array($q->learningSubject()->slug, ['current-affairs', 'general-knowledge'], true) ? ($q->isPublished() ? 'published' : 'draft') : $q->chapter->status, 'title' => $q->title, 'quiz_date' => $q->quiz_date?->toDateString(), 'dur' => $q->duration, 'pass' => $q->passing_score, 'qs' => $q->isCurrentAffairs() ? $q->questionAnswers() : $q->questions, 'attempts' => $results->count(), 'avg' => (int) round($results->avg('percentage') ?? 0)];
+                return ['id' => $q->id, 'ch' => $q->chapter_id, 'current_affairs' => $q->learningSubject()->slug === 'current-affairs', 'general_knowledge' => $q->learningSubject()->slug === 'general-knowledge', 'status' => in_array($q->learningSubject()->slug, ['current-affairs', 'general-knowledge'], true) ? ($q->isPublished() ? 'published' : 'draft') : $q->chapter->status, 'title' => $q->title, 'quiz_date' => $q->quiz_date?->toDateString(), 'dur' => $q->duration, 'pass' => $q->passing_score, 'qs' => $q->isQuestionAnswer() ? $q->questionAnswers() : $q->questions, 'attempts' => $results->count(), 'avg' => (int) round($results->avg('percentage') ?? 0)];
             })->all(),
             'users' => $users->map(function ($u) use ($attempts, $quizzes) {
                 $results = $attempts->where('user_id', $u->id);
@@ -166,7 +166,7 @@ class AdminController extends Controller
             if (($test['current_affairs'] ?? false) && ($test['general_knowledge'] ?? false)) {
                 throw ValidationException::withMessages(['tests.'.$index.'.general_knowledge' => 'Select one quiz type.']);
             }
-            $rules = ($test['current_affairs'] ?? false)
+            $rules = ($test['current_affairs'] ?? false) || ($test['general_knowledge'] ?? false)
                 ? ['qs.*.answer' => 'required|string|max:10000', 'qs.*.o' => 'prohibited', 'qs.*.c' => 'prohibited', 'qs.*.explanation' => 'prohibited']
                 : ['dur' => 'required|integer|between:1,240', 'pass' => 'required|integer|between:1,100', 'qs.*.o' => 'required|array|size:4', 'qs.*.c' => 'required|integer|between:0,3'];
             $validator = Validator::make($test, $rules);
@@ -208,7 +208,7 @@ class AdminController extends Controller
             foreach ($data['tests'] as $test) {
                 $record = Quiz::find($test['id']) ?? new Quiz;
                 $record->id = $test['id'];
-                if ($test['current_affairs'] ?? false) {
+                if (($test['current_affairs'] ?? false) || ($test['general_knowledge'] ?? false)) {
                     $previousQuestions = $record->questions ?? [];
                     foreach ($test['qs'] as $index => $question) {
                         $test['qs'][$index] = array_merge($previousQuestions[$index] ?? [], ['q' => $question['q'], 'answer' => $question['answer']]);

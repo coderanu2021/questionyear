@@ -47,6 +47,11 @@ class Quiz extends Model
         return $this->learningSubject()->slug === 'current-affairs';
     }
 
+    public function isQuestionAnswer(): bool
+    {
+        return in_array($this->learningSubject()->slug, ['current-affairs', 'general-knowledge'], true);
+    }
+
     /** @return array<int, array{q: string, answer: string}> */
     public function questionAnswers(): array
     {
@@ -58,8 +63,8 @@ class Quiz extends Model
 
     public function scopeMultipleChoice(Builder $query): void
     {
-        $query->whereDoesntHave('subject', fn (Builder $subject) => $subject->where('slug', 'current-affairs'))
-            ->whereDoesntHave('chapter.subject', fn (Builder $subject) => $subject->where('slug', 'current-affairs'));
+        $query->whereDoesntHave('subject', fn (Builder $subject) => $subject->whereIn('slug', ['current-affairs', 'general-knowledge']))
+            ->whereDoesntHave('chapter.subject', fn (Builder $subject) => $subject->whereIn('slug', ['current-affairs', 'general-knowledge']));
     }
 
     public function isPublished(): bool

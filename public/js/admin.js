@@ -98,11 +98,11 @@ async function delChapter(id){
 
 let draft=[];
 function qHTML(){
- if($('#t_kind')?.value==='current-affairs')return draft.map((q,i)=>`<div class="q"><div class="qt"><input aria-label="Question ${i+1}" placeholder="Question ${i+1}" value="${esc(q.q)}" oninput="draft[${i}].q=this.value"><button class="btn sm dng" onclick="draft.splice(${i},1);$('#qs').innerHTML=qHTML()" aria-label="Remove question">${ic('trash')}</button></div><div class="f"><label for="answer-${i}">Answer</label><textarea id="answer-${i}" placeholder="Write the answer" oninput="draft[${i}].answer=this.value">${esc(q.answer??q.o?.[q.c]??'')}</textarea></div></div>`).join('')||'<div class="empty" style="padding:20px">No questions yet.</div>';
+ if(['current-affairs','general-knowledge'].includes($('#t_kind')?.value))return draft.map((q,i)=>`<div class="q"><div class="qt"><input aria-label="Question ${i+1}" placeholder="Question ${i+1}" value="${esc(q.q)}" oninput="draft[${i}].q=this.value"><button class="btn sm dng" onclick="draft.splice(${i},1);$('#qs').innerHTML=qHTML()" aria-label="Remove question">${ic('trash')}</button></div><div class="f"><label for="answer-${i}">Answer</label><textarea id="answer-${i}" placeholder="Write the answer" oninput="draft[${i}].answer=this.value">${esc(q.answer??q.o?.[q.c]??'')}</textarea></div></div>`).join('')||'<div class="empty" style="padding:20px">No questions yet.</div>';
  return draft.map((q,i)=>`<div class="q"><div class="qt"><input placeholder="Question ${i+1}" value="${esc(q.q)}" oninput="draft[${i}].q=this.value"><button class="btn sm dng" onclick="draft.splice(${i},1);$('#qs').innerHTML=qHTML()" aria-label="Remove question">${ic('trash')}</button></div>
  ${q.o.map((o,j)=>`<div class="opt"><input type="radio" name="r${i}" ${q.c==j?'checked':''} onchange="draft[${i}].c=${j}" title="Correct answer"><input type="text" placeholder="Option ${j+1}" value="${esc(o)}" oninput="draft[${i}].o[${j}]=this.value"></div>`).join('')}<div class="f"><label>Answer explanation</label><textarea placeholder="Explain the correct answer" oninput="draft[${i}].explanation=this.value">${esc(q.explanation||'')}</textarea></div></div>`).join('')||'<div class="empty" style="padding:20px">No questions yet.</div>';
 }
-function addQ(){draft.push($('#t_kind')?.value==='current-affairs'?{q:'',answer:''}:{q:'',o:['','','',''],c:0});$('#qs').innerHTML=qHTML()}
+function addQ(){draft.push(['current-affairs','general-knowledge'].includes($('#t_kind')?.value)?{q:'',answer:''}:{q:'',o:['','','',''],c:0});$('#qs').innerHTML=qHTML()}
 function testModal(id){
  location.href=id?window.TEST_URLS.edit[id]:window.TEST_URLS.create;
 }
@@ -111,13 +111,14 @@ function chapterOptionLabel(chapter){
 }
 function toggleQuizChapter(){
  const currentAffairs=$('#t_kind').value==='current-affairs';
- $('#test-chapter-field').hidden=currentAffairs;
- $('#test-status-field').hidden=!currentAffairs;
+ const standalone=['current-affairs','general-knowledge'].includes($('#t_kind').value);
+ $('#test-chapter-field').hidden=standalone;
+ $('#test-status-field').hidden=!standalone;
  $('#t_date').required=currentAffairs;
- $('#test-duration-field').hidden=currentAffairs;
- $('#test-pass-field').hidden=currentAffairs;
- $('#question-help').textContent=currentAffairs?'Add each question and its answer.':'Select the radio button next to the correct option.';
- draft=draft.map(q=>currentAffairs?{...q,answer:q.answer??q.o?.[q.c]??''}:{...q,o:q.o||['','','',''],c:q.c??0});
+ $('#test-duration-field').hidden=standalone;
+ $('#test-pass-field').hidden=standalone;
+ $('#question-help').textContent=standalone?'Add each question and its answer.':'Select the radio button next to the correct option.';
+ draft=draft.map(q=>standalone?{...q,answer:q.answer??q.o?.[q.c]??''}:{...q,o:q.o||['','','',''],c:q.c??0});
  $('#qs').innerHTML=qHTML();
 }
 function renderTestForm(id){
@@ -139,12 +140,13 @@ function renderTestForm(id){
 async function saveTest(id){
  const title=$('#t_t').value.trim();if(!title)return toast('Enter a test title');
  const currentAffairs=$('#t_kind').value==='current-affairs';
+ const generalKnowledge=$('#t_kind').value==='general-knowledge',standalone=currentAffairs||generalKnowledge;
  const selectedChapter=S.chapters.find(c=>chapterOptionLabel(c)===$('#t_c').value.trim());
  if(!standalone&&(!selectedChapter||['Current Affairs','General Knowledge'].includes(selectedChapter.subject)))return toast('Select a chapter from the search suggestions');
  if(currentAffairs&&!$('#t_date').value)return toast('Select the Current Affairs quiz date');
  if(!draft.length)return toast('Add at least one complete question');
- if(draft.some(q=>!q.q.trim()||(currentAffairs?!q.answer?.trim():!q.o.every(o=>o.trim()))))return toast(currentAffairs?'Complete every question and answer':'Complete every question and all four options');
- const qs=draft.map(q=>currentAffairs?{q:q.q.trim(),answer:q.answer.trim()}:{q:q.q,o:q.o,c:q.c,explanation:q.explanation||''});
+ if(draft.some(q=>!q.q.trim()||(standalone?!q.answer?.trim():!q.o.every(o=>o.trim()))))return toast(standalone?'Complete every question and answer':'Complete every question and all four options');
+ const qs=draft.map(q=>standalone?{q:q.q.trim(),answer:q.answer.trim()}:{q:q.q,o:q.o,c:q.c,explanation:q.explanation||''});
  const d={ch:standalone?null:selectedChapter.id,current_affairs:currentAffairs,general_knowledge:generalKnowledge,title,quiz_date:$('#t_date').value||null,status:$('#t_status').value,dur:+$('#t_d').value||15,pass:+$('#t_p').value||40,qs};
  if(id)Object.assign(S.tests.find(t=>t.id==id),d);else S.tests.push({id:nid(S.tests),attempts:0,avg:0,...d});
  if(!await save()){return;}location.href=window.TEST_URLS.index;
