@@ -99,6 +99,9 @@ class AdminPracticeGenerationTest extends TestCase
             if ($status === 404) {
                 $sequence->push(['models' => []]);
             }
+            if ($status === 503) {
+                $sequence->push($body, $status)->push($body, $status);
+            }
         }
         foreach ($failures as [$status, $body, $expected]) {
             $response = $this->postJson(route('admin.practice.generate'), ['period' => 'daily'])
@@ -132,5 +135,20 @@ class AdminPracticeGenerationTest extends TestCase
         $this->artisan('practice:generate daily')->assertSuccessful();
         $this->assertDatabaseCount('practice_sets', 1);
         Http::assertSentCount(4);
+    }
+
+    public function test_temporary_service_failure_is_retried_and_publishes_only_one_quiz(): void
+    {
+        config(['services.gemini.key' => 'test-key']);
+        Subject::factory()->create();
+        $questions = array_map(fn (int $index): array => ['q' => 'Recovered question '.$index, 'o' => ['A', 'B', 'C', 'D'], 'c' => 0, 'explanation' => 'Explanation'], range(1, 20));
+        Http::fakeSequence()->push([], 503)->push([], 503)
+            ->push(['candidates' => [['content' => ['parts' => [['text' => json_encode($questions)]]]]]]);
+        $this->actingAs(User::factory()->create(['role' => 'admin']));
+        $this->postJson(route('admin.practice.generate'), ['period' => 'daily'])->assertOk()->assertJsonPath('success', true);
+        $this->assertCount(20, json_decode(DB::table('practice_sets')->value('questions'), true));
+        $this->artisan('practice:generate daily')->assertSuccessful();
+        $this->assertDatabaseCount('practice_sets', 1);
+        Http::assertSentCount(3);
     }
 }

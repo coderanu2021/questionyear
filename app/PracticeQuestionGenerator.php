@@ -4,6 +4,8 @@ namespace App;
 
 use App\Models\Quiz;
 use App\Models\Subject;
+use Exception;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -120,7 +122,9 @@ class PracticeQuestionGenerator
             'contents' => [['parts' => [['text' => 'Generate exactly '.$count.' accurate English MCQs for '.$subject.'. Four distinct options, one correct answer (c is zero-based), and an explanation. Avoid ambiguous or time-sensitive facts. Do not repeat: '.json_encode($exclude)]]]],
             'generationConfig' => ['responseMimeType' => 'application/json', 'responseSchema' => ['type' => 'ARRAY', 'items' => ['type' => 'OBJECT', 'properties' => ['q' => ['type' => 'STRING'], 'o' => ['type' => 'ARRAY', 'items' => ['type' => 'STRING']], 'c' => ['type' => 'INTEGER'], 'explanation' => ['type' => 'STRING']], 'required' => ['q', 'o', 'c', 'explanation']]]],
         ];
-        $client = Http::withHeaders(['x-goog-api-key' => $key])->connectTimeout(10)->timeout(90);
+        $client = Http::withHeaders(['x-goog-api-key' => $key])->connectTimeout(10)->timeout(90)
+            ->retry([1000, 2000], when: fn (Exception $exception): bool => $exception instanceof RequestException
+                && in_array($exception->response->status(), [500, 502, 503, 504], true), throw: false);
         $response = $client->post('https://generativelanguage.googleapis.com/v1beta/models/'.$model.':generateContent', $payload);
         if ($response->status() === 404) {
             $fallback = $this->findAvailableModel($key, $model);
