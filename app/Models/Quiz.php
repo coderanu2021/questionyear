@@ -18,7 +18,7 @@ class Quiz extends Model
 
     protected function casts(): array
     {
-        return ['questions' => 'array'];
+        return ['questions' => 'array', 'quiz_date' => 'date'];
     }
 
     public function chapter(): BelongsTo

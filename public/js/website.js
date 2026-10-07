@@ -67,13 +67,13 @@ function renderChaps(){
   const x=curSub,f=$("cf").value.trim().toLowerCase();
   if(x.id==="current-affairs"){
     const quizzes=subjectQuizzes(x).filter(t=>t.title.toLowerCase().includes(f));
-    $("cl").innerHTML=quizzes.length?quizzes.map(t=>`<a class="chap" style="--c:${x.c}" href="${esc(t.url)}"><span class="cn"><i class="fa-solid fa-play"></i></span><div><h3>${esc(t.title)}</h3><small>${t.count} questions · ${t.duration} minutes · Pass ${t.pass}%</small></div><span class="go">Start quiz</span></a>`).join(""):`<p class="empty" style="display:block">No quizzes match your search.</p>`;
+    $("cl").innerHTML=quizzes.length?quizzes.map(t=>`<a class="chap" style="--c:${x.c}" href="${esc(t.url)}"><span class="cn"><i class="fa-solid fa-play"></i></span><div><h3>${esc(t.title)}</h3><small>${t.quiz_date?`<time datetime="${esc(t.quiz_date)}">${esc(t.date_label)}</time> · `:""}${t.count} questions · ${t.duration} minutes · Pass ${t.pass}%</small></div><span class="go">Start quiz</span></a>`).join(""):`<p class="empty" style="display:block">No quizzes match your search.</p>`;
     return;
   }
   const it=x.ch.map((t,i)=>({t,i})).filter(o=>o.t.toLowerCase().includes(f)&&(!$("chapter-category").value||window.CURRICULUM.categories[x.id+":"+o.i]===$("chapter-category").value));
   $("cl").innerHTML=it.length?it.map(({t,i})=>{const b=QB[x.id+":"+i],n=LN[x.id+":"+i];
     return (n||b)?`<a class="chap" style="--c:${x.c}" href="${n?esc(window.CURRICULUM.chapterUrls[x.id+":"+i]):`${esc(window.CURRICULUM.quizUrls[x.id+":"+i])}`}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>${n?"Chapter notes":"Practice quiz"}${b?" + "+b.length+" practice questions":""}</small></div><span class="go"><i class="fa-solid fa-book-open"></i> ${n?"Read chapter":"Start quiz"}</span></a>`
-    :`<div class="chap off" style="--c:${x.c}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>Notes and questions are being added</small></div><span class="soon">Coming soon</span></div>`}).map((markup,k)=>{const index=it[k].i;const tests=window.CURRICULUM.tests[x.id+":"+index]||[];return markup+tests.map(t=>`<a class="chap" href="${esc(t.url)}"><span class="cn"><i class="fa-solid fa-play"></i></span><div><h3>${esc(t.title)}</h3><small>${t.count} questions · ${t.duration} minutes · Pass ${t.pass}%</small></div></a>`).join("")}).join(""):`<p class="empty" style="display:block">No chapters match your search.</p>`;
+    :`<div class="chap off" style="--c:${x.c}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>Notes and questions are being added</small></div><span class="soon">Coming soon</span></div>`}).map((markup,k)=>{const index=it[k].i;const tests=window.CURRICULUM.tests[x.id+":"+index]||[];return markup+tests.map(t=>`<a class="chap" href="${esc(t.url)}"><span class="cn"><i class="fa-solid fa-play"></i></span><div><h3>${esc(t.title)}</h3><small>${t.quiz_date?`<time datetime="${esc(t.quiz_date)}">${esc(t.date_label)}</time> · `:""}${t.count} questions · ${t.duration} minutes · Pass ${t.pass}%</small></div></a>`).join("")}).join(""):`<p class="empty" style="display:block">No chapters match your search.</p>`;
 }
 function subjectPage(x){
   const quizOnly=x.id==="current-affairs";
@@ -166,9 +166,9 @@ function drawQ(){
 function accountGate(){clearInterval(tmr);$("qb").innerHTML=`<div class="res"><h2>Create an account to continue</h2><p>You have completed your 25 free guest questions. Log in or create a free account to solve more questions.</p><div class="cta2"><a class="btn btn-o" href="/register">Create free account</a><a class="btn btn-l" href="/login">Log in</a></div></div>`}
 function startQuiz(){qi=0;qsc=0;qans=[];t0=Date.now();clearInterval(tmr);if(!window.CURRENT_USER&&window.GUEST_QUESTIONS_USED>=25){accountGate();return}tmr=setInterval(tick,1000);drawQ()}
 function quizPage(x,i){
-  curId=x.id;curIdx=i;qs=QB[x.id+":"+i];const t=x.ch[i];document.title=window.PAGE_SEO_TITLE||window.CHAPTER_SEO_TITLE||t+" quiz – "+SITE_TITLE;
+  curId=x.id;curIdx=i;qs=QB[x.id+":"+i];const settings=quizSettings(),t=x.id==="current-affairs"?settings?.title||x.ch[i]:x.ch[i];document.title=window.PAGE_SEO_TITLE||window.CHAPTER_SEO_TITLE||t+" quiz – "+SITE_TITLE;
   const ln=LN[x.id+":"+i]?`<span>/</span><a href="/learn/${x.id}/${i}">Notes</a>`:"";
-  $("qc").innerHTML=`<a href="/">Home</a><span>/</span><a href="/subject/${x.id}">${esc(x.n)}</a>${ln}<span>/</span><b>${esc(t)}</b>`;
+  $("qc").innerHTML=`<a href="/">Home</a><span>/</span><a href="/subject/${x.id}">${esc(x.n)}</a>${ln}<span>/</span><b>${esc(t)}</b>${settings?.quiz_date?`<span>/</span><time datetime="${esc(settings.quiz_date)}">${esc(settings.date_label)}</time>`:''}`;
   startQuiz();
 }
 async function grade(k){

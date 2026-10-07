@@ -116,7 +116,7 @@ class AdminController extends Controller
             'tests' => $quizzes->map(function ($q) use ($attempts) {
                 $results = $attempts->where('quiz_id', $q->id);
 
-                return ['id' => $q->id, 'ch' => $q->chapter_id, 'title' => $q->title, 'dur' => $q->duration, 'pass' => $q->passing_score, 'qs' => $q->questions, 'attempts' => $results->count(), 'avg' => (int) round($results->avg('percentage') ?? 0)];
+                return ['id' => $q->id, 'ch' => $q->chapter_id, 'title' => $q->title, 'quiz_date' => $q->quiz_date?->toDateString(), 'dur' => $q->duration, 'pass' => $q->passing_score, 'qs' => $q->questions, 'attempts' => $results->count(), 'avg' => (int) round($results->avg('percentage') ?? 0)];
             })->all(),
             'users' => $users->map(function ($u) use ($attempts, $quizzes) {
                 $results = $attempts->where('user_id', $u->id);
@@ -158,7 +158,7 @@ class AdminController extends Controller
         $data = $request->validate([
             'version' => 'required|string', 'chapters' => 'present|array|max:1000', 'tests' => 'present|array|max:1000', 'users' => 'present|array',
             'chapters.*.id' => 'required|integer|min:1|distinct', 'chapters.*.title' => 'required|string|max:255', 'chapters.*.subject' => 'required|string|max:100', 'chapters.*.category' => 'nullable|in:Ancient History,Medieval History,Modern History', 'chapters.*.lessons' => 'required|integer|between:1,1000', 'chapters.*.status' => 'required|in:published,draft', 'chapters.*.desc' => 'nullable|string|max:10000', 'chapters.*.content' => 'nullable|string|max:500000', 'chapters.*.meta_title' => 'nullable|string|max:255', 'chapters.*.meta_description' => 'nullable|string|max:1000', 'chapters.*.meta_keywords' => 'nullable|string|max:1000',
-            'tests.*.id' => 'required|integer|min:1|distinct', 'tests.*.ch' => 'required|integer', 'tests.*.title' => 'required|string|max:255', 'tests.*.dur' => 'required|integer|between:1,240', 'tests.*.pass' => 'required|integer|between:1,100', 'tests.*.qs' => 'required|array|min:1|max:200', 'tests.*.qs.*.q' => 'required|string|max:5000', 'tests.*.qs.*.o' => 'required|array|size:4', 'tests.*.qs.*.o.*' => 'required|string|max:2000', 'tests.*.qs.*.c' => 'required|integer|between:0,3', 'tests.*.qs.*.explanation' => 'nullable|string|max:10000',
+            'tests.*.id' => 'required|integer|min:1|distinct', 'tests.*.ch' => 'required|integer', 'tests.*.title' => 'required|string|max:255', 'tests.*.quiz_date' => 'nullable|date_format:Y-m-d', 'tests.*.dur' => 'required|integer|between:1,240', 'tests.*.pass' => 'required|integer|between:1,100', 'tests.*.qs' => 'required|array|min:1|max:200', 'tests.*.qs.*.q' => 'required|string|max:5000', 'tests.*.qs.*.o' => 'required|array|size:4', 'tests.*.qs.*.o.*' => 'required|string|max:2000', 'tests.*.qs.*.c' => 'required|integer|between:0,3', 'tests.*.qs.*.explanation' => 'nullable|string|max:10000',
             'users.*.id' => 'required|integer|exists:users,id', 'users.*.status' => 'required|in:active,inactive,blocked',
         ]);
         DB::transaction(function () use ($data) {
@@ -180,7 +180,7 @@ class AdminController extends Controller
             foreach ($data['tests'] as $test) {
                 $record = Quiz::find($test['id']) ?? new Quiz;
                 $record->id = $test['id'];
-                $record->fill(['chapter_id' => $test['ch'], 'title' => $test['title'], 'duration' => $test['dur'], 'passing_score' => $test['pass'], 'questions' => $test['qs']])->save();
+                $record->fill(['chapter_id' => $test['ch'], 'title' => $test['title'], 'quiz_date' => array_key_exists('quiz_date', $test) ? $test['quiz_date'] : $record->quiz_date, 'duration' => $test['dur'], 'passing_score' => $test['pass'], 'questions' => $test['qs']])->save();
             }
             foreach ($data['users'] as $user) {
                 User::where('id', $user['id'])->where('role', 'student')->update(['status' => $user['status']]);
