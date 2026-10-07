@@ -15,7 +15,7 @@
           <div class="ca-heading">
             <div class="ca-eyebrow"><span>Current Affairs</span>@if($currentAffairsQuiz->quiz_date)<span class="ca-date"><i class="fa-regular fa-calendar" aria-hidden="true"></i><time datetime="{{ $currentAffairsQuiz->quiz_date->toDateString() }}">{{ $currentAffairsQuiz->quiz_date->format('d M Y') }}</time></span>@endif</div>
             <h1>{{ $currentAffairsQuiz->title }}</h1>
-            <p>A quick read. A little more informed.</p>
+            <p>Daily questions and answers, in one place.</p>
           </div>
           <div class="ca-tools">
             <label class="ca-search"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input id="ca-search" type="search" placeholder="Find a question or answer" aria-label="Search questions and answers" autocomplete="off"></label>
@@ -25,7 +25,7 @@
             @foreach($currentAffairsQuiz->questionAnswers() as $question)
               <article class="ca-exchange" id="ca-question-{{ $loop->iteration }}" data-ca-question="{{ $loop->iteration }}">
                 <div class="ca-question-message"><span class="ca-question-number">Question {{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</span><h2>{{ $question['q'] }}</h2></div>
-                <div class="ca-answer-message"><span class="ca-answer-icon" aria-hidden="true"><i class="fa-solid fa-book-open"></i></span><div><span class="ca-answer-label">Answer</span><p>{{ $question['answer'] }}</p></div></div>
+                <div class="ca-answer-message"><div><span class="ca-answer-label">Answer</span><p>{{ $question['answer'] }}</p></div></div>
               </article>
             @endforeach
           </div>
