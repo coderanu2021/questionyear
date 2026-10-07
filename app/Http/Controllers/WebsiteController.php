@@ -91,7 +91,14 @@ class WebsiteController extends Controller
         }
         $seoChapter = isset($selected) && $chapter !== null ? $selected->chapters[$chapter] : null;
         $settings = SiteSettings::values();
-        $seoTitle = $seoChapter?->meta_title ?: ($seoChapter ? $seoChapter->title.' – '.$settings['site_title'] : $settings['site_title']);
+        $defaultTitle = match (true) {
+            $seoChapter !== null => $seoChapter->title.' – '.$settings['site_title'],
+            $request->routeIs('login') => 'Log in – '.$settings['site_title'],
+            $request->routeIs('register') => 'Create account – '.$settings['site_title'],
+            isset($selected) => $selected->name.' chapters – '.$settings['site_title'],
+            default => $settings['site_title'],
+        };
+        $seoTitle = $seoChapter?->meta_title ?: $defaultTitle;
         $seoDescription = $seoChapter?->meta_description ?: ($seoChapter?->description ?: $settings['site_description']);
         $seoKeywords = $seoChapter?->meta_keywords;
         $popular = [];
@@ -101,7 +108,7 @@ class WebsiteController extends Controller
             }
         }
 
-        return view('website.index', ['latestBlogs' => $latestBlogs, 'chapterHeading' => $request->routeIs('learn', 'chapter') ? $seoChapter?->title : null, 'chapterMetaTitle' => $seoChapter?->meta_title, 'seoTitle' => $seoTitle, 'seoDescription' => $seoDescription, 'seoKeywords' => $seoKeywords, 'curriculum' => $curriculum, 'quizIds' => $quizIds, 'currentUser' => $request->user()?->only('name', 'email'), 'popular' => $popular, 'chapterCount' => $subjects->sum(fn ($s) => $s->chapters->count()), 'subjectCount' => $subjects->count(), 'questionCount' => Quiz::whereHas('chapter', fn ($q) => $q->where('status', 'published'))->get()->sum(fn ($q) => count($q->questions))]);
+        return view('website.index', ['seoChapter' => $seoChapter, 'latestBlogs' => $latestBlogs, 'chapterHeading' => $request->routeIs('learn', 'chapter') ? $seoChapter?->title : null, 'chapterMetaTitle' => $seoChapter?->meta_title, 'seoTitle' => $seoTitle, 'seoDescription' => $seoDescription, 'seoKeywords' => $seoKeywords, 'curriculum' => $curriculum, 'quizIds' => $quizIds, 'currentUser' => $request->user()?->only('name', 'email'), 'popular' => $popular, 'chapterCount' => $subjects->sum(fn ($s) => $s->chapters->count()), 'subjectCount' => $subjects->count(), 'questionCount' => Quiz::whereHas('chapter', fn ($q) => $q->where('status', 'published'))->get()->sum(fn ($q) => count($q->questions))]);
     }
 
     public function answer(Request $request, Quiz $quiz): JsonResponse

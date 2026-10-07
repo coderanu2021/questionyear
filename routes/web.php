@@ -6,6 +6,7 @@ use App\Http\Controllers\DailyQuizController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\LearningController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\PageSeoController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\SiteSettingsController;
 use App\Http\Controllers\WebsiteController;
@@ -63,6 +64,8 @@ Route::get('/reset-password/{token}', [PageController::class, 'resetForm'])->nam
 Route::post('/reset-password', [PageController::class, 'reset'])->middleware('throttle:5,1')->name('password.update');
 Route::get('/{page}', [PageController::class, 'show'])->whereIn('page', ['about', 'contact', 'help', 'careers', 'privacy', 'terms', 'cookies', 'leaderboard', 'forgot-password'])->name('page');
 Route::middleware('auth')->group(function () {
+    Route::get('/admin/seo', [PageSeoController::class, 'index'])->name('admin.seo.index');
+    Route::put('/admin/seo', [PageSeoController::class, 'update'])->name('admin.seo.update');
     Route::get('/admin/posts', [PostController::class, 'index'])->name('admin.posts.index');
     Route::get('/admin/posts/create', [PostController::class, 'create'])->name('admin.posts.create');
     Route::post('/admin/posts', [PostController::class, 'store'])->name('admin.posts.store');

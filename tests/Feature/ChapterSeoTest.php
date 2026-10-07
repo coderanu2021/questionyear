@@ -24,7 +24,7 @@ class ChapterSeoTest extends TestCase
     public function test_chapter_seo_is_saved_edited_and_rendered_in_the_page_head(): void
     {
         $chapter = Chapter::factory()->create();
-        Quiz::factory()->for($chapter)->create();
+        $quiz = Quiz::factory()->for($chapter)->create();
         $admin = User::factory()->create(['role' => 'admin']);
         $state = $this->actingAs($admin)->get(route('admin'))->viewData('state');
         $state['chapters'][0]['meta_title'] = 'Study & practice "Maths"';
@@ -32,8 +32,9 @@ class ChapterSeoTest extends TestCase
         $state['chapters'][0]['meta_keywords'] = 'maths, learning, practice';
         $saved = $this->putJson(route('admin.save'), $state)->assertOk()->assertJsonPath('chapters.0.meta_title', $state['chapters'][0]['meta_title'])->json();
         $this->assertDatabaseHas('chapters', ['id' => $chapter->id, 'meta_keywords' => 'maths, learning, practice']);
-        foreach (['learn', 'quiz'] as $route) {
-            $this->get(route($route, ['subject' => $chapter->subject->slug, 'chapter' => 0]))->assertOk()->assertSee('<title>Study &amp; practice &quot;Maths&quot;</title>', false)->assertSee('content="Learn &lt;topics&gt; with chapter practice."', false)->assertSee('name="keywords" content="maths, learning, practice"', false);
+        $this->get(route('quiz', ['subject' => $chapter->subject->slug, 'chapter' => 0]))->assertRedirect($quiz->publicUrl());
+        foreach ([route('learn', ['subject' => $chapter->subject->slug, 'chapter' => 0]), $quiz->publicUrl()] as $url) {
+            $this->get($url)->assertOk()->assertSee('<title>Study &amp; practice &quot;Maths&quot;</title>', false)->assertSee('content="Learn &lt;topics&gt; with chapter practice."', false)->assertSee('name="keywords" content="maths, learning, practice"', false);
         }
         $saved['chapters'][0]['meta_title'] = 'New SEO title';
         $saved['chapters'][0]['meta_description'] = '';

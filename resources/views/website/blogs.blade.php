@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="csrf-token" content="{{ csrf_token() }}">
-<title>{{ isset($post) ? $post->title : 'Blogs' }} – {{ $siteSettings['site_title'] }}</title>
-<meta name="description" content="{{ isset($post) ? ($post->excerpt ?: Illuminate\Support\Str::limit($post->content, 160)) : 'Study tips, exam preparation and learning insights.' }}">
+@include('website.partials.seo', ['defaultTitle' => (isset($post) ? $post->title : 'Blogs').' – '.$siteSettings['site_title'], 'defaultDescription' => isset($post) ? ($post->excerpt ?: Illuminate\Support\Str::limit($post->content, 160)) : 'Study tips, exam preparation and learning insights.'])
+
 <link rel="stylesheet" href="{{ asset('css/website.css') }}">@include('website.partials.favicon')@include('website.partials.canonical')
 </head><body>
 @include('website.partials.header')
@@ -20,4 +20,3 @@
 @include('website.partials.footer')@include('website.partials.content-protection')
 <script src="{{ asset('js/navigation.js') }}"></script>
 </body></html>
-

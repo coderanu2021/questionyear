@@ -70,7 +70,7 @@ function renderChaps(){
     :`<div class="chap off" style="--c:${x.c}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>Notes and questions are being added</small></div><span class="soon">Coming soon</span></div>`}).map((markup,k)=>{const index=it[k].i;const tests=window.CURRICULUM.tests[x.id+":"+index]||[];return markup+tests.map(t=>`<a class="chap" href="${esc(t.url)}"><span class="cn"><i class="fa-solid fa-play"></i></span><div><h3>${esc(t.title)}</h3><small>${t.count} questions · ${t.duration} minutes · Pass ${t.pass}%</small></div></a>`).join("")}).join(""):`<p class="empty" style="display:block">No chapters match your search.</p>`;
 }
 function subjectPage(x){
-  curSub=x;document.title=x.n+" chapters – "+SITE_TITLE;
+  curSub=x;document.title=window.PAGE_SEO_TITLE||x.n+" chapters – "+SITE_TITLE;
   $("sbc").textContent=x.n;$("sn").textContent=x.n;$("sd").textContent=x.d;
   const ic=$("sic");ic.textContent=mono(x.n);ic.style.setProperty("--c",x.c);
   const ready=x.ch.filter((_,i)=>LN[x.id+":"+i]||QB[x.id+":"+i]).length;
@@ -86,7 +86,7 @@ $("chapter-category").onchange=renderChaps;
 const CO={tip:["fa-lightbulb","Exam tip"],key:["fa-key","Key point"],note:["fa-circle-info","Did you know?"]};
 function learnPage(x,i){
   const d=LN[x.id+":"+i],t=x.ch[i],q=QB[x.id+":"+i];
-  document.title=window.CHAPTER_SEO_TITLE||t+" – "+x.n+" – "+SITE_TITLE;
+  document.title=window.PAGE_SEO_TITLE||window.CHAPTER_SEO_TITLE||t+" – "+x.n+" – "+SITE_TITLE;
   const secs=d.s.map((s,n)=>{
     const ps=s.p.map((p,k)=>/<\/?(?:p|h[1-6]|ul|ol|table|div|section|figure|blockquote)\b/i.test(p)?p:`<p${n===0&&k===0?' class="drop"':""}>${p}</p>`).join("");
     const tb=s.t?`<div class="bk-t"><table><thead><tr>${s.t.h.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${s.t.r.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:"";
@@ -156,7 +156,7 @@ function drawQ(){
 function accountGate(){clearInterval(tmr);$("qb").innerHTML=`<div class="res"><h2>Create an account to continue</h2><p>You have completed your 25 free guest questions. Log in or create a free account to solve more questions.</p><div class="cta2"><a class="btn btn-o" href="/register">Create free account</a><a class="btn btn-l" href="/login">Log in</a></div></div>`}
 function startQuiz(){qi=0;qsc=0;qans=[];t0=Date.now();clearInterval(tmr);if(!window.CURRENT_USER&&window.GUEST_QUESTIONS_USED>=25){accountGate();return}tmr=setInterval(tick,1000);drawQ()}
 function quizPage(x,i){
-  curId=x.id;curIdx=i;qs=QB[x.id+":"+i];const t=x.ch[i];document.title=window.CHAPTER_SEO_TITLE||t+" quiz – "+SITE_TITLE;
+  curId=x.id;curIdx=i;qs=QB[x.id+":"+i];const t=x.ch[i];document.title=window.PAGE_SEO_TITLE||window.CHAPTER_SEO_TITLE||t+" quiz – "+SITE_TITLE;
   const ln=LN[x.id+":"+i]?`<span>/</span><a href="/learn/${x.id}/${i}">Notes</a>`:"";
   $("qc").innerHTML=`<a href="/">Home</a><span>/</span><a href="/subject/${x.id}">${esc(x.n)}</a>${ln}<span>/</span><b>${esc(t)}</b>`;
   startQuiz();
@@ -188,7 +188,7 @@ let CU=window.CURRENT_USER,amode="login";
 function field(id,label,icon,type,ph,ac){return `<label class="inp"><span>${label}</span><div class="inw"><i class="fa-solid ${icon}"></i><input id="${id}" type="${type}" placeholder="${ph}" autocomplete="${ac}"${type==="password"?'><button type="button" class="eye" data-eye aria-label="Show password"><i class="fa-regular fa-eye"></i></button>':">"}</div></label>`}
 function authPage(mode){
   amode=mode;const L=mode==="login";
-  document.title=(L?"Log in":"Create account")+" – "+SITE_TITLE;
+  document.title=window.PAGE_SEO_TITLE||(L?"Log in":"Create account")+" – "+SITE_TITLE;
   $("auth").innerHTML=`<div class="au"><div class="au-side"><div><h2>Learn. Practice. Improve.</h2><p>${L?"Welcome back! Pick up your practice right where you left off.":"Join "+esc(SITE_TITLE)+" for free and start practicing in minutes."}</p>
   <ul><li><i class="fa-solid fa-book-open"></i>Chapter notes written like a textbook</li><li><i class="fa-solid fa-circle-check"></i>Instant answers with explanations</li><li><i class="fa-solid fa-chart-line"></i>Track your score topic by topic</li><li><i class="fa-solid fa-fire"></i>Build a daily practice streak</li></ul></div></div>
   <div class="au-main"><div class="au-card"><h1>${L?"Log in to "+esc(SITE_TITLE):"Create your account"}</h1><p class="lead">${L?"Enter your details to continue.":"It takes less than a minute."}</p>

@@ -1,4 +1,4 @@
-<div class="head"><div><h2>Website settings</h2><p>Update your branding, contact information and website content.</p></div><a class="btn" href="{{ route('home') }}" target="_blank" rel="noopener">Preview website ↗</a></div>
+<div class="head"><div><h2>Website settings</h2><p>Update your branding, contact information and website content.</p><p><a href="{{ route('admin.seo.index') }}">Manage page titles, meta descriptions and keywords →</a></p></div><a class="btn" href="{{ route('home') }}" target="_blank" rel="noopener">Preview website ↗</a></div>
 @if(session('status'))<div class="card settings-message" role="status">{{ session('status') }}</div>@endif
 @if($errors->any())<div class="card settings-message" role="alert">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>@endif
 <form class="card settings-form" action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data">@csrf @method('PUT')

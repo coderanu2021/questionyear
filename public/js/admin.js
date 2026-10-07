@@ -10,7 +10,7 @@ const ICON={
  help:'<circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/>'
 };
 const ic=n=>`<svg class="ic" viewBox="0 0 24 24">${ICON[n]}</svg>`;
-const NAV=[['dashboard','Dashboard','dash'],['chapters','Chapters','book'],['tests','Tests & Quizzes','quiz'],['posts','Blogs & News','book'],['users','Users','users'],['analytics','Analytics','chart'],['messages','Messages','book'],['practice','Practice Quizzes','clock'],['settings','Settings','edit']];
+const NAV=[['dashboard','Dashboard','dash'],['chapters','Chapters','book'],['tests','Tests & Quizzes','quiz'],['posts','Blogs & News','book'],['seo','Page SEO','edit'],['users','Users','users'],['analytics','Analytics','chart'],['messages','Messages','book'],['practice','Practice Quizzes','clock'],['settings','Settings','edit']];
 
 /* ---------- data ---------- */
 let S=window.ADMIN_STATE;let persisted=JSON.stringify(S);
@@ -138,7 +138,7 @@ function rerender(focusId){
 function go(v){
  cur=v;$('#title').textContent=NAV.find(n=>n[0]==v)[1];
  $('#nav').innerHTML=NAV.map(n=>`<button class="${n[0]==v?'on':''}" onclick="location.href='/admin/${n[0]}'">${ic(n[2])}${n[1]}</button>`).join('');
- $('#side').classList.remove('open');if(!['settings','practice','posts'].includes(v))rerender();scrollTo(0,0);
+ $('#side').classList.remove('open');if(!['settings','practice','posts','seo'].includes(v))rerender();scrollTo(0,0);
 }
 $('#burger').onclick=()=>$('#side').classList.toggle('open');
 go(window.ADMIN_PAGE);
