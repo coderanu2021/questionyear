@@ -68,4 +68,15 @@ class AdminPracticeGenerationTest extends TestCase
         $this->assertDatabaseCount('practice_sets', 0);
         Http::assertNothingSent();
     }
+
+    public function test_unavailable_model_shows_the_model_configuration_fix(): void
+    {
+        config(['services.gemini.key' => 'test-key']);
+        Subject::factory()->create();
+        Http::fake(['*' => Http::response([], 404)]);
+        $this->actingAs(User::factory()->create(['role' => 'admin']));
+        $this->post(route('admin.practice.generate'), ['period' => 'daily'])->assertRedirect('/admin/practice')->assertSessionHasErrors('generation');
+        $this->get('/admin/practice')->assertSee('Gemini model is unavailable (HTTP 404).')->assertSee('GEMINI_MODEL');
+        $this->assertDatabaseCount('practice_sets', 0);
+    }
 }

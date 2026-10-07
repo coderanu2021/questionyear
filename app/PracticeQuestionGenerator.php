@@ -119,6 +119,9 @@ class PracticeQuestionGenerator
                 'generationConfig' => ['responseMimeType' => 'application/json', 'responseSchema' => ['type' => 'ARRAY', 'items' => ['type' => 'OBJECT', 'properties' => ['q' => ['type' => 'STRING'], 'o' => ['type' => 'ARRAY', 'items' => ['type' => 'STRING']], 'c' => ['type' => 'INTEGER'], 'explanation' => ['type' => 'STRING']], 'required' => ['q', 'o', 'c', 'explanation']]]],
             ]);
         if (! $response->successful()) {
+            if ($response->status() === 404) {
+                throw new RuntimeException('Gemini model is unavailable (HTTP 404). Set GEMINI_MODEL to an available text generation model in the server environment, then run php artisan config:clear. Existing sets are preserved.');
+            }
             throw new RuntimeException('Gemini generation failed (HTTP '.$response->status().'). Existing sets are preserved.');
         }
         $questions = json_decode($response->json('candidates.0.content.parts.0.text', ''), true);
