@@ -12,7 +12,7 @@ function mono(n){const w=n.replace("&","").split(/\s+/).filter(Boolean);return w
 function render(){
   fl.innerHTML=cats.map(c=>`<button class="chip" aria-pressed="${c===cat}" data-c="${c}">${esc(c)}</button>`).join("");
   const r=SUB.filter(x=>(cat==="All"||x.cat===cat)&&x.n.toLowerCase().includes(term));
-  gr.innerHTML=r.map(x=>`<a href="/subject/${x.id}" class="card" style="--c:${x.c}"><div class="card-h"><div class="ic">${mono(x.n)}</div><div><small>${esc(x.cat)}</small><h3>${esc(x.n)}</h3></div></div><p>${esc(x.d)}</p><div class="card-f"><span>${x.id==="current-affairs"?subjectQuizzes(x).length+" quizzes":x.ch.length+" chapters"}</span><b>View ${x.id==="current-affairs"?"quizzes":"chapters"} ${CH}</b></div></a>`).join("");
+  gr.innerHTML=r.map(x=>`<a href="/subject/${x.id}" class="card" style="--c:${x.c}"><div class="card-h"><div class="ic">${mono(x.n)}</div><div><small>${esc(x.cat)}</small><h3>${esc(x.n)}</h3></div></div><p>${esc(x.d)}</p><div class="card-f"><span>${["current-affairs","general-knowledge"].includes(x.id)?subjectQuizzes(x).length+" quizzes":x.ch.length+" chapters"}</span><b>View ${["current-affairs","general-knowledge"].includes(x.id)?"quizzes":"chapters"} ${CH}</b></div></a>`).join("");
   em.style.display=r.length?"none":"block";
 }
 fl.onclick=e=>{const b=e.target.closest("[data-c]");if(b){cat=b.dataset.c;render()}};
@@ -70,13 +70,14 @@ function renderChaps(){
     $("cl").innerHTML=quizzes.length?quizzes.map(t=>{const parts=t.date_label?.split(" ");return `<a class="ca-edition" href="${esc(t.url)}"><div class="ca-edition-date">${parts?`<strong>${esc(parts[0])}</strong><span>${esc(parts[1])}</span>`:`<i class="fa-regular fa-file-lines" aria-hidden="true"></i>`}</div><div class="ca-edition-body"><h3>${esc(t.title)}</h3><small>${t.count} questions and answers${t.date_label?` · ${esc(t.date_label)}`:""}</small></div><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>`}).join(""):`<p class="empty" style="display:block">No quizzes match your search.</p>`;
     return;
   }
+  if(x.id==="general-knowledge"){const quizzes=subjectQuizzes(x).filter(t=>t.title.toLowerCase().includes(f));$("cl").innerHTML=quizzes.length?quizzes.map(t=>`<a class="chap" href="${esc(t.url)}"><span class="cn"><i class="fa-solid fa-play"></i></span><div><h3>${esc(t.title)}</h3><small>${t.count} MCQs · ${t.duration} minutes · Pass ${t.pass}%</small></div><span class="go">Start quiz</span></a>`).join(""):`<p class="empty" style="display:block">No quizzes match your search.</p>`;return;}
   const it=x.ch.map((t,i)=>({t,i})).filter(o=>o.t.toLowerCase().includes(f)&&(!$("chapter-category").value||window.CURRICULUM.categories[x.id+":"+o.i]===$("chapter-category").value));
   $("cl").innerHTML=it.length?it.map(({t,i})=>{const b=QB[x.id+":"+i],n=LN[x.id+":"+i];
     return (n||b)?`<a class="chap" style="--c:${x.c}" href="${n?esc(window.CURRICULUM.chapterUrls[x.id+":"+i]):`${esc(window.CURRICULUM.quizUrls[x.id+":"+i])}`}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>${n?"Chapter notes":"Practice quiz"}${b?" + "+b.length+" practice questions":""}</small></div><span class="go"><i class="fa-solid fa-book-open"></i> ${n?"Read chapter":"Start quiz"}</span></a>`
     :`<div class="chap off" style="--c:${x.c}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>Notes and questions are being added</small></div><span class="soon">Coming soon</span></div>`}).map((markup,k)=>{const index=it[k].i;const tests=window.CURRICULUM.tests[x.id+":"+index]||[];return markup+tests.map(t=>`<a class="chap" href="${esc(t.url)}"><span class="cn"><i class="fa-solid fa-play"></i></span><div><h3>${esc(t.title)}</h3><small>${t.quiz_date?`<time datetime="${esc(t.quiz_date)}">${esc(t.date_label)}</time> · `:""}${t.count} questions · ${t.duration} minutes · Pass ${t.pass}%</small></div></a>`).join("")}).join(""):`<p class="empty" style="display:block">No chapters match your search.</p>`;
 }
 function subjectPage(x){
-  const quizOnly=x.id==="current-affairs";
+  const quizOnly=["current-affairs","general-knowledge"].includes(x.id);
   curSub=x;document.title=window.PAGE_SEO_TITLE||x.n+(quizOnly?" quizzes – ":" chapters – ")+SITE_TITLE;
   $("subject-list-title").textContent=quizOnly?"Quizzes":"Chapters";
   $("cf").placeholder=quizOnly?"Search quizzes":"Search chapters";
@@ -166,7 +167,7 @@ function drawQ(){
 function accountGate(){clearInterval(tmr);$("qb").innerHTML=`<div class="res"><h2>Create an account to continue</h2><p>You have completed your 25 free guest questions. Log in or create a free account to solve more questions.</p><div class="cta2"><a class="btn btn-o" href="/register">Create free account</a><a class="btn btn-l" href="/login">Log in</a></div></div>`}
 function startQuiz(){qi=0;qsc=0;qans=[];t0=Date.now();clearInterval(tmr);if(!window.CURRENT_USER&&window.GUEST_QUESTIONS_USED>=25){accountGate();return}tmr=setInterval(tick,1000);drawQ()}
 function quizPage(x,i){
-  curId=x.id;curIdx=i;qs=QB[x.id+":"+i];const settings=quizSettings(),t=x.id==="current-affairs"?settings?.title||x.ch[i]:x.ch[i];document.title=window.PAGE_SEO_TITLE||window.CHAPTER_SEO_TITLE||t+" quiz – "+SITE_TITLE;
+  curId=x.id;curIdx=i;qs=QB[x.id+":"+i];const settings=quizSettings(),t=["current-affairs","general-knowledge"].includes(x.id)?settings?.title||x.ch[i]:x.ch[i];document.title=window.PAGE_SEO_TITLE||window.CHAPTER_SEO_TITLE||t+" quiz – "+SITE_TITLE;
   const ln=LN[x.id+":"+i]?`<span>/</span><a href="/learn/${x.id}/${i}">Notes</a>`:"";
   $("qc").innerHTML=`<a href="/">Home</a><span>/</span><a href="/subject/${x.id}">${esc(x.n)}</a>${ln}<span>/</span><b>${esc(t)}</b>${settings?.quiz_date?`<span>/</span><time datetime="${esc(settings.quiz_date)}">${esc(settings.date_label)}</time>`:''}`;
   if(x.id==="current-affairs")initCurrentAffairsReader();else startQuiz();
@@ -200,7 +201,7 @@ async function results(){
   clearInterval(tmr);const pct=Math.round(qsc/qs.length*100);
   const msg=pct>=80?"Excellent work":pct>=50?"Good effort":"Keep practicing";
   const rev=LN[curId+":"+curIdx]?`<a class="btn btn-l" href="/learn/${curId}/${curIdx}">Revise notes</a>`:"";
-  $("qb").innerHTML=`<div class="res"><div class="sb">${qsc}<span>/${qs.length}</span></div><h2>${msg}</h2><p class="sub" style="margin:0 auto 20px">You scored ${pct}% in ${fmt()}.</p><div class="cta2"><button class="btn btn-o" id="qr">Try again</button>${rev}<a class="btn btn-l" href="/my-learning">Revise mistakes / Next 10 questions</a><a class="btn btn-l" href="/subject/${curId}">Back to ${curId==="current-affairs"?"quizzes":"chapters"}</a></div></div><div class="rv"><h3>Review answers</h3>`+qs.map((q,i)=>{const ok=qans[i]===q[2];return `<div><div class="t">${i+1}. ${esc(q[0])}</div><span style="color:var(--${ok?"ok":"bad"});font-weight:600">${ok?"Correct":"Your answer: "+esc(q[1][qans[i]]??"Not answered")}</span><div>Correct answer: ${esc(q[1][q[2]])}</div>${questionTools(i,true)}</div>`}).join("")+`</div>`;
+  $("qb").innerHTML=`<div class="res"><div class="sb">${qsc}<span>/${qs.length}</span></div><h2>${msg}</h2><p class="sub" style="margin:0 auto 20px">You scored ${pct}% in ${fmt()}.</p><div class="cta2"><button class="btn btn-o" id="qr">Try again</button>${rev}<a class="btn btn-l" href="/my-learning">Revise mistakes / Next 10 questions</a><a class="btn btn-l" href="/subject/${curId}">Back to ${["current-affairs","general-knowledge"].includes(curId)?"quizzes":"chapters"}</a></div></div><div class="rv"><h3>Review answers</h3>`+qs.map((q,i)=>{const ok=qans[i]===q[2];return `<div><div class="t">${i+1}. ${esc(q[0])}</div><span style="color:var(--${ok?"ok":"bad"});font-weight:600">${ok?"Correct":"Your answer: "+esc(q[1][qans[i]]??"Not answered")}</span><div>Correct answer: ${esc(q[1][q[2]])}</div>${questionTools(i,true)}</div>`}).join("")+`</div>`;
 }
 $("qb").addEventListener("click",e=>{
   const o=e.target.closest(".qo");

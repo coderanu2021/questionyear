@@ -26,7 +26,7 @@ class SitemapController extends Controller
             $urls[route('subject', $subject->slug)] = $subject->updated_at;
             foreach ($subject->chapters as $index => $chapter) {
                 $chapter->setRelation('subject', $subject);
-                if ($subject->slug !== 'current-affairs' && ($chapter->content || $chapter->notes)) {
+                if (! in_array($subject->slug, ['current-affairs', 'general-knowledge'], true) && ($chapter->content || $chapter->notes)) {
                     $urls[$chapter->readingUrl($index)] = $chapter->updated_at;
                 }
                 foreach ($chapter->quizzes as $quiz) {

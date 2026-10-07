@@ -1,6 +1,6 @@
 window.ADMIN_VIEWS=window.ADMIN_VIEWS||{};window.ADMIN_VIEWS.chapters=function chapters(){
  const q=(window._cq||'').toLowerCase(),sub=window._cs||'';
- const chapters=S.chapters.filter(c=>c.subject!=='Current Affairs');
+ const chapters=S.chapters.filter(c=>!['Current Affairs','General Knowledge'].includes(c.subject));
  const subs=[...new Set(chapters.map(c=>c.subject))];
  const rows=chapters.filter(c=>c.title.toLowerCase().includes(q)&&(!sub||c.subject==sub));
  return `<div class="head"><div><h2>Chapters</h2><p>${chapters.length} chapters across ${subs.length} subjects</p></div><button class="btn pri" onclick="chapterModal()">${ic('plus')}Add chapter</button></div>

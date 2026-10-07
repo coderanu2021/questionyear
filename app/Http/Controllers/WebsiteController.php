@@ -33,7 +33,7 @@ class WebsiteController extends Controller
         if ($request->url() !== $quiz->publicUrl()) {
             return redirect()->to($quiz->publicUrl(), 301);
         }
-        $chapter = $subject === 'current-affairs' ? null : $quiz->chapter->subject->chapters()->where('status', 'published')->orderBy('id')->pluck('id')->search($quiz->chapter_id);
+        $chapter = in_array($subject, ['current-affairs', 'general-knowledge'], true) ? null : $quiz->chapter->subject->chapters()->where('status', 'published')->orderBy('id')->pluck('id')->search($quiz->chapter_id);
 
         return $this->index($request, $subject, $chapter, $quiz->id);
     }
@@ -52,13 +52,13 @@ class WebsiteController extends Controller
         $curriculum = ['S' => [], 'QB' => [], 'LN' => [], 'tests' => [], 'categories' => [], 'chapterUrls' => [], 'quizUrls' => []];
         $quizIds = [];
         foreach ($subjects as $item) {
-            if ($item->slug === 'current-affairs') {
+            if (in_array($item->slug, ['current-affairs', 'general-knowledge'], true)) {
                 $quizzes = Quiz::published()->where(fn ($query) => $query->where('subject_id', $item->id)->orWhereHas('chapter', fn ($query) => $query->where('subject_id', $item->id)))->orderByDesc('quiz_date')->orderByDesc('id')->get();
                 $curriculum['S'][] = [$item->name, $item->category, $item->description ?? '', $quizzes->pluck('title')->all()];
                 foreach ($quizzes as $index => $quiz) {
                     $key = $item->slug.':'.$index;
-                    $curriculum['tests'][$key] = [['id' => $quiz->id, 'title' => $quiz->title, 'quiz_date' => $quiz->quiz_date?->toDateString(), 'date_label' => $quiz->quiz_date?->format('d M Y'), 'current_affairs' => true, 'duration' => $quiz->duration, 'pass' => $quiz->passing_score, 'count' => count($quiz->questions), 'url' => $quiz->publicUrl()]];
-                    $curriculum['QB'][$key] = [];
+                    $curriculum['tests'][$key] = [['id' => $quiz->id, 'title' => $quiz->title, 'quiz_date' => $quiz->quiz_date?->toDateString(), 'date_label' => $quiz->quiz_date?->format('d M Y'), 'current_affairs' => $item->slug === 'current-affairs', 'duration' => $quiz->duration, 'pass' => $quiz->passing_score, 'count' => count($quiz->questions), 'url' => $quiz->publicUrl()]];
+                    $curriculum['QB'][$key] = $item->slug === 'current-affairs' ? [] : array_map(fn ($question) => [$question['q'], $question['o'], null, ''], $quiz->questions);
                     $quizIds[$key] = $quiz->id;
                     $curriculum['quizUrls'][$key] = $quiz->publicUrl();
                 }
@@ -105,11 +105,11 @@ class WebsiteController extends Controller
         $seoChapter = isset($selected) && $chapter !== null ? $selected->chapters[$chapter] : null;
         $settings = SiteSettings::values();
         $defaultTitle = match (true) {
-            $subject === 'current-affairs' && $test !== null => $quizzes->firstWhere('id', $test)?->title.' – '.$settings['site_title'],
+            in_array($subject, ['current-affairs', 'general-knowledge'], true) && $test !== null => Quiz::find($test)?->title.' – '.$settings['site_title'],
             $seoChapter !== null => $seoChapter->title.' – '.$settings['site_title'],
             $request->routeIs('login') => 'Log in – '.$settings['site_title'],
             $request->routeIs('register') => 'Create account – '.$settings['site_title'],
-            isset($selected) => $selected->name.($selected->slug === 'current-affairs' ? ' quizzes – ' : ' chapters – ').$settings['site_title'],
+            isset($selected) => $selected->name.(in_array($selected->slug, ['current-affairs', 'general-knowledge'], true) ? ' quizzes – ' : ' chapters – ').$settings['site_title'],
             default => $settings['site_title'],
         };
         $seoTitle = $seoChapter?->meta_title ?: $defaultTitle;

@@ -37,7 +37,7 @@ class PageSeo
         }
         $chapterIndexes = [];
         foreach (Chapter::with('subject')->orderBy('id')->get() as $chapter) {
-            if ($chapter->subject->slug === 'current-affairs') {
+            if (in_array($chapter->subject->slug, ['current-affairs', 'general-knowledge'], true)) {
                 continue;
             }
             $index = $chapterIndexes[$chapter->subject_id] ?? 0;
