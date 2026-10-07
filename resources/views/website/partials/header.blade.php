@@ -19,8 +19,7 @@
       <li><a href="/#popular">Quizzes</a></li><li><a href="{{ route('daily') }}">Daily quiz</a></li><li><a href="{{ route('weekly') }}">Weekly quiz</a></li><li><a href="{{ route('monthly') }}">Monthly quiz</a></li>
       <li><a href="/#exams">Exams</a></li>
       <li><a href="{{ route('blogs.index') }}">Blogs</a></li>
-      <li><a href="/#how">How it works</a></li>
-      <li><a href="/#faq">FAQ</a></li>
+      <li><a href="/subject/current-affairs">Current Affairs</a></li>
       <li class="mnav" id="msi"><a href="/login">Sign in</a></li>
     </ul></nav>
     <span class="sp"></span>
