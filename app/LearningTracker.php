@@ -48,7 +48,7 @@ class LearningTracker
             foreach (Attempt::where('user_id', $user->id)->get() as $attempt) {
                 $quiz = Quiz::with('chapter')->find($attempt->quiz_id);
                 if ($quiz && count($quiz->questions) === count($attempt->answers)) {
-                    $history->push(['questions' => $quiz->questions, 'answers' => $attempt->answers, 'subject' => $quiz->chapter->subject_id, 'time' => $attempt->created_at]);
+                    $history->push(['questions' => $quiz->questions, 'answers' => $attempt->answers, 'subject' => $quiz->learningSubject()->id, 'time' => $attempt->created_at]);
                 }
             }
             foreach (DB::table('daily_quiz_attempts')->where('user_id', $user->id)->get() as $attempt) {
@@ -76,11 +76,11 @@ class LearningTracker
         abort_unless(count($parts) === 3 && ctype_digit($parts[2]), 404);
         if ($parts[0] === 'quiz') {
             $quiz = Quiz::with('chapter')->findOrFail($parts[1]);
-            abort_unless($quiz->chapter->status === 'published', 404);
+            abort_unless($quiz->isPublished(), 404);
             $question = $quiz->questions[(int) $parts[2]] ?? null;
             abort_unless($question, 404);
 
-            return $this->remember($question, $quiz->chapter->subject_id);
+            return $this->remember($question, $quiz->learningSubject()->id);
         }
         abort_unless($parts[0] === 'practice', 404);
         $set = DB::table('practice_sets')->find($parts[1]);
@@ -95,10 +95,10 @@ class LearningTracker
     public function importBank(): array
     {
         $questionIds = [];
-        foreach (Quiz::with('chapter')->whereHas('chapter', fn ($query) => $query->where('status', 'published'))->get() as $quiz) {
+        foreach (Quiz::with('chapter')->published()->get() as $quiz) {
             foreach ($quiz->questions as $question) {
                 if (Validator::make($question, ['q' => 'required|string', 'o' => 'required|array|size:4', 'c' => 'required|integer|between:0,3'])->passes()) {
-                    $questionIds[] = $this->remember($question, $quiz->chapter->subject_id);
+                    $questionIds[] = $this->remember($question, $quiz->learningSubject()->id);
                 }
             }
         }

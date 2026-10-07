@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Quiz;
 use App\Models\Subject;
 use Illuminate\Http\Response;
 
@@ -36,6 +37,9 @@ class SitemapController extends Controller
         }
         foreach (Post::where('type', 'blog')->where('status', 'published')->where('published_at', '<=', now())->get() as $post) {
             $urls[route('blogs.show', $post->slug)] = $post->updated_at;
+        }
+        foreach (Quiz::published()->whereNotNull('subject_id')->with('subject')->get() as $quiz) {
+            $urls[$quiz->publicUrl()] = $quiz->updated_at;
         }
         $xml = new \XMLWriter;
         $xml->openMemory();

@@ -37,6 +37,9 @@ class PageSeo
         }
         $chapterIndexes = [];
         foreach (Chapter::with('subject')->orderBy('id')->get() as $chapter) {
+            if ($chapter->subject->slug === 'current-affairs') {
+                continue;
+            }
             $index = $chapterIndexes[$chapter->subject_id] ?? 0;
             $pages['chapter:'.$chapter->id] = ['label' => $chapter->subject->name.' / '.$chapter->title, 'group' => 'Chapters', 'url' => $chapter->status === 'published' ? $chapter->readingUrl($index) : null];
             if ($chapter->status === 'published') {
@@ -44,7 +47,7 @@ class PageSeo
             }
         }
         foreach (Quiz::with('chapter.subject')->orderBy('title')->get() as $quiz) {
-            $pages['quiz:'.$quiz->id] = ['label' => $quiz->chapter->subject->name.' / '.$quiz->title, 'group' => 'Quizzes', 'url' => $quiz->chapter->status === 'published' ? $quiz->publicUrl() : null];
+            $pages['quiz:'.$quiz->id] = ['label' => $quiz->learningSubject()->name.' / '.$quiz->title, 'group' => 'Quizzes', 'url' => $quiz->isPublished() ? $quiz->publicUrl() : null];
         }
         foreach (Post::orderBy('title')->get() as $post) {
             $pages['post:'.$post->id] = ['label' => $post->title, 'group' => ucfirst($post->type).' posts', 'url' => $post->type === 'blog' && $post->status === 'published' ? route('blogs.show', $post->slug) : null];

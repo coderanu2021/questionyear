@@ -29,11 +29,11 @@ class WebsiteController extends Controller
 
     public function quizPage(Request $request, string $subject, Quiz $quiz, string $slug): View|RedirectResponse
     {
-        abort_unless($quiz->chapter->status === 'published' && $quiz->chapter->subject->slug === $subject, 404);
+        abort_unless($quiz->isPublished() && $quiz->learningSubject()->slug === $subject, 404);
         if ($request->url() !== $quiz->publicUrl()) {
             return redirect()->to($quiz->publicUrl(), 301);
         }
-        $chapter = $quiz->chapter->subject->chapters()->where('status', 'published')->orderBy('id')->pluck('id')->search($quiz->chapter_id);
+        $chapter = $subject === 'current-affairs' ? null : $quiz->chapter->subject->chapters()->where('status', 'published')->orderBy('id')->pluck('id')->search($quiz->chapter_id);
 
         return $this->index($request, $subject, $chapter, $quiz->id);
     }
@@ -52,6 +52,19 @@ class WebsiteController extends Controller
         $curriculum = ['S' => [], 'QB' => [], 'LN' => [], 'tests' => [], 'categories' => [], 'chapterUrls' => [], 'quizUrls' => []];
         $quizIds = [];
         foreach ($subjects as $item) {
+            if ($item->slug === 'current-affairs') {
+                $quizzes = Quiz::published()->where(fn ($query) => $query->where('subject_id', $item->id)->orWhereHas('chapter', fn ($query) => $query->where('subject_id', $item->id)))->orderByDesc('quiz_date')->orderByDesc('id')->get();
+                $curriculum['S'][] = [$item->name, $item->category, $item->description ?? '', $quizzes->pluck('title')->all()];
+                foreach ($quizzes as $index => $quiz) {
+                    $key = $item->slug.':'.$index;
+                    $curriculum['tests'][$key] = [['id' => $quiz->id, 'title' => $quiz->title, 'quiz_date' => $quiz->quiz_date?->toDateString(), 'date_label' => $quiz->quiz_date?->format('d M Y'), 'duration' => $quiz->duration, 'pass' => $quiz->passing_score, 'count' => count($quiz->questions), 'url' => $quiz->publicUrl()]];
+                    $curriculum['QB'][$key] = array_map(fn ($question) => [$question['q'], $question['o'], null, ''], $quiz->questions);
+                    $quizIds[$key] = $quiz->id;
+                    $curriculum['quizUrls'][$key] = $quiz->publicUrl();
+                }
+
+                continue;
+            }
             $curriculum['S'][] = [$item->name, $item->category, $item->description ?? '', $item->chapters->pluck('title')->all()];
             foreach ($item->chapters as $index => $entry) {
                 $key = $item->slug.':'.$index;
@@ -92,6 +105,7 @@ class WebsiteController extends Controller
         $seoChapter = isset($selected) && $chapter !== null ? $selected->chapters[$chapter] : null;
         $settings = SiteSettings::values();
         $defaultTitle = match (true) {
+            $subject === 'current-affairs' && $test !== null => $quizzes->firstWhere('id', $test)?->title.' – '.$settings['site_title'],
             $seoChapter !== null => $seoChapter->title.' – '.$settings['site_title'],
             $request->routeIs('login') => 'Log in – '.$settings['site_title'],
             $request->routeIs('register') => 'Create account – '.$settings['site_title'],
@@ -108,12 +122,12 @@ class WebsiteController extends Controller
             }
         }
 
-        return view('website.index', ['seoChapter' => $seoChapter, 'latestBlogs' => $latestBlogs, 'chapterHeading' => $request->routeIs('learn', 'chapter') ? $seoChapter?->title : null, 'chapterMetaTitle' => $seoChapter?->meta_title, 'seoTitle' => $seoTitle, 'seoDescription' => $seoDescription, 'seoKeywords' => $seoKeywords, 'curriculum' => $curriculum, 'quizIds' => $quizIds, 'currentUser' => $request->user()?->only('name', 'email'), 'popular' => $popular, 'chapterCount' => $subjects->sum(fn ($s) => $s->chapters->count()), 'subjectCount' => $subjects->count(), 'questionCount' => Quiz::whereHas('chapter', fn ($q) => $q->where('status', 'published'))->get()->sum(fn ($q) => count($q->questions))]);
+        return view('website.index', ['seoChapter' => $seoChapter, 'latestBlogs' => $latestBlogs, 'chapterHeading' => $request->routeIs('learn', 'chapter') ? $seoChapter?->title : null, 'chapterMetaTitle' => $seoChapter?->meta_title, 'seoTitle' => $seoTitle, 'seoDescription' => $seoDescription, 'seoKeywords' => $seoKeywords, 'curriculum' => $curriculum, 'quizIds' => $quizIds, 'currentUser' => $request->user()?->only('name', 'email'), 'popular' => $popular, 'chapterCount' => $subjects->sum(fn ($s) => $s->chapters->count()), 'subjectCount' => $subjects->count(), 'questionCount' => Quiz::published()->get()->sum(fn ($q) => count($q->questions))]);
     }
 
     public function answer(Request $request, Quiz $quiz): JsonResponse
     {
-        abort_unless($quiz->chapter->status === 'published', 404);
+        abort_unless($quiz->isPublished(), 404);
         $data = $request->validate(['question' => 'required|integer|min:0', 'answer' => 'required|integer|between:0,3']);
         $question = $quiz->questions[$data['question']] ?? null;
         abort_unless($question, 404);
@@ -122,7 +136,7 @@ class WebsiteController extends Controller
             $this->consumeGuestQuestions($request, 1);
             $request->session()->put('guest_answers.'.$quiz->id.'.'.$data['question'], $data['answer']);
         } else {
-            app(LearningTracker::class)->record($request->user(), [$question], [$data['answer']], $quiz->chapter->subject_id);
+            app(LearningTracker::class)->record($request->user(), [$question], [$data['answer']], $quiz->learningSubject()->id);
         }
 
         return response()->json(['correct' => $question['c'], 'explanation' => $question['explanation'] ?? '', 'guest_remaining' => $request->user() ? null : max(0, 25 - $request->session()->get('guest_questions_used', 0))]);
@@ -130,7 +144,7 @@ class WebsiteController extends Controller
 
     public function attempt(Request $request, Quiz $quiz): JsonResponse
     {
-        abort_unless($quiz->chapter->status === 'published', 404);
+        abort_unless($quiz->isPublished(), 404);
         abort_if($request->user()?->status === 'blocked', 403);
         $data = $request->validate(['answers' => 'required|array|size:'.count($quiz->questions), 'answers.*' => 'required|integer|between:-1,3', 'seconds' => 'required|integer|min:0|max:86400']);
         if (! array_is_list($data['answers'])) {
@@ -156,7 +170,7 @@ class WebsiteController extends Controller
         $percentage = (int) round($score / count($quiz->questions) * 100);
         Attempt::create(['quiz_id' => $quiz->id, 'user_id' => $request->user()?->id, 'answers' => $data['answers'], 'score' => $score, 'total' => count($quiz->questions), 'seconds' => $data['seconds'], 'percentage' => $percentage]);
         if ($request->user()) {
-            app(LearningTracker::class)->record($request->user(), $quiz->questions, $data['answers'], $quiz->chapter->subject_id);
+            app(LearningTracker::class)->record($request->user(), $quiz->questions, $data['answers'], $quiz->learningSubject()->id);
         }
 
         $review = $quiz->questions;

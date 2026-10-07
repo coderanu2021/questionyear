@@ -116,7 +116,7 @@ class AdminController extends Controller
             'tests' => $quizzes->map(function ($q) use ($attempts) {
                 $results = $attempts->where('quiz_id', $q->id);
 
-                return ['id' => $q->id, 'ch' => $q->chapter_id, 'title' => $q->title, 'quiz_date' => $q->quiz_date?->toDateString(), 'dur' => $q->duration, 'pass' => $q->passing_score, 'qs' => $q->questions, 'attempts' => $results->count(), 'avg' => (int) round($results->avg('percentage') ?? 0)];
+                return ['id' => $q->id, 'ch' => $q->chapter_id, 'current_affairs' => $q->learningSubject()->slug === 'current-affairs', 'status' => $q->learningSubject()->slug === 'current-affairs' ? ($q->isPublished() ? 'published' : 'draft') : $q->chapter->status, 'title' => $q->title, 'quiz_date' => $q->quiz_date?->toDateString(), 'dur' => $q->duration, 'pass' => $q->passing_score, 'qs' => $q->questions, 'attempts' => $results->count(), 'avg' => (int) round($results->avg('percentage') ?? 0)];
             })->all(),
             'users' => $users->map(function ($u) use ($attempts, $quizzes) {
                 $results = $attempts->where('user_id', $u->id);
@@ -158,20 +158,27 @@ class AdminController extends Controller
         $data = $request->validate([
             'version' => 'required|string', 'chapters' => 'present|array|max:1000', 'tests' => 'present|array|max:1000', 'users' => 'present|array',
             'chapters.*.id' => 'required|integer|min:1|distinct', 'chapters.*.title' => 'required|string|max:255', 'chapters.*.subject' => 'required|string|max:100', 'chapters.*.category' => 'nullable|in:Ancient History,Medieval History,Modern History', 'chapters.*.lessons' => 'required|integer|between:1,1000', 'chapters.*.status' => 'required|in:published,draft', 'chapters.*.desc' => 'nullable|string|max:10000', 'chapters.*.content' => 'nullable|string|max:500000', 'chapters.*.meta_title' => 'nullable|string|max:255', 'chapters.*.meta_description' => 'nullable|string|max:1000', 'chapters.*.meta_keywords' => 'nullable|string|max:1000',
-            'tests.*.id' => 'required|integer|min:1|distinct', 'tests.*.ch' => 'required|integer', 'tests.*.title' => 'required|string|max:255', 'tests.*.quiz_date' => 'nullable|date_format:Y-m-d', 'tests.*.dur' => 'required|integer|between:1,240', 'tests.*.pass' => 'required|integer|between:1,100', 'tests.*.qs' => 'required|array|min:1|max:200', 'tests.*.qs.*.q' => 'required|string|max:5000', 'tests.*.qs.*.o' => 'required|array|size:4', 'tests.*.qs.*.o.*' => 'required|string|max:2000', 'tests.*.qs.*.c' => 'required|integer|between:0,3', 'tests.*.qs.*.explanation' => 'nullable|string|max:10000',
+            'tests.*.id' => 'required|integer|min:1|distinct', 'tests.*.ch' => 'nullable|integer', 'tests.*.current_affairs' => 'sometimes|boolean', 'tests.*.status' => 'sometimes|in:published,draft', 'tests.*.title' => 'required|string|max:255', 'tests.*.quiz_date' => 'nullable|date_format:Y-m-d', 'tests.*.dur' => 'required|integer|between:1,240', 'tests.*.pass' => 'required|integer|between:1,100', 'tests.*.qs' => 'required|array|min:1|max:200', 'tests.*.qs.*.q' => 'required|string|max:5000', 'tests.*.qs.*.o' => 'required|array|size:4', 'tests.*.qs.*.o.*' => 'required|string|max:2000', 'tests.*.qs.*.c' => 'required|integer|between:0,3', 'tests.*.qs.*.explanation' => 'nullable|string|max:10000',
             'users.*.id' => 'required|integer|exists:users,id', 'users.*.status' => 'required|in:active,inactive,blocked',
         ]);
         DB::transaction(function () use ($data) {
             abort_unless(hash_equals($this->state()['version'], $data['version']), 409, 'Data changed in another tab. Reload before saving.');
             $chapterIds = array_column($data['chapters'], 'id');
             foreach ($data['tests'] as $test) {
-                if (! in_array($test['ch'], $chapterIds)) {
+                $existingQuiz = Quiz::find($test['id']);
+                if (($test['current_affairs'] ?? false) && $existingQuiz?->chapter_id !== null && $existingQuiz->learningSubject()->slug !== 'current-affairs') {
+                    throw ValidationException::withMessages(['tests' => 'Create a new Current Affairs quiz instead of changing an existing subject quiz.']);
+                }
+                if (! ($test['current_affairs'] ?? false) && ! in_array($test['ch'] ?? null, $chapterIds, true)) {
                     throw ValidationException::withMessages(['tests' => 'Select an existing chapter for every test.']);
                 }
             }
             Quiz::whereNotIn('id', array_column($data['tests'], 'id'))->delete();
             Chapter::whereNotIn('id', $chapterIds)->delete();
             foreach ($data['chapters'] as $chapter) {
+                if (Str::slug($chapter['subject']) === 'current-affairs' && ! Chapter::whereKey($chapter['id'])->whereHas('subject', fn ($query) => $query->where('slug', 'current-affairs'))->exists()) {
+                    throw ValidationException::withMessages(['chapters' => 'Add Current Affairs directly from Tests & Quizzes without a chapter.']);
+                }
                 $subject = Subject::firstOrCreate(['name' => $chapter['subject']], ['slug' => Str::slug(str_replace('&', '', $chapter['subject'])), 'category' => 'General', 'description' => 'Explore '.$chapter['subject']]);
                 $record = Chapter::find($chapter['id']) ?? new Chapter;
                 $record->id = $chapter['id'];
@@ -180,7 +187,7 @@ class AdminController extends Controller
             foreach ($data['tests'] as $test) {
                 $record = Quiz::find($test['id']) ?? new Quiz;
                 $record->id = $test['id'];
-                $record->fill(['chapter_id' => $test['ch'], 'title' => $test['title'], 'quiz_date' => array_key_exists('quiz_date', $test) ? $test['quiz_date'] : $record->quiz_date, 'duration' => $test['dur'], 'passing_score' => $test['pass'], 'questions' => $test['qs']])->save();
+                $record->fill(['chapter_id' => ($test['current_affairs'] ?? false) ? ($record->chapter_id ?? null) : $test['ch'], 'subject_id' => ($test['current_affairs'] ?? false) && $record->chapter_id === null ? Subject::firstOrCreate(['slug' => 'current-affairs'], ['name' => 'Current Affairs', 'category' => 'General', 'description' => 'Daily current affairs quizzes'])->id : null, 'status' => $test['status'] ?? 'published', 'title' => $test['title'], 'quiz_date' => array_key_exists('quiz_date', $test) ? $test['quiz_date'] : $record->quiz_date, 'duration' => $test['dur'], 'passing_score' => $test['pass'], 'questions' => $test['qs']])->save();
             }
             foreach ($data['users'] as $user) {
                 User::where('id', $user['id'])->where('role', 'student')->update(['status' => $user['status']]);
