@@ -115,6 +115,15 @@ function learnPage(x,i){
   <aside class="bk-toc box"><h3><i class="fa-solid fa-book-open"></i> In this chapter</h3>${d.s.map((s,n)=>`<button data-go="bk${n}"><i class="fa-solid ${s.i}"></i>${esc(s.h)}</button>`).join("")}<button data-go="bkend"><i class="fa-solid fa-list-check"></i>Chapter summary</button>${q?`<a class="btn btn-o" href="${esc(window.CURRICULUM.quizUrls[x.id+":"+i])}" style="width:100%;margin-top:14px"><i class="fa-solid fa-play"></i> Practice quiz</a>`:""}</aside></div>`;
   const sm=document.querySelector(".bk-sum");if(sm)sm.id="bkend";
   const article=$("learn").querySelector(".bk-art");
+  article.querySelectorAll("table").forEach(table=>{
+    if(table.parentElement.closest("table"))return;
+    let container=table.closest(".bk-t");
+    if(!container){container=document.createElement("div");container.className="bk-t";table.before(container);container.append(table)}
+    container.tabIndex=0;
+    container.setAttribute("role","region");
+    container.setAttribute("aria-label","Chapter table — scroll horizontally to see all columns");
+    if(!table.tHead&&table.rows.length)table.rows[0].classList.add("bk-table-header");
+  });
   article.querySelectorAll("h1").forEach(heading=>{const replacement=document.createElement("h2");replacement.innerHTML=heading.innerHTML;heading.replaceWith(replacement)});
   const toc=$("learn").querySelector(".bk-toc");
   toc.querySelectorAll("button[data-go]").forEach(button=>button.remove());
