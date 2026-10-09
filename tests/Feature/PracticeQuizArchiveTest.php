@@ -85,6 +85,18 @@ class PracticeQuizArchiveTest extends TestCase
         $this->get(route('daily', ['page' => 2]))->assertOk()->assertViewHas('archiveSets', fn ($sets): bool => $sets->count() === 1);
     }
 
+    public function test_quiz_set_urls_use_the_requested_format_and_redirect_old_links(): void
+    {
+        foreach (array_keys(PracticeQuestionGenerator::COUNTS) as $period) {
+            $id = $this->storeSet($period, app(PracticeQuestionGenerator::class)->date($period), 1, 'Saved');
+            $url = route($period.'.set', ['set' => $id]);
+            $this->assertStringEndsWith('/'.$period.'-quiz/sets/quiz-set-'.$id, $url);
+            $this->assertSame($url, route($period.'.set.submit', ['set' => $id]));
+            $this->get('/'.$period.'-quiz/sets/'.$id)->assertStatus(301)->assertRedirect($url);
+            $this->get($url)->assertOk()->assertSee('Saved question 1');
+        }
+    }
+
     public function test_migration_keeps_legacy_set_ids_and_question_snapshots(): void
     {
         $migration = require database_path('migrations/2026_10_09_072326_support_multiple_practice_sets_per_period.php');

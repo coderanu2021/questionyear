@@ -12,6 +12,7 @@ use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SiteSettingsController;
 use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\WordImportController;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -51,8 +52,10 @@ Route::post('/quizzes/{quiz}/attempts', [WebsiteController::class, 'attempt'])->
 Route::get('/daily-quiz', [DailyQuizController::class, 'index'])->name('daily')->block(10, 10);
 Route::post('/daily-quiz', [DailyQuizController::class, 'submit'])->name('daily.submit')->middleware('throttle:10,1')->block(10, 10);
 foreach (['daily', 'weekly', 'monthly'] as $period) {
-    Route::get('/'.$period.'-quiz/sets/{set}', [DailyQuizController::class, 'index'])->defaults('period', $period)->whereNumber('set')->name($period.'.set')->block(10, 10);
-    Route::post('/'.$period.'-quiz/sets/{set}', [DailyQuizController::class, 'submit'])->defaults('period', $period)->whereNumber('set')->middleware('throttle:10,1')->name($period.'.set.submit')->block(10, 10);
+    Route::get('/'.$period.'-quiz/sets/quiz-set-{set}', [DailyQuizController::class, 'index'])->defaults('period', $period)->whereNumber('set')->name($period.'.set')->block(10, 10);
+    Route::post('/'.$period.'-quiz/sets/quiz-set-{set}', [DailyQuizController::class, 'submit'])->defaults('period', $period)->whereNumber('set')->middleware('throttle:10,1')->name($period.'.set.submit')->block(10, 10);
+    Route::get('/'.$period.'-quiz/sets/{set}', fn (string $set): RedirectResponse => redirect()->route($period.'.set', ['set' => $set], 301))->whereNumber('set');
+    Route::post('/'.$period.'-quiz/sets/{set}', [DailyQuizController::class, 'submit'])->defaults('period', $period)->whereNumber('set')->middleware('throttle:10,1')->block(10, 10);
 }
 foreach (['weekly', 'monthly'] as $period) {
     Route::get('/'.$period.'-quiz', [DailyQuizController::class, 'index'])->defaults('period', $period)->name($period)->block(10, 10);
