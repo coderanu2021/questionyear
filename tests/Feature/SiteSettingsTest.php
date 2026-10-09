@@ -17,7 +17,7 @@ class SiteSettingsTest extends TestCase
 
     public function test_default_site_name_and_contact_email_appear_on_public_pages(): void
     {
-        $this->get(route('home'))->assertOk()->assertSee('<title>questionyear</title>', false)->assertSee('mailto:questionyear2026@gmail.com', false)->assertDontSee('QuizHub');
+        $this->get(route('home'))->assertOk()->assertSee('<title>Free GK Quizzes &amp; Chapter Notes | questionyear</title>', false)->assertSee('mailto:questionyear2026@gmail.com', false)->assertDontSee('QuizHub');
         foreach (['/contact', '/about', '/daily-quiz', '/upcoming', '/missing-page'] as $url) {
             $this->get($url)->assertSee('questionyear')->assertDontSee('QuizHub');
         }
@@ -41,7 +41,7 @@ class SiteSettingsTest extends TestCase
         $this->actingAs(User::factory()->create(['role' => 'admin']));
         $payload = [...$this->payload(), 'site_title' => 'My Learning Site', 'site_description' => 'Updated default SEO description.', 'contact_email' => 'support@example.com', 'home_title' => 'A new homepage heading', 'home_description' => 'Our new introduction.', 'about_content' => "About our learning platform.\nMore details.", 'footer_description' => 'Updated footer content.', 'contact_description' => 'Get in touch with our team.'];
         $this->put(route('admin.settings.update'), $payload)->assertRedirect(route('admin', ['page' => 'settings']));
-        $this->get(route('home'))->assertSee('<title>My Learning Site</title>', false)->assertSee('content="Updated default SEO description."', false)->assertSee('A new homepage heading')->assertSee('Our new introduction.')->assertSee('Updated footer content.')->assertSee('mailto:support@example.com', false);
+        $this->get(route('home'))->assertSee('<title>Free GK Quizzes &amp; Chapter Notes | My Learning Site</title>', false)->assertSee('content="Updated default SEO description."', false)->assertSee('A new homepage heading')->assertSee('Our new introduction.')->assertSee('Updated footer content.')->assertSee('mailto:support@example.com', false);
         $this->get('/about')->assertSee('About My Learning Site')->assertSee('About our learning platform.');
         $this->get('/contact')->assertSee('Get in touch with our team.')->assertSee('support@example.com');
         $this->get(route('daily'))->assertSee('Daily quiz – My Learning Site');

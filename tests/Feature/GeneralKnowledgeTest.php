@@ -23,7 +23,7 @@ class GeneralKnowledgeTest extends TestCase
         $quiz = Quiz::findOrFail(1);
         $this->assertSame('general-knowledge', $quiz->learningSubject()->slug);
         $this->assertDatabaseCount('chapters', 0);
-        $response = $this->get(route('subject', 'general-knowledge'))->assertOk()->assertSee('General Knowledge quizzes');
+        $response = $this->get(route('subject', 'general-knowledge'))->assertOk()->assertSee('General Knowledge Questions & Answers');
         $curriculum = $response->viewData('curriculum');
         $this->assertSame([], $curriculum['LN']);
         $this->assertSame([], $curriculum['chapterUrls']);

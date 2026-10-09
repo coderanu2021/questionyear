@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\IndusValleyContent;
 use App\Models\Chapter;
 use App\Models\Subject;
 use Illuminate\Database\Seeder;
@@ -17,7 +18,7 @@ class IndusValleyContentSeeder extends Seeder
         $subject = Subject::firstOrCreate(['slug' => 'history'], ['name' => 'History', 'category' => 'General', 'description' => 'Explore History']);
         $chapter = Chapter::firstOrCreate(['subject_id' => $subject->id, 'title' => $data['title']], ['category' => $data['category'], 'lessons' => 1, 'status' => 'published']);
         if (blank($chapter->content)) {
-            $chapter->update(['content' => $data['content'], 'category' => $chapter->category ?? $data['category']]);
+            $chapter->update(['content' => IndusValleyContent::clean($data['content']), 'category' => $chapter->category ?? $data['category']]);
         }
     }
 }

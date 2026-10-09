@@ -1,6 +1,9 @@
-<main id="quiz" @if(!$questionAnswerQuiz) hidden @endif>
+<main id="quiz" @if(!$serverQuiz) hidden @endif>
   <div @class(['wrap', 'qwrap' => !$questionAnswerQuiz, 'ca-reader' => $questionAnswerQuiz])><div class="crumb" id="qc"></div><div @class(['box qbox' => !$questionAnswerQuiz]) id="qb">
-    @if($questionAnswerQuiz)
+    @if($serverQuiz && !$questionAnswerQuiz)
+      <h1>{{ $serverQuiz->title }}</h1><p>Practice {{ count($serverQuiz->questions) }} multiple-choice questions. Start the interactive quiz to check your answers and explanations.</p>
+      @foreach($serverQuiz->questions as $question)<section class="daily-review-item"><h2>{{ $loop->iteration }}. {{ $question['q'] }}</h2><ol type="A">@foreach($question['o'] as $option)<li>{{ $option }}</li>@endforeach</ol></section>@endforeach
+    @elseif($questionAnswerQuiz)
       <div class="ca-layout">
         <div class="ca-content">
           <div class="ca-heading">

@@ -1,4 +1,4 @@
-<main id="home">
+<main id="home" @if(!request()->routeIs('home')) hidden @endif>
 <div class="hero"><div class="wrap">
   <div>
     @if(request()->routeIs('home'))
@@ -30,8 +30,8 @@
   <h2>Choose a subject</h2>
   <p class="sub">Pick a subject to start a quiz. Every subject has topic-wise sets, timed tests and previous-style questions.</p>
   <div class="filters" id="fl"></div>
-  <div class="grid" id="gr"></div>
-  <p class="empty" id="em">No subjects match your search. Try a different word.</p>
+  <div class="grid" id="gr">@foreach($curriculum['S'] as $entry)<a class="card" href="{{ route('subject', Illuminate\Support\Str::slug(str_replace('&', '', $entry[0]))) }}"><div class="card-h"><div><small>{{ $entry[1] }}</small><h3>{{ $entry[0] }}</h3></div></div><p>{{ $entry[2] }}</p><div class="card-f"><span>{{ count($entry[3]) }} topics</span><b>Explore {{ $entry[0] }} →</b></div></a>@endforeach</div>
+  <p class="empty" id="em" @if(count($curriculum['S'])) style="display:none" @endif>No subjects match your search. Try a different word.</p>
 </div></section>
 
 <section class="alt"><div class="wrap dqb">

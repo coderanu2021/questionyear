@@ -30,7 +30,7 @@ class PageSeoTest extends TestCase
         }
         $this->get(route('admin.seo.index', ['page_key' => 'route:home']))->assertOk()->assertSee('Custom &amp; &quot;Homepage&quot;', false);
         $this->put(route('admin.seo.update'), ['page_key' => 'route:home', 'meta_title' => '', 'meta_description' => '', 'meta_keywords' => ''])->assertRedirect();
-        $this->get(route('home'))->assertOk()->assertSee('<title>questionyear</title>', false)->assertDontSee('Description &lt;safe&gt;', false);
+        $this->get(route('home'))->assertOk()->assertSee('<title>Free GK Quizzes &amp; Chapter Notes | questionyear</title>', false)->assertDontSee('Description &lt;safe&gt;', false);
     }
 
     public function test_static_practice_auth_and_error_pages_render_saved_metadata(): void

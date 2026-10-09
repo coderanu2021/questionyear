@@ -6,13 +6,15 @@ use App\Models\Post;
 use App\Models\Quiz;
 use App\Models\Subject;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class SitemapController extends Controller
 {
     public function __invoke(): Response
     {
         $urls = [];
-        foreach (['home', 'blogs.index', 'daily', 'weekly', 'monthly', 'upcoming', 'learning.leaderboard'] as $name) {
+        foreach (['home', 'learning.leaderboard'] as $name) {
             $urls[route($name)] = null;
         }
         foreach (['about', 'contact', 'help', 'careers', 'privacy', 'terms', 'cookies', 'leaderboard'] as $page) {
@@ -23,23 +25,34 @@ class SitemapController extends Controller
         }
         $subjects = Subject::with(['chapters' => fn ($query) => $query->where('status', 'published')->orderBy('id'), 'chapters.quizzes'])->orderBy('id')->get();
         foreach ($subjects as $subject) {
-            $urls[route('subject', $subject->slug)] = $subject->updated_at;
             foreach ($subject->chapters as $index => $chapter) {
                 $chapter->setRelation('subject', $subject);
                 if (! in_array($subject->slug, ['current-affairs', 'general-knowledge'], true) && ($chapter->content || $chapter->notes)) {
+                    $urls[route('subject', $subject->slug)] = $subject->updated_at;
                     $urls[$chapter->readingUrl($index)] = $chapter->updated_at;
                 }
                 foreach ($chapter->quizzes as $quiz) {
                     $quiz->setRelation('chapter', $chapter);
-                    $urls[$quiz->publicUrl()] = $quiz->updated_at;
+                    if ($quiz->isPublished()) {
+                        $urls[route('subject', $subject->slug)] = $subject->updated_at;
+                        $urls[$quiz->publicUrl()] = $quiz->updated_at;
+                    }
                 }
             }
         }
         foreach (Post::where('type', 'blog')->where('status', 'published')->where('published_at', '<=', now())->get() as $post) {
+            $urls[route('blogs.index')] = null;
             $urls[route('blogs.show', $post->slug)] = $post->updated_at;
         }
         foreach (Quiz::published()->whereNotNull('subject_id')->with('subject')->get() as $quiz) {
+            $urls[route('subject', $quiz->subject->slug)] = $quiz->subject->updated_at;
             $urls[$quiz->publicUrl()] = $quiz->updated_at;
+        }
+        foreach (DB::table('practice_sets')->whereIn('period', ['daily', 'weekly', 'monthly'])->orderBy('id')->get() as $set) {
+            if (count(json_decode($set->questions, true) ?? []) > 0) {
+                $urls[route($set->period)] = null;
+                $urls[route($set->period.'.set', ['set' => $set->id])] = Carbon::parse($set->updated_at ?? $set->created_at);
+            }
         }
         $xml = new \XMLWriter;
         $xml->openMemory();

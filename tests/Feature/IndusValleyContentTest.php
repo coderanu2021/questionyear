@@ -20,7 +20,8 @@ class IndusValleyContentTest extends TestCase
         $this->seed(IndusValleyContentSeeder::class);
         $chapter->refresh();
         $this->assertStringContainsString('Daya Ram Sahni', $chapter->content);
-        $this->assertStringContainsString('modify this content', $chapter->content);
+        $this->assertStringNotContainsString('modify this content', $chapter->content);
+        $this->assertStringNotContainsString('indus velly', $chapter->content);
         $this->assertSame(2, substr_count($chapter->content, '<table>'));
         $this->assertSame('Ancient History', $chapter->category);
         $this->assertSame('published', $chapter->status);
