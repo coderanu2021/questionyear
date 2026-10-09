@@ -16,14 +16,14 @@ class WebsiteLanguageTest extends TestCase
     public function test_language_switch_translates_navigation_and_persists_between_pages(): void
     {
         Http::preventStrayRequests();
-        $this->get('/')->assertOk()->assertSee('<html lang="en">', false)->assertSee('Daily quiz');
+        $this->get('/')->assertOk()->assertSee('<html lang="en">', false)->assertSee('Daily MCQ');
         $this->post(route('website.language'), ['language' => 'hi', 'return_to' => '/daily-quiz'])
             ->assertRedirect('/daily-quiz')->assertSessionHas('website_language', 'hi');
         $this->get('/daily-quiz')->assertOk()->assertSee('<html lang="hi">', false)
-            ->assertSee('दैनिक क्विज़')->assertSee('विषय')->assertSee('भाषा');
+            ->assertSee('दैनिक MCQ')->assertSee('विषय')->assertSee('भाषा');
         $this->get('/blogs')->assertOk()->assertSee('ब्लॉग')->assertSee('<html lang="hi">', false);
         $this->post(route('website.language'), ['language' => 'en', 'return_to' => '/blogs'])->assertRedirect('/blogs');
-        $this->get('/blogs')->assertOk()->assertSee('<html lang="en">', false)->assertSee('Daily quiz');
+        $this->get('/blogs')->assertOk()->assertSee('<html lang="en">', false)->assertSee('Daily MCQ');
         Http::assertNothingSent();
     }
 

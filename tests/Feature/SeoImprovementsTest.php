@@ -46,9 +46,9 @@ class SeoImprovementsTest extends TestCase
         $subject = Subject::factory()->create(['name' => 'History', 'slug' => 'history']);
         $chapter = Chapter::factory()->for($subject)->create(['title' => 'Prehistoric Period']);
         $quiz = Quiz::factory()->for($chapter)->create(['title' => 'Prehistoric MCQs']);
-        $home = $this->get(route('home'))->assertOk()->assertSee('<title>Free GK Quizzes &amp; Chapter Notes | questionyear</title>', false);
+        $home = $this->get(route('home'))->assertOk()->assertSee('<title>Free GK MCQs &amp; Chapter Notes | questionyear</title>', false);
         $this->assertStringContainsString('<h3>History</h3>', $this->withoutScripts($home->getContent()));
-        $subjectPage = $this->get(route('subject', $subject->slug))->assertOk()->assertSee('History Notes & Practice Quizzes');
+        $subjectPage = $this->get(route('subject', $subject->slug))->assertOk()->assertSee('History Notes & Practice MCQs');
         $html = $this->withoutScripts($subjectPage->getContent());
         $this->assertStringContainsString('<h1 id="sn">History</h1>', $html);
         $this->assertStringContainsString('href="'.$chapter->readingUrl(0).'"', $html);

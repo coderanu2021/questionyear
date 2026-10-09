@@ -26,9 +26,9 @@ class PageController extends Controller
         $settings = SiteSettings::values();
         $pages = [
             'about' => ['About '.$settings['site_title'], $settings['about_content']],
-            'help' => ['Help centre', 'Choose a subject and open a published chapter. Read its notes or select a quiz. Your results are saved to your progress when you are logged in. Contact us if you find an incorrect question.'],
+            'help' => ['Help centre', 'Choose a subject and open a published chapter. Read its notes or select an MCQ. Your results are saved to your progress when you are logged in. Contact us if you find an incorrect question.'],
             'careers' => ['Careers', 'There are no open positions currently. Use the contact form to express interest in contributing educational content.'],
-            'privacy' => ['Privacy', 'We store your name, email, securely hashed password, quiz answers and results to provide your account and learning history. Contact form messages are stored for administrators to review.'],
+            'privacy' => ['Privacy', 'We store your name, email, securely hashed password, MCQ answers and results to provide your account and learning history. Contact form messages are stored for administrators to review.'],
             'terms' => ['Terms of use', 'Use '.$settings['site_title'].' for personal study and practice. Content is provided for learning and does not guarantee an exam result. Do not misuse accounts or submit abusive content.'],
             'cookies' => ['Cookies', $settings['site_title'].' uses a session cookie for login and request security. A remember-me cookie is used when you choose to stay logged in. Your theme preference is stored in your browser.'],
             'feedback' => ['Share your feedback', 'Help us make your learning experience better. Tell us what you liked and what we can improve.'],
@@ -85,7 +85,7 @@ class PageController extends Controller
         $exams = ['upsc' => ['History', 'Geography', 'Political Science', 'Economics', 'Environment'], 'ssc' => ['Mathematics', 'Reasoning', 'English', 'General Knowledge'], 'banking' => ['Mathematics', 'Reasoning', 'English', 'Economics'], 'railways' => ['Mathematics', 'Reasoning', 'Physics', 'General Knowledge'], 'neet' => ['Biology', 'Physics', 'Chemistry'], 'jee' => ['Mathematics', 'Physics', 'Chemistry'], 'cbse-board' => ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'English'], 'state-psc' => ['History', 'Geography', 'Political Science', 'General Knowledge']];
         abort_unless(isset($exams[$exam]), 404);
 
-        return view('website.content', ['page' => 'exam', 'title' => strtoupper(str_replace('-', ' ', $exam)).' practice', 'description' => 'Explore relevant subjects and available chapter quizzes.', 'subjects' => Subject::whereIn('name', $exams[$exam])->get()]);
+        return view('website.content', ['page' => 'exam', 'title' => strtoupper(str_replace('-', ' ', $exam)).' practice', 'description' => 'Explore relevant subjects and available chapter MCQs.', 'subjects' => Subject::whereIn('name', $exams[$exam])->get()]);
     }
 
     public function forgot(Request $request): RedirectResponse

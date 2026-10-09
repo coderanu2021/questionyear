@@ -30,7 +30,7 @@ class PageSeoTest extends TestCase
         }
         $this->get(route('admin.seo.index', ['page_key' => 'route:home']))->assertOk()->assertSee('Custom &amp; &quot;Homepage&quot;', false);
         $this->put(route('admin.seo.update'), ['page_key' => 'route:home', 'meta_title' => '', 'meta_description' => '', 'meta_keywords' => ''])->assertRedirect();
-        $this->get(route('home'))->assertOk()->assertSee('<title>Free GK Quizzes &amp; Chapter Notes | questionyear</title>', false)->assertDontSee('Description &lt;safe&gt;', false);
+        $this->get(route('home'))->assertOk()->assertSee('<title>Free GK MCQs &amp; Chapter Notes | questionyear</title>', false)->assertDontSee('Description &lt;safe&gt;', false);
     }
 
     public function test_static_practice_auth_and_error_pages_render_saved_metadata(): void
@@ -83,13 +83,13 @@ class PageSeoTest extends TestCase
         $this->saveSeo('subject:'.$subject->id, 'Specific subject');
         $this->saveSeo('chapter:'.$chapter->id, 'Specific chapter');
         $this->saveSeo('quiz:'.$quiz->id, 'Specific quiz');
-        foreach ([route('blogs.show', $blog->slug) => 'Specific blog', route('blogs.show', $otherBlog->slug) => 'All blog pages', route('subject', $subject->slug) => 'Specific subject', $chapter->readingUrl(0) => 'Specific chapter', $quiz->publicUrl() => 'Specific quiz'] as $url => $title) {
+        foreach ([route('blogs.show', $blog->slug) => 'Specific blog', route('blogs.show', $otherBlog->slug) => 'All blog pages', route('subject', $subject->slug) => 'Specific subject', $chapter->readingUrl(0) => 'Specific chapter', $quiz->publicUrl() => 'Specific MCQ'] as $url => $title) {
             $this->get($url)->assertOk()->assertSee('<title>'.$title.'</title>', false);
         }
         $blog->update(['slug' => 'renamed-blog']);
         $quiz->update(['title' => 'Renamed quiz']);
         $this->get(route('blogs.show', $blog->slug))->assertOk()->assertSee('<title>Specific blog</title>', false);
-        $this->get($quiz->publicUrl())->assertOk()->assertSee('<title>Specific quiz</title>', false);
+        $this->get($quiz->publicUrl())->assertOk()->assertSee('<title>Specific MCQ</title>', false);
     }
 
     public function test_website_defaults_can_be_overridden_field_by_field(): void

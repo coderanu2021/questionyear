@@ -95,7 +95,7 @@ class CurrentAffairsTest extends TestCase
         $quizzes = Quiz::factory()->count(2)->for($chapter)->create();
         $draft = Chapter::factory()->for($subject)->create(['status' => 'draft']);
         Quiz::factory()->for($draft)->create();
-        $response = $this->get(route('subject', $subject->slug))->assertOk()->assertSee('Current Affairs Questions & Answers')->assertSee('>Quizzes</h2>', false);
+        $response = $this->get(route('subject', $subject->slug))->assertOk()->assertSee('Current Affairs Questions & Answers')->assertSee('>MCQs</h2>', false);
         $curriculum = $response->viewData('curriculum');
         $this->assertArrayNotHasKey('current-affairs:0', $curriculum['LN']);
         $this->assertCount(1, $curriculum['tests']['current-affairs:0']);

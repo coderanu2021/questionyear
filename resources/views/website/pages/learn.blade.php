@@ -13,7 +13,7 @@
 </section>
 @endforeach
 @if($serverChapterData['sum'] ?? [])<section class="bk-sum"><h2>{{ __('Chapter summary') }}</h2><ul>@foreach($serverChapterData['sum'] as $summary)<li>{!! $summary !!}</li>@endforeach</ul></section>@endif
-@foreach($serverChapter->quizzes as $quiz)<p><a class="btn btn-o" href="{{ $quiz->publicUrl() }}">Practice {{ $quiz->title }}</a></p>@endforeach
+@foreach($serverChapter->quizzes as $quiz)<p><a class="btn btn-o" href="{{ $quiz->publicUrl() }}">Practice {{ App\WebsiteText::mcq($quiz->title) }}</a></p>@endforeach
 </article></div>
 @endif
 </main>

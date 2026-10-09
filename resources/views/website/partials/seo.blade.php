@@ -4,6 +4,9 @@
         'description' => $defaultDescription ?? $siteSettings['site_description'],
         'keywords' => $defaultKeywords ?? null,
     ], ['seoChapter' => $seoChapter ?? null, 'post' => $post ?? null, 'errorPage' => $errorPage ?? null]);
+    foreach (['title', 'description', 'keywords'] as $field) {
+        $pageMetadata[$field] = App\WebsiteText::mcq($pageMetadata[$field] ?? '');
+    }
 @endphp
 <title>{{ $pageMetadata['title'] }}</title>
 <meta name="description" content="{{ $pageMetadata['description'] }}">

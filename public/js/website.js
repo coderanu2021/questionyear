@@ -1,3 +1,4 @@
+const mcqText=text=>String(text??"").replace(/\bquiz(?:zes)?\b/gi,word=>word.toLowerCase()==="quizzes"?"MCQs":"MCQ");
 const tr=(key,values={})=>window.websiteText(key,values);
 async function api(url,data){const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify(data)});const result=await response.json();if(!response.ok){const error=Error(result.message||'Request failed');error.code=result.code;throw error}return result;}
 const SITE_TITLE=window.SITE_TITLE||"questionyear";const S=window.CURRICULUM.S;
@@ -13,7 +14,7 @@ function mono(n){const w=n.replace("&","").split(/\s+/).filter(Boolean);return w
 function render(){
   fl.innerHTML=cats.map(c=>`<button class="chip" aria-pressed="${c===cat}" data-c="${c}">${esc(tr(c))}</button>`).join("");
   const r=SUB.filter(x=>(cat==="All"||x.cat===cat)&&(x.n+" "+tr(x.n)).toLowerCase().includes(term));
-  gr.innerHTML=r.map(x=>`<a href="/subject/${x.id}" class="card" style="--c:${x.c}"><div class="card-h"><div class="ic">${mono(x.n)}</div><div><small>${esc(tr(x.cat))}</small><h3>${esc(tr(x.n))}</h3></div></div><p>${esc(x.d)}</p><div class="card-f"><span>${["current-affairs","general-knowledge"].includes(x.id)?subjectQuizzes(x).length+" quizzes":x.ch.length+" chapters"}</span><b>View ${["current-affairs","general-knowledge"].includes(x.id)?"quizzes":"chapters"} ${CH}</b></div></a>`).join("");
+  gr.innerHTML=r.map(x=>`<a href="/subject/${x.id}" class="card" style="--c:${x.c}"><div class="card-h"><div class="ic">${mono(x.n)}</div><div><small>${esc(tr(x.cat))}</small><h3>${esc(tr(x.n))}</h3></div></div><p>${esc(x.d)}</p><div class="card-f"><span>${["current-affairs","general-knowledge"].includes(x.id)?subjectQuizzes(x).length+" MCQs":x.ch.length+" chapters"}</span><b>View ${["current-affairs","general-knowledge"].includes(x.id)?"MCQs":"chapters"} ${CH}</b></div></a>`).join("");
   em.style.display=r.length?"none":"block";
 }
 fl.onclick=e=>{const b=e.target.closest("[data-c]");if(b){cat=b.dataset.c;render()}};
@@ -67,25 +68,25 @@ linkify(".mega a");linkify("footer .fcols>div:nth-child(2) a");
 function renderChaps(){
   const x=curSub,f=$("cf").value.trim().toLowerCase();
   if(["current-affairs","general-knowledge"].includes(x.id)){
-    const quizzes=subjectQuizzes(x).filter(t=>t.title.toLowerCase().includes(f));
-    $("cl").innerHTML=quizzes.length?quizzes.map(t=>{const parts=t.date_label?.split(" ");return `<a class="ca-edition" href="${esc(t.url)}"><div class="ca-edition-date">${parts?`<strong>${esc(parts[0])}</strong><span>${esc(parts[1])}</span>`:`<i class="fa-regular fa-file-lines" aria-hidden="true"></i>`}</div><div class="ca-edition-body"><h3>${esc(t.title)}</h3><small>${t.count} questions and answers${t.date_label?` · ${esc(t.date_label)}`:""}</small></div><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>`}).join(""):`<p class="empty" style="display:block">${tr("No quizzes match your search.")}</p>`;
+    const MCQs=subjectQuizzes(x).filter(t=>t.title.toLowerCase().includes(f));
+    $("cl").innerHTML=quizzes.length?quizzes.map(t=>{const parts=t.date_label?.split(" ");return `<a class="ca-edition" href="${esc(t.url)}"><div class="ca-edition-date">${parts?`<strong>${esc(parts[0])}</strong><span>${esc(parts[1])}</span>`:`<i class="fa-regular fa-file-lines" aria-hidden="true"></i>`}</div><div class="ca-edition-body"><h3>${esc(mcqText(t.title))}</h3><small>${t.count} questions and answers${t.date_label?` · ${esc(t.date_label)}`:""}</small></div><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>`}).join(""):`<p class="empty" style="display:block">${tr("No MCQs match your search.")}</p>`;
     return;
   }
   const it=x.ch.map((t,i)=>({t,i})).filter(o=>o.t.toLowerCase().includes(f)&&(!$("chapter-category").value||window.CURRICULUM.categories[x.id+":"+o.i]===$("chapter-category").value));
   $("cl").innerHTML=it.length?it.map(({t,i})=>{const b=QB[x.id+":"+i],n=LN[x.id+":"+i];
-    return (n||b)?`<a class="chap" style="--c:${x.c}" href="${n?esc(window.CURRICULUM.chapterUrls[x.id+":"+i]):`${esc(window.CURRICULUM.quizUrls[x.id+":"+i])}`}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>${n?tr("Chapter notes"):tr("Practice quiz")}${b?" + "+b.length+" practice questions":""}</small></div><span class="go"><i class="fa-solid fa-book-open"></i> ${n?tr("Read chapter"):tr("Start quiz")}</span></a>`
-    :`<div class="chap off" style="--c:${x.c}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>${tr("Notes and questions are being added")}</small></div><span class="soon">${tr("Coming soon")}</span></div>`}).map((markup,k)=>{const index=it[k].i;const tests=window.CURRICULUM.tests[x.id+":"+index]||[];return markup+tests.map(t=>`<a class="chap" href="${esc(t.url)}"><span class="cn"><i class="fa-solid fa-play"></i></span><div><h3>${esc(t.title)}</h3><small>${t.quiz_date?`<time datetime="${esc(t.quiz_date)}">${esc(t.date_label)}</time> · `:""}${t.count} questions · ${t.duration} minutes · Pass ${t.pass}%</small></div></a>`).join("")}).join(""):`<p class="empty" style="display:block">${tr("No chapters match your search.")}</p>`;
+    return (n||b)?`<a class="chap" style="--c:${x.c}" href="${n?esc(window.CURRICULUM.chapterUrls[x.id+":"+i]):`${esc(window.CURRICULUM.quizUrls[x.id+":"+i])}`}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>${n?tr("Chapter notes"):tr("Practice MCQ")}${b?" + "+b.length+" practice questions":""}</small></div><span class="go"><i class="fa-solid fa-book-open"></i> ${n?tr("Read chapter"):tr("Start MCQ")}</span></a>`
+    :`<div class="chap off" style="--c:${x.c}"><span class="cn">${i+1}</span><div><h3>${esc(t)}</h3><small>${tr("Notes and questions are being added")}</small></div><span class="soon">${tr("Coming soon")}</span></div>`}).map((markup,k)=>{const index=it[k].i;const tests=window.CURRICULUM.tests[x.id+":"+index]||[];return markup+tests.map(t=>`<a class="chap" href="${esc(t.url)}"><span class="cn"><i class="fa-solid fa-play"></i></span><div><h3>${esc(mcqText(t.title))}</h3><small>${t.quiz_date?`<time datetime="${esc(t.quiz_date)}">${esc(t.date_label)}</time> · `:""}${t.count} questions · ${t.duration} minutes · Pass ${t.pass}%</small></div></a>`).join("")}).join(""):`<p class="empty" style="display:block">${tr("No chapters match your search.")}</p>`;
 }
 function subjectPage(x){
   const quizOnly=["current-affairs","general-knowledge"].includes(x.id);
-  curSub=x;document.title=window.PAGE_SEO_TITLE||x.n+(quizOnly?" quizzes – ":" chapters – ")+SITE_TITLE;
-  $("subject-list-title").textContent=quizOnly?tr("Quizzes"):tr("Chapters");
-  $("cf").placeholder=quizOnly?tr("Search quizzes"):tr("Search chapters");
+  curSub=x;document.title=window.PAGE_SEO_TITLE||x.n+(quizOnly?" MCQs – ":" chapters – ")+SITE_TITLE;
+  $("subject-list-title").textContent=quizOnly?tr("MCQs"):tr("Chapters");
+  $("cf").placeholder=quizOnly?tr("Search MCQs"):tr("Search chapters");
   $("cf").setAttribute("aria-label",$("cf").placeholder);
   $("sbc").textContent=tr(x.n);$("sn").textContent=tr(x.n);$("sd").textContent=x.d;
   const ic=$("sic");ic.textContent=mono(x.n);ic.style.setProperty("--c",x.c);
   const ready=x.ch.filter((_,i)=>LN[x.id+":"+i]||QB[x.id+":"+i]).length;
-  $("ss").innerHTML=quizOnly?`<div><b>${subjectQuizzes(x).length}</b>quizzes</div>`:`<div><b>${x.ch.length}</b>chapters</div><div><b>${ready}</b>ready to learn and practice</div>`;
+  $("ss").innerHTML=quizOnly?`<div><b>${subjectQuizzes(x).length}</b>MCQs</div>`:`<div><b>${x.ch.length}</b>chapters</div><div><b>${ready}</b>ready to learn and practice</div>`;
   $("chapter-categories").hidden=x.id!=="history";$("chapter-category").value="";
   $("cf").value="";renderChaps();
   $("sl").innerHTML=SUB.map(o=>`<a href="/subject/${o.id}" class="${o.id===x.id?"on":""}" style="--c:${o.c}"><i></i>${esc(tr(o.n))}</a>`).join("");
@@ -110,10 +111,10 @@ function learnPage(x,i){
   <div class="bk-meta"><span><i class="fa-regular fa-clock"></i>${esc(d.time)}</span><span><i class="fa-solid fa-list"></i>${d.s.length} sections</span>${q?`<span><i class="fa-solid fa-circle-question"></i>${q.length} practice questions</span>`:""}</div></div><i class="fa-solid ${d.icon} bk-wm"></i></div>
   <div class="wrap bk-lay"><article class="bk-art">${secs}
   <div class="bk-sum"><h2><i class="fa-solid fa-list-check"></i>${tr("Chapter summary")}</h2><ul>${d.sum.map(z=>`<li><i class="fa-solid fa-circle-check"></i><span>${z}</span></li>`).join("")}</ul></div>
-  ${q?`<div class="band bk-cta"><div><h2><i class="fa-solid fa-pen-to-square"></i> Ready to test yourself?</h2><p>${q.length} practice questions based on this chapter.</p></div><a class="btn btn-o" href="${esc(window.CURRICULUM.quizUrls[x.id+":"+i])}" style="height:46px;padding:0 26px">${tr("Start practice quiz")}</a></div>`:""}
+  ${q?`<div class="band bk-cta"><div><h2><i class="fa-solid fa-pen-to-square"></i> Ready to test yourself?</h2><p>${q.length} practice questions based on this chapter.</p></div><a class="btn btn-o" href="${esc(window.CURRICULUM.quizUrls[x.id+":"+i])}" style="height:46px;padding:0 26px">${tr("Start practice MCQ")}</a></div>`:""}
   <div class="bk-nav">${pv?`<a href="${pv}"><small><i class="fa-solid fa-arrow-left"></i> Previous</small><b>${esc(x.ch[i-1])}</b></a>`:"<span></span>"}${nx?`<a href="${nx}" style="text-align:right"><small>Next <i class="fa-solid fa-arrow-right"></i></small><b>${esc(x.ch[i+1])}</b></a>`:"<span></span>"}</div>
   </article>
-  <aside class="bk-toc box"><h3><i class="fa-solid fa-book-open"></i> In this chapter</h3>${d.s.map((s,n)=>`<button data-go="bk${n}"><i class="fa-solid ${s.i}"></i>${esc(s.h)}</button>`).join("")}<button data-go="bkend"><i class="fa-solid fa-list-check"></i>${tr("Chapter summary")}</button>${q?`<a class="btn btn-o" href="${esc(window.CURRICULUM.quizUrls[x.id+":"+i])}" style="width:100%;margin-top:14px"><i class="fa-solid fa-play"></i> Practice quiz</a>`:""}</aside></div>`;
+  <aside class="bk-toc box"><h3><i class="fa-solid fa-book-open"></i> In this chapter</h3>${d.s.map((s,n)=>`<button data-go="bk${n}"><i class="fa-solid ${s.i}"></i>${esc(s.h)}</button>`).join("")}<button data-go="bkend"><i class="fa-solid fa-list-check"></i>${tr("Chapter summary")}</button>${q?`<a class="btn btn-o" href="${esc(window.CURRICULUM.quizUrls[x.id+":"+i])}" style="width:100%;margin-top:14px"><i class="fa-solid fa-play"></i> Practice MCQ</a>`:""}</aside></div>`;
   const sm=document.querySelector(".bk-sum");if(sm)sm.id="bkend";
   const article=$("learn").querySelector(".bk-art");
   article.querySelectorAll("table").forEach(table=>{
@@ -171,12 +172,12 @@ function tick(){const remaining=Math.max(0,(quizSettings()?.duration||15)*60-Mat
 function drawQ(){
   if(!window.CURRENT_USER&&window.GUEST_QUESTIONS_USED>=25){accountGate();return}
   const q=qs[qi];
-  $("qb").innerHTML=`<div class="qtop"><span>${tr("Question :number of :total",{number:qi+1,total:qs.length})}</span><span id="tm">${fmt()}</span></div><div class="prog"><i style="width:${qi/qs.length*100}%"></i></div><h2 class="qt">${esc(q[0])}</h2>`+q[1].map((o,k)=>`<button class="qo" data-k="${k}"><b>${"ABCD"[k]}</b>${esc(o)}</button>`).join("")+`<div id="qe">${questionTools(qi)}</div><div class="qf"><a href="/subject/${curId}" class="btn btn-l">${tr("Exit quiz")}</a><button class="btn btn-o" id="qn" hidden>${tr("Next question")}</button></div>`;
+  $("qb").innerHTML=`<div class="qtop"><span>${tr("Question :number of :total",{number:qi+1,total:qs.length})}</span><span id="tm">${fmt()}</span></div><div class="prog"><i style="width:${qi/qs.length*100}%"></i></div><h2 class="qt">${esc(q[0])}</h2>`+q[1].map((o,k)=>`<button class="qo" data-k="${k}"><b>${"ABCD"[k]}</b>${esc(o)}</button>`).join("")+`<div id="qe">${questionTools(qi)}</div><div class="qf"><a href="/subject/${curId}" class="btn btn-l">${tr("Exit MCQ")}</a><button class="btn btn-o" id="qn" hidden>${tr("Next question")}</button></div>`;
 }
 function accountGate(){clearInterval(tmr);$("qb").innerHTML=`<div class="res"><h2>${tr("Create an account to continue")}</h2><p>You have completed your 25 free guest questions. Log in or create a free account to solve more questions.</p><div class="cta2"><a class="btn btn-o" href="/register">${tr("Create free account")}</a><a class="btn btn-l" href="/login">${tr("Log in")}</a></div></div>`}
 function startQuiz(){qi=0;qsc=0;qans=[];t0=Date.now();clearInterval(tmr);if(!window.CURRENT_USER&&window.GUEST_QUESTIONS_USED>=25){accountGate();return}tmr=setInterval(tick,1000);drawQ()}
 function quizPage(x,i){
-  curId=x.id;curIdx=i;qs=QB[x.id+":"+i];const settings=quizSettings(),t=["current-affairs","general-knowledge"].includes(x.id)?settings?.title||x.ch[i]:x.ch[i];document.title=window.PAGE_SEO_TITLE||window.CHAPTER_SEO_TITLE||t+" quiz – "+SITE_TITLE;
+  curId=x.id;curIdx=i;qs=QB[x.id+":"+i];const settings=quizSettings(),t=["current-affairs","general-knowledge"].includes(x.id)?mcqText(settings?.title||x.ch[i]):x.ch[i];document.title=window.PAGE_SEO_TITLE||window.CHAPTER_SEO_TITLE||t+" MCQ – "+SITE_TITLE;
   const ln=LN[x.id+":"+i]?`<span>/</span><a href="/learn/${x.id}/${i}">${tr("Notes")}</a>`:"";
   $("qc").innerHTML=`<a href="/">${tr("Home")}</a><span>/</span><a href="/subject/${x.id}">${esc(tr(x.n))}</a>${ln}<span>/</span><b>${esc(t)}</b>${settings?.quiz_date?`<span>/</span><time datetime="${esc(settings.quiz_date)}">${esc(settings.date_label)}</time>`:''}`;
   if(["current-affairs","general-knowledge"].includes(x.id))initCurrentAffairsReader();else startQuiz();
@@ -210,7 +211,7 @@ async function results(){
   clearInterval(tmr);const pct=Math.round(qsc/qs.length*100);
   const msg=pct>=80?tr("Excellent work"):pct>=50?tr("Good effort"):tr("Keep practicing");
   const rev=LN[curId+":"+curIdx]?`<a class="btn btn-l" href="/learn/${curId}/${curIdx}">${tr("Revise notes")}</a>`:"";
-  $("qb").innerHTML=`<div class="res"><div class="sb">${qsc}<span>/${qs.length}</span></div><h2>${msg}</h2><p class="sub" style="margin:0 auto 20px">${tr("You scored :score% in :time.",{score:pct,time:fmt()})}</p><div class="cta2"><button class="btn btn-o" id="qr">${tr("Try again")}</button>${rev}<a class="btn btn-l" href="/my-learning">Revise mistakes / Next 10 questions</a><a class="btn btn-l" href="/subject/${curId}">Back to ${["current-affairs","general-knowledge"].includes(curId)?"quizzes":"chapters"}</a></div></div><div class="rv"><h3>${tr("Review answers")}</h3>`+qs.map((q,i)=>{const ok=qans[i]===q[2];return `<div><div class="t">${i+1}. ${esc(q[0])}</div><span style="color:var(--${ok?"ok":"bad"});font-weight:600">${ok?tr("Correct"):esc(tr("Your answer: :answer",{answer:q[1][qans[i]]??tr("Not answered")}))}</span><div>${esc(tr("Correct answer: :answer",{answer:q[1][q[2]]}))}</div>${questionTools(i,true)}</div>`}).join("")+`</div>`;
+  $("qb").innerHTML=`<div class="res"><div class="sb">${qsc}<span>/${qs.length}</span></div><h2>${msg}</h2><p class="sub" style="margin:0 auto 20px">${tr("You scored :score% in :time.",{score:pct,time:fmt()})}</p><div class="cta2"><button class="btn btn-o" id="qr">${tr("Try again")}</button>${rev}<a class="btn btn-l" href="/my-learning">Revise mistakes / Next 10 questions</a><a class="btn btn-l" href="/subject/${curId}">Back to ${["current-affairs","general-knowledge"].includes(curId)?"MCQs":"chapters"}</a></div></div><div class="rv"><h3>${tr("Review answers")}</h3>`+qs.map((q,i)=>{const ok=qans[i]===q[2];return `<div><div class="t">${i+1}. ${esc(q[0])}</div><span style="color:var(--${ok?"ok":"bad"});font-weight:600">${ok?tr("Correct"):esc(tr("Your answer: :answer",{answer:q[1][qans[i]]??tr("Not answered")}))}</span><div>${esc(tr("Correct answer: :answer",{answer:q[1][q[2]]}))}</div>${questionTools(i,true)}</div>`}).join("")+`</div>`;
 }
 $("qb").addEventListener("click",e=>{
   const o=e.target.closest(".qo");

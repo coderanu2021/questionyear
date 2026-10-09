@@ -1,14 +1,14 @@
 <main id="quiz" @if(!$serverQuiz) hidden @endif>
   <div @class(['wrap', 'qwrap' => !$questionAnswerQuiz, 'ca-reader' => $questionAnswerQuiz])><div class="crumb" id="qc"></div><div @class(['box qbox' => !$questionAnswerQuiz]) id="qb">
     @if($serverQuiz && !$questionAnswerQuiz)
-      <h1>{{ $serverQuiz->title }}</h1><p>Practice {{ count($serverQuiz->questions) }} multiple-choice questions. Start the interactive quiz to check your answers and explanations.</p>
+      <h1>{{ App\WebsiteText::mcq($serverQuiz->title) }}</h1><p>Practice {{ count($serverQuiz->questions) }} multiple-choice questions. Start the interactive MCQ to check your answers and explanations.</p>
       @foreach($serverQuiz->questions as $question)<section class="daily-review-item"><h2>{{ $loop->iteration }}. {{ $question['q'] }}</h2><ol type="A">@foreach($question['o'] as $option)<li>{{ $option }}</li>@endforeach</ol></section>@endforeach
     @elseif($questionAnswerQuiz)
       <div class="ca-layout">
         <div class="ca-content">
           <div class="ca-heading">
             <div class="ca-eyebrow"><span>{{ $questionAnswerQuiz->learningSubject()->name }}</span>@if($questionAnswerQuiz->quiz_date)<span class="ca-date"><i class="fa-regular fa-calendar" aria-hidden="true"></i><time datetime="{{ $questionAnswerQuiz->quiz_date->toDateString() }}">{{ $questionAnswerQuiz->quiz_date->format('d M Y') }}</time></span>@endif</div>
-            <h1>{{ $questionAnswerQuiz->title }}</h1>
+            <h1>{{ App\WebsiteText::mcq($questionAnswerQuiz->title) }}</h1>
             <p>Daily questions and answers, in one place.</p>
           </div>
           <div class="ca-tools">

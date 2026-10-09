@@ -101,7 +101,7 @@ class DailyQuizController extends Controller
             }
         });
 
-        return redirect()->route($request->route('set') !== null ? $period.'.set' : $period, $request->route('set') !== null ? ['set' => $stored->id] : [])->with('status', 'Quiz submitted. Your marks and answer review are ready below.');
+        return redirect()->route($request->route('set') !== null ? $period.'.set' : $period, $request->route('set') !== null ? ['set' => $stored->id] : [])->with('status', 'MCQ submitted. Your marks and answer review are ready below.');
     }
 
     private function participant(Request $request): string

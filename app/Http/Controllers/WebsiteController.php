@@ -110,14 +110,14 @@ class WebsiteController extends Controller
             $seoChapter !== null => $seoChapter->title.' – '.$settings['site_title'],
             $request->routeIs('login') => 'Log in – '.$settings['site_title'],
             $request->routeIs('register') => 'Create account – '.$settings['site_title'],
-            isset($selected) => $selected->name.(in_array($selected->slug, ['current-affairs', 'general-knowledge'], true) ? ' Questions & Answers – ' : ' Notes & Practice Quizzes – ').$settings['site_title'],
-            default => 'Free GK Quizzes & Chapter Notes | '.$settings['site_title'],
+            isset($selected) => $selected->name.(in_array($selected->slug, ['current-affairs', 'general-knowledge'], true) ? ' Questions & Answers – ' : ' Notes & Practice MCQs – ').$settings['site_title'],
+            default => 'Free GK MCQs & Chapter Notes | '.$settings['site_title'],
         };
         $seoTitle = $seoChapter?->meta_title ?: $defaultTitle;
         $defaultDescription = match (true) {
             $seoQuiz !== null => 'Practice '.$seoQuiz->title.' with '.count($seoQuiz->questions).' '.($seoQuiz->isQuestionAnswer() ? 'questions and answers' : 'multiple-choice questions and answer explanations').'. Study '.$seoQuiz->learningSubject()->name.' on '.$settings['site_title'].'.',
             $seoChapter !== null => $seoChapter->description ?: 'Study '.$seoChapter->title.' with '.$seoChapter->subject->name.' chapter notes, key facts and revision material on '.$settings['site_title'].'.',
-            isset($selected) => 'Explore '.$selected->name.' '.(in_array($selected->slug, ['current-affairs', 'general-knowledge'], true) ? 'questions and answers' : 'chapter notes and topic-wise practice quizzes').'. '.$selected->description,
+            isset($selected) => 'Explore '.$selected->name.' '.(in_array($selected->slug, ['current-affairs', 'general-knowledge'], true) ? 'questions and answers' : 'chapter notes and topic-wise practice MCQs').'. '.$selected->description,
             default => $settings['site_description'],
         };
         $seoDescription = $seoChapter?->meta_description ?: Str::limit(trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags($defaultDescription))) ?? ''), 170);

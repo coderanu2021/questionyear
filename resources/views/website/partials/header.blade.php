@@ -17,7 +17,7 @@
     <a href="/" class="logo">@include('website.partials.brand-logo')</a>
     <nav id="nav"><ul>
       <li><button id="sb" aria-expanded="false" aria-controls="mega">{{ __('Subjects') }} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button></li>
-      <li><a href="/#popular">{{ __('Quizzes') }}</a></li><li><a href="{{ route('daily') }}">{{ __('Daily quiz') }}</a></li><li><a href="{{ route('weekly') }}">{{ __('Weekly quiz') }}</a></li><li><a href="{{ route('monthly') }}">{{ __('Monthly quiz') }}</a></li>
+      <li><a href="/#popular">{{ __('MCQs') }}</a></li><li><a href="{{ route('daily') }}">{{ __('Daily MCQ') }}</a></li><li><a href="{{ route('weekly') }}">{{ __('Weekly MCQ') }}</a></li><li><a href="{{ route('monthly') }}">{{ __('Monthly MCQ') }}</a></li>
       <li><a href="{{ route('blogs.index') }}">{{ __('Blogs') }}</a></li>
       <li><a href="/subject/current-affairs">{{ __('Current Affairs') }}</a></li>
       <li class="mnav" id="msi"><a href="/login">{{ __('Sign in') }}</a></li>
