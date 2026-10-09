@@ -68,7 +68,7 @@ linkify(".mega a");linkify("footer .fcols>div:nth-child(2) a");
 function renderChaps(){
   const x=curSub,f=$("cf").value.trim().toLowerCase();
   if(["current-affairs","general-knowledge"].includes(x.id)){
-    const MCQs=subjectQuizzes(x).filter(t=>t.title.toLowerCase().includes(f));
+    const quizzes=subjectQuizzes(x).filter(t=>t.title.toLowerCase().includes(f));
     $("cl").innerHTML=quizzes.length?quizzes.map(t=>{const parts=t.date_label?.split(" ");return `<a class="ca-edition" href="${esc(t.url)}"><div class="ca-edition-date">${parts?`<strong>${esc(parts[0])}</strong><span>${esc(parts[1])}</span>`:`<i class="fa-regular fa-file-lines" aria-hidden="true"></i>`}</div><div class="ca-edition-body"><h3>${esc(mcqText(t.title))}</h3><small>${t.count} questions and answers${t.date_label?` · ${esc(t.date_label)}`:""}</small></div><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>`}).join(""):`<p class="empty" style="display:block">${tr("No MCQs match your search.")}</p>`;
     return;
   }
