@@ -11,6 +11,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SiteSettingsController;
 use App\Http\Controllers\WebsiteController;
+use App\Http\Controllers\WordImportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -66,6 +67,7 @@ Route::get('/reset-password/{token}', [PageController::class, 'resetForm'])->nam
 Route::post('/reset-password', [PageController::class, 'reset'])->middleware('throttle:5,1')->name('password.update');
 Route::get('/{page}', [PageController::class, 'show'])->whereIn('page', ['about', 'contact', 'help', 'careers', 'privacy', 'terms', 'cookies', 'leaderboard', 'forgot-password'])->name('page');
 Route::middleware('auth')->group(function () {
+    Route::post('/admin/import', [WordImportController::class, 'store'])->middleware('throttle:10,1')->name('admin.import.store');
     Route::get('/admin/seo', [PageSeoController::class, 'index'])->name('admin.seo.index');
     Route::put('/admin/seo', [PageSeoController::class, 'update'])->name('admin.seo.update');
     Route::get('/admin/posts', [PostController::class, 'index'])->name('admin.posts.index');

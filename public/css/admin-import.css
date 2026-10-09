@@ -1,0 +1,5 @@
+#word-import-form .field{margin-bottom:20px}
+#word-import-form label{display:block;font-weight:600;margin-bottom:8px}
+#word-import-form input,#word-import-form select{width:100%;padding:11px;border:1px solid var(--line);border-radius:8px;background:#fff}
+#word-import-form p{color:var(--mute);line-height:1.6;margin:8px 0 16px}
+#word-import-form pre{white-space:pre-wrap;background:var(--bg);padding:16px;border-radius:8px;margin:12px 0 20px;line-height:1.7}

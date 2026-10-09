@@ -31,7 +31,7 @@ class AdminController extends Controller
     public function index(Request $request, string $page = 'dashboard'): View
     {
         $this->authorizeAdmin($request);
-        abort_unless(in_array($page, ['dashboard', 'chapters', 'tests', 'users', 'analytics', 'messages', 'settings', 'practice']), 404);
+        abort_unless(in_array($page, ['dashboard', 'chapters', 'tests', 'users', 'analytics', 'messages', 'settings', 'practice', 'import']), 404);
 
         $practicePeriods = [];
         if ($page === 'practice') {
@@ -43,7 +43,7 @@ class AdminController extends Controller
             }
         }
 
-        return view('admin.index', ['state' => $this->state(), 'page' => $page, 'practicePeriods' => $practicePeriods]);
+        return view('admin.index', ['state' => $this->state(), 'page' => $page, 'practicePeriods' => $practicePeriods, 'importSubjects' => $page === 'import' ? Subject::whereNotIn('slug', ['current-affairs', 'general-knowledge'])->orderBy('name')->get() : []]);
     }
 
     public function generatePractice(Request $request, PracticeQuestionGenerator $generator): RedirectResponse|JsonResponse
