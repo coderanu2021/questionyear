@@ -29,16 +29,19 @@ class PracticeQuestionGenerator
         };
     }
 
-    public function generate(string $period): void
+    public function generate(string $period, bool $newSet = false): int
     {
         if (! isset(self::COUNTS[$period])) {
             throw new RuntimeException('Unknown practice period.');
         }
-        Cache::lock('practice-generation', 3600)->block(5, function () use ($period): void {
+
+        return Cache::lock('practice-generation', 3600)->block(5, function () use ($period, $newSet): int {
             $date = $this->date($period);
-            if (DB::table('practice_sets')->where('period', $period)->where('starts_on', $date)->exists()) {
-                return;
+            $existing = DB::table('practice_sets')->where('period', $period)->where('starts_on', $date)->orderByDesc('set_number')->first();
+            if ($existing && ! $newSet) {
+                return $existing->id;
             }
+            $setNumber = ($existing?->set_number ?? 0) + 1;
             foreach (Quiz::with('chapter')->published()->multipleChoice()->get() as $quiz) {
                 foreach ($quiz->questions as $question) {
                     $this->store($question, $quiz->learningSubject()->id, 'published');
@@ -80,13 +83,15 @@ class PracticeQuestionGenerator
                     $missing -= count($questions);
                 }
             }
-            DB::transaction(function () use ($fresh, $selected, $period, $date): void {
+
+            return DB::transaction(function () use ($fresh, $selected, $period, $date, $setNumber): int {
                 $questions = $selected->map(fn ($row): array => [...json_decode($row->question, true), 'subject_id' => $row->subject_id])->all();
                 foreach ($fresh as $item) {
                     $questions[] = [...$item['question'], 'subject_id' => $item['subject_id']];
                 }
                 shuffle($questions);
-                DB::table('practice_sets')->insert(['period' => $period, 'starts_on' => $date, 'questions' => json_encode($questions, JSON_THROW_ON_ERROR), 'created_at' => now(), 'updated_at' => now()]);
+
+                return DB::table('practice_sets')->insertGetId(['period' => $period, 'starts_on' => $date, 'set_number' => $setNumber, 'questions' => json_encode($questions, JSON_THROW_ON_ERROR), 'created_at' => now(), 'updated_at' => now()]);
             });
         });
     }

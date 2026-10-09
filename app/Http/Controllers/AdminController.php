@@ -38,8 +38,10 @@ class AdminController extends Controller
             $generator = app(PracticeQuestionGenerator::class);
             foreach (PracticeQuestionGenerator::COUNTS as $period => $count) {
                 $date = $generator->date($period);
-                $set = DB::table('practice_sets')->where('period', $period)->where('starts_on', $date)->first();
-                $practicePeriods[] = ['period' => $period, 'date' => $date, 'target' => $count, 'count' => $set ? count(json_decode($set->questions, true)) : 0, 'created_at' => $set?->created_at, 'ready' => $set !== null];
+                $sets = DB::table('practice_sets')->where('period', $period)->where('starts_on', $date);
+                $setCount = $sets->count();
+                $set = $sets->orderByDesc('set_number')->first();
+                $practicePeriods[] = ['period' => $period, 'date' => $date, 'target' => $count, 'count' => $set ? count(json_decode($set->questions, true)) : 0, 'created_at' => $set?->created_at, 'ready' => $set !== null, 'set_count' => $setCount, 'set_id' => $set?->id];
             }
         }
 
@@ -51,7 +53,7 @@ class AdminController extends Controller
         $this->authorizeAdmin($request);
         $data = $request->validate(['period' => 'required|in:daily,weekly,monthly']);
         try {
-            $generator->generate($data['period']);
+            $setId = $generator->generate($data['period'], newSet: true);
         } catch (RuntimeException|ConnectionException|LockTimeoutException $exception) {
             report($exception);
             $message = match (true) {
@@ -68,9 +70,9 @@ class AdminController extends Controller
             return redirect()->route('admin', ['page' => 'practice'])->withErrors(['generation' => $message]);
         }
 
-        $message = ucfirst($data['period']).' quiz is ready. An existing quiz is kept without another API call.';
+        $message = 'A new '.$data['period'].' quiz is ready. Previous quizzes remain available in the quiz archive.';
         if ($request->expectsJson()) {
-            return response()->json(['success' => true, 'message' => $message]);
+            return response()->json(['success' => true, 'message' => $message, 'url' => route($data['period'].'.set', ['set' => $setId])]);
         }
 
         return redirect()->route('admin', ['page' => 'practice'])->with('status', $message);

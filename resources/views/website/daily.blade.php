@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="csrf-token" content="{{ csrf_token() }}">@include('website.partials.seo', ['defaultTitle' => ucfirst($period).' quiz – '.$siteSettings['site_title'], 'defaultDescription' => 'Take daily, weekly or monthly quizzes, earn marks and review your answers. Practice 20 daily, 50 weekly, or 200 monthly questions.'])<link rel="stylesheet" href="{{ asset('css/website.css') }}">@include('website.partials.favicon')@include('website.partials.canonical')
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="csrf-token" content="{{ csrf_token() }}">@include('website.partials.seo', ['defaultTitle' => ucfirst($period).' quiz'.(request()->route('set') !== null ? ' · '.$date.' · Set '.$setNumber : '').' – '.$siteSettings['site_title'], 'defaultDescription' => 'Take daily, weekly or monthly quizzes, earn marks and review your answers. Practice 20 daily, 50 weekly, or 200 monthly questions.'])<link rel="stylesheet" href="{{ asset('css/website.css') }}?v={{ filemtime(public_path('css/website.css')) }}">@include('website.partials.favicon')@include('website.partials.canonical')
 </head>
 <body>
 @include('website.partials.header')
 <script>window.CURRENT_USER={{ Illuminate\Support\Js::from(auth()->user()?->only('name', 'email')) }};</script>
 <main class="wrap daily-page">
     <div class="crumb"><a href="{{ route('home') }}">Home</a><span>/</span><b>{{ ucfirst($period) }} quiz</b></div>
-    <section class="daily-hero"><div><span class="daily-label">YOUR {{ strtoupper($period) }} PRACTICE</span><h1>A little practice.<br>A stronger tomorrow.</h1><p>A fresh selection each {{ $period === "daily" ? "day" : ($period === "weekly" ? "week" : "month") }}. Solve, submit and learn from your answers.</p><span>{{ \Carbon\Carbon::parse($date)->format('l, d F Y') }} · {{ $period === "daily" ? "Resets daily" : ($period === "weekly" ? "Resets Monday" : "Resets on the first of each month") }} at midnight IST</span></div><div class="daily-orbit" aria-hidden="true"><span>Q</span><b>?</b></div></section>
+    <section class="daily-hero"><div><span class="daily-label">YOUR {{ strtoupper($period) }} PRACTICE</span><h1>A little practice.<br>A stronger tomorrow.</h1><p>Solve, submit and learn from your answers. Every saved quiz remains available, including earlier {{ $period === 'daily' ? 'days' : ($period === 'weekly' ? 'weeks' : 'months') }}.</p><span>{{ \Carbon\Carbon::parse($date)->format('l, d F Y') }} · Set {{ $setNumber }} · IST</span></div><div class="daily-orbit" aria-hidden="true"><span>Q</span><b>?</b></div></section>
+    <p style="margin-top:20px"><a class="btn btn-l" href="#quiz-archive">Browse all {{ $period }} quizzes ↓</a></p>
     <div class="daily-stats"><div class="box"><strong>{{ $questionCount }}</strong><span>{{ ucfirst($period) }} questions</span></div><div class="box"><strong>{{ $attempts->sum('score') }} / {{ $attempts->sum('total') }}</strong><span>Marks earned this period</span></div><div class="box"><strong>{{ $attempts->count() }} / {{ $availableSets }}</strong><span>Available sets completed</span></div></div>
     <p class="sub">{{ $questionCount }} questions per set · 1 mark for each correct answer · No negative marking. @guest <a href="{{ route('register') }}">Sign up with email</a> to save your results to your account. @endguest</p>
     @if(session('status'))<p class="daily-notice" role="status">{{ session('status') }}</p>@endif
@@ -15,7 +16,7 @@
     @if(count($questions))
         <div class="daily-heading"><div><h2>Set {{ $setNumber }} <span class="daily-label">{{ count($questions) }} QUESTIONS</span></h2><p>Choose your answers, then submit to see your score.</p></div><a href="#daily-submit" class="btn btn-l">Go to submit ↓</a></div>
         @if(count($questions) < $questionCount)<p class="daily-notice">This set currently contains {{ count($questions) }} published questions. More questions will appear as they are added.</p>@endif
-        <form method="POST" action="{{ route($period.'.submit') }}" id="daily-form">@csrf<input type="hidden" name="date" value="{{ $date }}"><input type="hidden" name="set_number" value="{{ $setNumber }}">
+        <form method="POST" action="{{ route($period.'.set.submit', ['set' => $practiceSetId]) }}" id="daily-form">@csrf<input type="hidden" name="date" value="{{ $date }}"><input type="hidden" name="set_number" value="{{ $setNumber }}">
         @foreach($questions as $index => $question)
             <fieldset class="box daily-question"><legend><span>{{ $index + 1 }}</span> {{ $question['q'] }}</legend>
                 <input type="hidden" name="answers[{{ $index }}]" value="-1">
@@ -28,8 +29,22 @@
     @elseif($availableSets === 0)
         <div class="box daily-empty"><h2>Your {{ $period }} challenge is on its way</h2><p>Questions for this period are being prepared. Please check back soon.</p><a href="{{ route('home') }}" class="btn btn-o">Explore subjects</a></div>
     @else
-        <div class="box daily-empty"><span class="daily-label">{{ strtoupper($period) }} PRACTICE COMPLETE</span><h2>Great work. Come back next period!</h2><p>You earned {{ $attempts->sum('score') }} out of {{ $attempts->sum('total') }} marks.</p>@guest<a href="{{ route('register') }}" class="btn btn-o">Create an account to track your results</a>@else<a href="{{ route('progress') }}" class="btn btn-o">View my progress</a>@endguest</div>
+        <div class="box daily-empty"><span class="daily-label">SET {{ $setNumber }} COMPLETE</span><h2>Great work. Try another saved quiz!</h2><p>You earned {{ $lastAttempt?->score ?? 0 }} out of {{ $lastAttempt?->total ?? 0 }} marks in this set.</p><a href="#quiz-archive" class="btn btn-o">Browse saved quizzes</a></div>
     @endif
+    <section class="quiz-archive" id="quiz-archive" aria-labelledby="quiz-archive-heading">
+        <div class="daily-heading"><div><h2 id="quiz-archive-heading">All {{ $period }} quizzes</h2><p>Every generated quiz has its own page. Open an earlier set anytime.</p></div><span class="daily-label">{{ $archiveSets->total() }} SAVED SETS</span></div>
+        <div class="quiz-archive-grid">
+        @foreach($archiveSets as $archiveSet)
+            <a class="box quiz-archive-card" href="{{ route($period.'.set', ['set' => $archiveSet->id]) }}" @if($archiveSet->id === $practiceSetId) aria-current="page" @endif>
+                <span class="daily-label">{{ ucfirst($period) }} · Set {{ $archiveSet->set_number }}</span>
+                <h3>{{ \Carbon\Carbon::parse($archiveSet->starts_on)->format('d M Y') }}</h3>
+                <p>{{ $questionCount }} questions · Saved {{ \Carbon\Carbon::parse($archiveSet->created_at)->setTimezone('Asia/Kolkata')->format('d M, H:i') }} IST</p>
+                <strong>{{ $archiveSet->id === $practiceSetId ? 'Current quiz' : 'Open quiz' }} →</strong>
+            </a>
+        @endforeach
+        </div>
+        @if($archiveSets->hasPages())<nav class="quiz-archive-pagination" aria-label="Quiz archive pages">@if($archiveSets->previousPageUrl())<a class="btn btn-l" href="{{ $archiveSets->previousPageUrl() }}#quiz-archive">← Newer sets</a>@endif<span>Page {{ $archiveSets->currentPage() }} of {{ $archiveSets->lastPage() }}</span>@if($archiveSets->nextPageUrl())<a class="btn btn-l" href="{{ $archiveSets->nextPageUrl() }}#quiz-archive">Older sets →</a>@endif</nav>@endif
+    </section>
     @auth<p><a class="btn btn-o" href="{{ route('learning') }}">Revise wrong answers and choose your next 10 questions</a> <a class="btn btn-l" href="{{ route('learning.leaderboard') }}">Weekly leaderboard</a></p>@endauth
     @if($lastAttempt)
         <details class="box daily-review" @if(session('status')) open @endif><summary>Review set {{ $lastAttempt->set_number }} · {{ $lastAttempt->score }}/{{ $lastAttempt->total }} marks</summary>

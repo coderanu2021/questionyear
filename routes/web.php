@@ -50,6 +50,10 @@ Route::post('/quizzes/{quiz}/answer', [WebsiteController::class, 'answer'])->mid
 Route::post('/quizzes/{quiz}/attempts', [WebsiteController::class, 'attempt'])->middleware('throttle:30,1')->block(10, 10);
 Route::get('/daily-quiz', [DailyQuizController::class, 'index'])->name('daily')->block(10, 10);
 Route::post('/daily-quiz', [DailyQuizController::class, 'submit'])->name('daily.submit')->middleware('throttle:10,1')->block(10, 10);
+foreach (['daily', 'weekly', 'monthly'] as $period) {
+    Route::get('/'.$period.'-quiz/sets/{set}', [DailyQuizController::class, 'index'])->defaults('period', $period)->whereNumber('set')->name($period.'.set')->block(10, 10);
+    Route::post('/'.$period.'-quiz/sets/{set}', [DailyQuizController::class, 'submit'])->defaults('period', $period)->whereNumber('set')->middleware('throttle:10,1')->name($period.'.set.submit')->block(10, 10);
+}
 foreach (['weekly', 'monthly'] as $period) {
     Route::get('/'.$period.'-quiz', [DailyQuizController::class, 'index'])->defaults('period', $period)->name($period)->block(10, 10);
     Route::post('/'.$period.'-quiz', [DailyQuizController::class, 'submit'])->defaults('period', $period)->name($period.'.submit')->middleware('throttle:10,1')->block(10, 10);

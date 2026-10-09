@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Subject;
 use App\Models\User;
+use App\PracticeQuestionGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -13,12 +14,18 @@ class AdminPracticeGenerationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_manual_generation_publishes_twenty_questions_and_scheduler_skips_api(): void
+    public function test_manual_generation_creates_another_set_and_scheduler_keeps_both_sets(): void
     {
         config(['services.gemini.key' => 'test-key']);
         Subject::factory()->create();
-        $questions = array_map(fn (int $index): array => ['q' => 'Question '.$index, 'o' => ['A', 'B', 'C', 'D'], 'c' => 0, 'explanation' => 'Explanation'], range(1, 20));
-        Http::fake(['*' => Http::response(['candidates' => [['content' => ['parts' => [['text' => json_encode($questions)]]]]]])]);
+        $batch = 0;
+        Http::fake(function ($request) use (&$batch) {
+            preg_match('/exactly (\d+)/', $request['contents'][0]['parts'][0]['text'], $matches);
+            $prefix = 'Batch '.++$batch;
+            $questions = array_map(fn (int $index): array => ['q' => $prefix.' Question '.$index, 'o' => ['A', 'B', 'C', 'D'], 'c' => 0, 'explanation' => 'Explanation'], range(1, (int) $matches[1]));
+
+            return Http::response(['candidates' => [['content' => ['parts' => [['text' => json_encode($questions)]]]]]]);
+        });
         $this->actingAs(User::factory()->create(['role' => 'admin']));
         $this->get('/admin/practice')->assertOk()->assertSee('Pending generation')->assertSee('Generate Daily Quiz');
         $this->post(route('admin.practice.generate'), ['period' => 'daily'])->assertRedirect('/admin/practice')->assertSessionHasNoErrors();
@@ -26,10 +33,10 @@ class AdminPracticeGenerationTest extends TestCase
         $this->assertCount(20, json_decode($snapshot, true));
         $this->post(route('admin.practice.generate'), ['period' => 'daily'])->assertSessionHasNoErrors();
         $this->artisan('practice:generate daily')->assertSuccessful();
-        $this->assertDatabaseCount('practice_sets', 1);
+        $this->assertDatabaseCount('practice_sets', 2);
         $this->assertSame($snapshot, DB::table('practice_sets')->value('questions'));
-        $this->get('/admin/practice')->assertOk()->assertSee('Already generated')->assertSee('20 / 20');
-        Http::assertSentCount(1);
+        $this->get('/admin/practice')->assertOk()->assertSee('Generate another Daily Quiz')->assertSee('20 / 20')->assertSee('2 saved sets');
+        Http::assertSentCount(2);
     }
 
     public function test_generation_requires_active_admin_and_valid_period(): void
@@ -55,6 +62,21 @@ class AdminPracticeGenerationTest extends TestCase
         $this->followingRedirects()->post(route('admin.practice.generate'), ['period' => 'daily'])
             ->assertOk()->assertSee('Gemini generation failed (HTTP 429).');
         $this->assertDatabaseCount('practice_sets', 0);
+    }
+
+    public function test_failed_regeneration_preserves_the_existing_quiz_and_its_page(): void
+    {
+        config(['services.gemini.key' => 'test-key']);
+        Subject::factory()->create();
+        $questions = array_map(fn (int $index): array => ['q' => 'Existing question '.$index, 'o' => ['A', 'B', 'C', 'D'], 'c' => 0, 'explanation' => 'Explanation'], range(1, 20));
+        $snapshot = json_encode($questions);
+        $id = DB::table('practice_sets')->insertGetId(['period' => 'daily', 'starts_on' => app(PracticeQuestionGenerator::class)->date('daily'), 'questions' => $snapshot, 'created_at' => now(), 'updated_at' => now()]);
+        Http::fake(['*' => Http::response([], 429)]);
+        $this->actingAs(User::factory()->create(['role' => 'admin']));
+        $this->postJson(route('admin.practice.generate'), ['period' => 'daily'])->assertUnprocessable();
+        $this->assertDatabaseCount('practice_sets', 1);
+        $this->assertDatabaseHas('practice_sets', ['id' => $id, 'questions' => $snapshot, 'set_number' => 1]);
+        $this->get(route('daily.set', ['set' => $id]))->assertOk()->assertSee('Existing question 1');
     }
 
     public function test_missing_api_key_shows_the_configuration_error(): void
