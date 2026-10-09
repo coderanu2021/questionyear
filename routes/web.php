@@ -11,12 +11,14 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SiteSettingsController;
 use App\Http\Controllers\WebsiteController;
+use App\Http\Controllers\WebsiteLanguageController;
 use App\Http\Controllers\WordImportController;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [WebsiteController::class, 'index'])->name('home');
+Route::post('/language', [WebsiteLanguageController::class, 'update'])->name('website.language');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/blogs', [PostController::class, 'blogs'])->name('blogs.index');
 Route::get('/blogs/{slug}', [PostController::class, 'show'])->name('blogs.show');

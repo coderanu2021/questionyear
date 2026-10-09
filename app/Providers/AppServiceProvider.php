@@ -16,6 +16,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->app->useLangPath(resource_path('lang'));
         DB::prohibitDestructiveCommands($this->app->isProduction());
 
         View::composer(['website.*', 'errors.*', 'errors::*', 'admin.index', 'admin.pages.settings'], function (\Illuminate\View\View $view): void {
