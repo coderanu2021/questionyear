@@ -67,20 +67,30 @@ class PracticeQuestionGenerator
                 $saved = DB::table('practice_questions')->where('subject_id', $subject->id)->inRandomOrder()->limit($reuseCount)->get();
                 $selected = $selected->concat($saved);
                 $missing = $target - $saved->count();
-                $exclude = $saved->map(fn ($row): string => json_decode($row->question, true)['q'])->all();
+                $exclude = DB::table('practice_questions')->where('subject_id', $subject->id)->pluck('question')
+                    ->map(fn (string $question): string => json_decode($question, true)['q'])->all();
+                $requestsRemaining = (int) ceil($missing / 20) + 3;
                 while ($missing > 0) {
+                    if ($requestsRemaining-- === 0) {
+                        throw new RuntimeException('Gemini could not provide enough unique questions after automatic retries. Try generation again later. Existing sets are preserved.');
+                    }
                     $batchSize = min(20, $missing);
                     $questions = $this->requestQuestions($subject->name, $batchSize, $exclude);
+                    $accepted = 0;
                     foreach ($questions as $question) {
                         $hash = hash('sha256', mb_strtolower(trim($question['q'])));
                         if (in_array($question['q'], $exclude, true) || $fresh->contains(fn (array $item): bool => hash('sha256', mb_strtolower(trim($item['question']['q']))) === $hash) || DB::table('practice_questions')->where('fingerprint', $hash)->exists()) {
-                            throw new RuntimeException('Gemini returned a duplicate question. Retry generation later.');
+                            if (! in_array($question['q'], $exclude, true)) {
+                                $exclude[] = $question['q'];
+                            }
+                            continue;
                         }
                         $fresh->push(['question' => $question, 'subject_id' => $subject->id]);
                         $this->store($question, $subject->id, 'gemini');
                         $exclude[] = $question['q'];
+                        $accepted++;
                     }
-                    $missing -= count($questions);
+                    $missing -= $accepted;
                 }
             }
 

@@ -62,10 +62,37 @@ class PracticeGenerationTest extends TestCase
     {
         config(['services.gemini.key' => 'test-key']);
         Subject::factory()->create();
-        $questions = array_fill(0, 20, $this->questions(1, 'Duplicate')[0]);
-        Http::fake(['*' => Http::response(['candidates' => [['content' => ['parts' => [['text' => json_encode($questions)]]]]]])]);
+        Http::fake(function ($request) {
+            preg_match('/exactly (\d+)/', $request['contents'][0]['parts'][0]['text'], $matches);
+            $questions = array_fill(0, (int) $matches[1], $this->questions(1, 'Duplicate')[0]);
+
+            return Http::response(['candidates' => [['content' => ['parts' => [['text' => json_encode($questions)]]]]]]);
+        });
         $this->artisan('practice:generate daily')->assertFailed();
         $this->assertDatabaseCount('practice_sets', 0);
+        Http::assertSentCount(4);
+    }
+
+    public function test_duplicate_saved_and_batch_questions_are_replaced_with_unique_questions(): void
+    {
+        config(['services.gemini.key' => 'test-key']);
+        Quiz::factory()->create(['questions' => $this->questions(20, 'Saved')]);
+        $newQuestions = $this->questions(3, 'New');
+        $batch = [$this->questions(1, 'Saved')[0], ...$newQuestions, $newQuestions[0], [...$newQuestions[1], 'q' => '  NEW QUESTION 2  ']];
+        Http::fakeSequence()
+            ->push(['candidates' => [['content' => ['parts' => [['text' => json_encode($batch)]]]]]])
+            ->push(['candidates' => [['content' => ['parts' => [['text' => json_encode($this->questions(3, 'Replacement'))]]]]]]);
+        $this->artisan('practice:generate daily')->assertSuccessful();
+        $questions = json_decode(DB::table('practice_sets')->value('questions'), true);
+        $this->assertCount(20, $questions);
+        $this->assertCount(20, array_unique(array_map(fn (array $question): string => mb_strtolower(trim($question['q'])), $questions)));
+        $this->assertSame(6, DB::table('practice_questions')->where('source', 'gemini')->count());
+        Http::assertSent(function ($request): bool {
+            $prompt = $request['contents'][0]['parts'][0]['text'];
+
+            return str_contains($prompt, 'exactly 3') && str_contains($prompt, 'New question 3') && str_contains($prompt, 'Saved question 20');
+        });
+        Http::assertSentCount(2);
     }
 
     public function test_completed_questions_are_preserved_when_a_later_api_batch_fails(): void

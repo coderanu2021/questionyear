@@ -79,6 +79,28 @@ class AdminPracticeGenerationTest extends TestCase
         $this->get(route('daily.set', ['set' => $id]))->assertOk()->assertSee('Existing question 1');
     }
 
+    public function test_duplicate_retry_limit_preserves_existing_sets_and_returns_a_clear_error(): void
+    {
+        config(['services.gemini.key' => 'test-key']);
+        Subject::factory()->create();
+        $question = ['q' => 'Repeated question', 'o' => ['A', 'B', 'C', 'D'], 'c' => 0, 'explanation' => 'Explanation'];
+        $snapshot = json_encode([$question]);
+        $id = DB::table('practice_sets')->insertGetId(['period' => 'daily', 'starts_on' => app(PracticeQuestionGenerator::class)->date('daily'), 'questions' => $snapshot, 'created_at' => now(), 'updated_at' => now()]);
+        Http::fake(function ($request) use ($question) {
+            preg_match('/exactly (\d+)/', $request['contents'][0]['parts'][0]['text'], $matches);
+
+            return Http::response(['candidates' => [['content' => ['parts' => [['text' => json_encode(array_fill(0, (int) $matches[1], $question))]]]]]]);
+        });
+        $this->actingAs(User::factory()->create(['role' => 'admin']));
+        $this->postJson(route('admin.practice.generate'), ['period' => 'daily'])->assertUnprocessable()
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('message', 'Gemini could not provide enough unique questions after automatic retries. Try generation again later. Existing sets are preserved.');
+        $this->assertDatabaseCount('practice_sets', 1);
+        $this->assertDatabaseHas('practice_sets', ['id' => $id, 'questions' => $snapshot]);
+        $this->get(route('daily.set', ['set' => $id]))->assertOk()->assertSee('Repeated question');
+        Http::assertSentCount(4);
+    }
+
     public function test_missing_api_key_shows_the_configuration_error(): void
     {
         config(['services.gemini.key' => null]);
