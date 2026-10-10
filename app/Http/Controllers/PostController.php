@@ -116,6 +116,7 @@ class PostController extends Controller
         $request->validate([
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string', 'max:1000'],
+            'meta_keywords' => ['nullable', 'string', 'max:1000'],
         ]);
         $request->validate(['title' => ['required', 'string', 'max:255'], 'slug' => ['nullable', 'string', 'max:255']]);
         $request->merge(['slug' => Str::slug($request->input('slug') ?: $request->input('title', ''))]);
@@ -135,7 +136,7 @@ class PostController extends Controller
     private function saveMetadata(Request $request, Post $post): void
     {
         $metadata = [];
-        foreach (['meta_title', 'meta_description'] as $field) {
+        foreach (['meta_title', 'meta_description', 'meta_keywords'] as $field) {
             if ($request->exists($field)) {
                 $metadata[$field] = trim((string) $request->input($field)) ?: null;
             }

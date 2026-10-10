@@ -6,7 +6,6 @@ use App\Models\Post;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -14,21 +13,38 @@ class PostsTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_blog_cards_show_content_images_and_detail_uses_reading_layout(): void
+    {
+        $post = Post::factory()->published()->create(['title' => 'Exam eligibility guide', 'content' => '<p>Prepare well.</p><figure><img src="/post-images/guide.png"></figure><h2>Qualification</h2>']);
+        foreach ([route('home'), route('blogs.index')] as $url) {
+            $this->get($url)->assertOk()->assertSee('class="blog-card"', false)->assertSee('src="/post-images/guide.png"', false)->assertSee('1 min read');
+        }
+        $this->get(route('blogs.show', $post->slug))->assertOk()->assertSee('class="blog-article"', false)->assertSee('class="blog-meta"', false)->assertSee('<h2>Qualification</h2>', false);
+        $post->update(['content' => '<img src="javascript:alert(1)"><p>No cover</p>']);
+        $this->assertNull($post->thumbnailUrl());
+        $this->get(route('blogs.index'))->assertOk()->assertSee('blog-card-placeholder')->assertDontSee('javascript:', false);
+    }
+
     public function test_post_form_saves_and_renders_metadata_using_existing_page_seo(): void
     {
         $this->actingAs(User::factory()->create(['role' => 'admin', 'status' => 'active']));
-        $this->get(route('admin.posts.create'))->assertOk()->assertSee('name="meta_title"', false)->assertSee('name="meta_description"', false);
-        $data = ['title' => 'Study tips', 'type' => 'blog', 'status' => 'published', 'content' => '<p>Practice daily.</p>', 'meta_title' => 'Custom SEO title', 'meta_description' => 'Custom SEO description'];
+        $this->get(route('admin.posts.create'))->assertOk()->assertSee('name="meta_title"', false)->assertSee('name="meta_description"', false)->assertSee('name="meta_keywords"', false);
+        $data = ['title' => 'Study tips', 'type' => 'blog', 'status' => 'published', 'content' => '<p>Practice daily.</p>', 'meta_title' => 'Custom SEO title', 'meta_description' => 'Custom SEO description', 'meta_keywords' => 'study, exams'];
         $this->post(route('admin.posts.store'), $data)->assertRedirect();
         $post = Post::firstOrFail();
         $this->assertDatabaseHas('page_seo', ['page_key' => 'post:'.$post->id, 'meta_title' => $data['meta_title'], 'meta_description' => $data['meta_description']]);
         $this->get(route('blogs.show', $post->slug))->assertOk()->assertSee('<title>Custom SEO title</title>', false)->assertSee('content="Custom SEO description"', false);
         $this->get(route('admin.posts.edit', $post))->assertOk()->assertSee('Custom SEO title')->assertSee('Custom SEO description');
-        DB::table('page_seo')->where('page_key', 'post:'.$post->id)->update(['meta_keywords' => 'study']);
+        $this->assertDatabaseHas('page_seo', ['page_key' => 'post:'.$post->id, 'meta_keywords' => 'study, exams']);
+        $this->get(route('blogs.show', $post->slug))->assertOk()->assertSee('<meta name="keywords" content="study, exams">', false);
+        $this->get(route('admin.posts.edit', $post))->assertOk()->assertSee('value="study, exams"', false);
         $this->put(route('admin.posts.update', $post), [...$data, 'meta_title' => '', 'meta_description' => ''])->assertRedirect();
-        $this->assertDatabaseHas('page_seo', ['page_key' => 'post:'.$post->id, 'meta_title' => null, 'meta_description' => null, 'meta_keywords' => 'study']);
+        $this->assertDatabaseHas('page_seo', ['page_key' => 'post:'.$post->id, 'meta_title' => null, 'meta_description' => null, 'meta_keywords' => 'study, exams']);
         $this->put(route('admin.posts.update', $post), [...$data, 'meta_title' => str_repeat('a', 256)])->assertSessionHasErrors('meta_title');
         $this->put(route('admin.posts.update', $post), [...$data, 'meta_description' => str_repeat('a', 1001)])->assertSessionHasErrors('meta_description');
+        $this->put(route('admin.posts.update', $post), [...$data, 'meta_keywords' => str_repeat('a', 1001)])->assertSessionHasErrors('meta_keywords');
+        $this->put(route('admin.posts.update', $post), [...$data, 'meta_keywords' => ''])->assertRedirect();
+        $this->assertDatabaseHas('page_seo', ['page_key' => 'post:'.$post->id, 'meta_keywords' => null]);
     }
 
     public function test_editor_images_can_be_uploaded_and_served(): void
