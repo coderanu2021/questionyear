@@ -27,7 +27,7 @@
     }
     ClassicEditor.create(field, {
         toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'uploadImage', 'blockQuote', 'insertTable', '|', 'undo', 'redo'],
-        extraPlugins: [editor => {
+        extraPlugins: [function PostImageUploadPlugin(editor) {
             editor.plugins.get('FileRepository').createUploadAdapter = loader => new PostImageUploadAdapter(loader);
         }]
     }).then(editor => {
@@ -46,5 +46,8 @@
                 editor.editing.view.focus();
             }
         });
-    }).catch(() => { status.textContent = 'Editor could not load. You can still enter text below.'; });
+    }).catch(error => {
+        console.error('Post editor initialization failed:', error);
+        status.textContent = 'Editor could not load. You can still enter text below.';
+    });
 })();
