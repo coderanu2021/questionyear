@@ -7,6 +7,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -74,13 +75,17 @@ class PostController extends Controller
     {
         $this->authorizeAdmin($request);
 
-        return view('admin.index', ['page' => 'posts', 'state' => $this->adminState(), 'post' => $post, 'isPostForm' => true]);
+        return view('admin.index', ['page' => 'posts', 'state' => $this->adminState(), 'post' => $post, 'isPostForm' => true, 'metadata' => DB::table('page_seo')->where('page_key', 'post:'.$post->id)->first()]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $this->authorizeAdmin($request);
-        Post::create($this->validatedPost($request));
+        $data = $this->validatedPost($request);
+        DB::transaction(function () use ($request, $data): void {
+            $post = Post::create($data);
+            $this->saveMetadata($request, $post);
+        });
 
         return redirect()->route('admin.posts.index')->with('status', 'Post created.');
     }
@@ -88,7 +93,11 @@ class PostController extends Controller
     public function update(Request $request, Post $post): RedirectResponse
     {
         $this->authorizeAdmin($request);
-        $post->update($this->validatedPost($request, $post));
+        $data = $this->validatedPost($request, $post);
+        DB::transaction(function () use ($request, $post, $data): void {
+            $post->update($data);
+            $this->saveMetadata($request, $post);
+        });
 
         return redirect()->route('admin.posts.index')->with('status', 'Post updated.');
     }
@@ -104,6 +113,10 @@ class PostController extends Controller
     /** @return array{type: string, title: string, slug: string, excerpt: ?string, content: string, status: string, published_at: mixed} */
     private function validatedPost(Request $request, ?Post $post = null): array
     {
+        $request->validate([
+            'meta_title' => ['nullable', 'string', 'max:255'],
+            'meta_description' => ['nullable', 'string', 'max:1000'],
+        ]);
         $request->validate(['title' => ['required', 'string', 'max:255'], 'slug' => ['nullable', 'string', 'max:255']]);
         $request->merge(['slug' => Str::slug($request->input('slug') ?: $request->input('title', ''))]);
         $data = $request->validate([
@@ -117,6 +130,19 @@ class PostController extends Controller
         $data['published_at'] = $data['status'] === 'published' ? ($post?->published_at ?? now()) : null;
 
         return $data;
+    }
+
+    private function saveMetadata(Request $request, Post $post): void
+    {
+        $metadata = [];
+        foreach (['meta_title', 'meta_description'] as $field) {
+            if ($request->exists($field)) {
+                $metadata[$field] = trim((string) $request->input($field)) ?: null;
+            }
+        }
+        if ($metadata !== []) {
+            DB::table('page_seo')->updateOrInsert(['page_key' => 'post:'.$post->id], [...$metadata, 'updated_at' => now()]);
+        }
     }
 
     /** @return array{tests: array, weeks: array{labels: array}} */

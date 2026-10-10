@@ -6,12 +6,30 @@ use App\Models\Post;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PostsTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_post_form_saves_and_renders_metadata_using_existing_page_seo(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => 'admin', 'status' => 'active']));
+        $this->get(route('admin.posts.create'))->assertOk()->assertSee('name="meta_title"', false)->assertSee('name="meta_description"', false);
+        $data = ['title' => 'Study tips', 'type' => 'blog', 'status' => 'published', 'content' => '<p>Practice daily.</p>', 'meta_title' => 'Custom SEO title', 'meta_description' => 'Custom SEO description'];
+        $this->post(route('admin.posts.store'), $data)->assertRedirect();
+        $post = Post::firstOrFail();
+        $this->assertDatabaseHas('page_seo', ['page_key' => 'post:'.$post->id, 'meta_title' => $data['meta_title'], 'meta_description' => $data['meta_description']]);
+        $this->get(route('blogs.show', $post->slug))->assertOk()->assertSee('<title>Custom SEO title</title>', false)->assertSee('content="Custom SEO description"', false);
+        $this->get(route('admin.posts.edit', $post))->assertOk()->assertSee('Custom SEO title')->assertSee('Custom SEO description');
+        DB::table('page_seo')->where('page_key', 'post:'.$post->id)->update(['meta_keywords' => 'study']);
+        $this->put(route('admin.posts.update', $post), [...$data, 'meta_title' => '', 'meta_description' => ''])->assertRedirect();
+        $this->assertDatabaseHas('page_seo', ['page_key' => 'post:'.$post->id, 'meta_title' => null, 'meta_description' => null, 'meta_keywords' => 'study']);
+        $this->put(route('admin.posts.update', $post), [...$data, 'meta_title' => str_repeat('a', 256)])->assertSessionHasErrors('meta_title');
+        $this->put(route('admin.posts.update', $post), [...$data, 'meta_description' => str_repeat('a', 1001)])->assertSessionHasErrors('meta_description');
+    }
 
     public function test_editor_images_can_be_uploaded_and_served(): void
     {
