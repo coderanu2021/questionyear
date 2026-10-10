@@ -73,7 +73,7 @@
     <article class="box home-blog-card">
       <time class="daily-label" datetime="{{ $blog->published_at->toDateString() }}">{{ $blog->published_at->format('d M Y') }}</time>
       <h3><a href="{{ route('blogs.show', $blog->slug) }}">{{ $blog->title }}</a></h3>
-      <p>{{ $blog->excerpt ?: Illuminate\Support\Str::limit($blog->content, 160) }}</p>
+      <p>{{ $blog->excerpt ?: Illuminate\Support\Str::limit(strip_tags($blog->content), 160) }}</p>
       <a class="btn btn-l" href="{{ route('blogs.show', $blog->slug) }}">Read blog →</a>
     </article>
     @empty

@@ -9,7 +9,9 @@
 <div class="f"><label for="post-title">Title</label><input id="post-title" name="title" value="{{ old('title', $post->title) }}" required maxlength="255"></div>
 <div class="f"><label for="post-slug">URL slug (generated from title when empty)</label><input id="post-slug" name="slug" value="{{ old('slug', $post->slug) }}" maxlength="255"></div>
 <div class="f"><label for="post-excerpt">Short description</label><textarea id="post-excerpt" name="excerpt" rows="3" maxlength="1000">{{ old('excerpt', $post->excerpt) }}</textarea></div>
-<div class="f"><label for="post-content">Content</label><textarea id="post-content" name="content" rows="16" required maxlength="100000" placeholder="Write your post here. Separate paragraphs with a blank line.">{{ old('content', $post->content) }}</textarea></div>
+<div class="f"><label for="post-content">Content</label><textarea id="post-content" name="content" rows="16" required maxlength="100000" data-upload-url="{{ route('admin.posts.images') }}" placeholder="Write your post here.">{{ old('content', $post->content) }}</textarea><p>Use the image button or drag an image into the editor. JPG, PNG, WebP or GIF, up to 5 MB.</p><p id="post-editor-status" role="status"></p></div>
+<style>.ck-editor__editable_inline{min-height:350px}.ck-content img{max-width:100%}</style>
+<script src="{{ asset('js/post-editor.js') }}?v={{ filemtime(public_path('js/post-editor.js')) }}" defer></script>
 <p style="margin-bottom:20px">Only published blogs appear on the website. News stays in the admin panel for now.</p>
 <button class="btn pri" type="submit">Save post</button>
 </form>

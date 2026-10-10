@@ -5,11 +5,36 @@ namespace Tests\Feature;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PostsTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_editor_images_can_be_uploaded_and_served(): void
+    {
+        Storage::fake('local');
+        $this->actingAs(User::factory()->create(['role' => 'admin', 'status' => 'active']));
+        $response = $this->postJson(route('admin.posts.images'), ['upload' => UploadedFile::fake()->image('photo.png')])->assertOk();
+        $this->get($response->json('url'))->assertOk()->assertHeader('X-Content-Type-Options', 'nosniff');
+        $this->assertCount(1, Storage::disk('local')->files('post-images'));
+        $this->postJson(route('admin.posts.images'), ['upload' => UploadedFile::fake()->create('script.svg', 10, 'image/svg+xml')])->assertUnprocessable();
+        $this->postJson(route('admin.posts.images'), ['upload' => UploadedFile::fake()->image('large.png')->size(5121)])->assertUnprocessable();
+        foreach ([['role' => 'student', 'status' => 'active'], ['role' => 'admin', 'status' => 'blocked']] as $attributes) {
+            $this->actingAs(User::factory()->create($attributes))->postJson(route('admin.posts.images'), [])->assertForbidden();
+        }
+        $this->get('/post-images/missing.png')->assertNotFound();
+    }
+
+    public function test_blog_renders_formatted_content_and_removes_unsafe_html(): void
+    {
+        $post = Post::factory()->published()->create(['content' => '<p><strong>Study</strong></p><figure><img src="/post-images/photo.png" onerror="alert(1)"><figcaption>Photo</figcaption></figure><script>alert(2)</script><a href="javascript:alert(3)">Link</a>']);
+        $this->get(route('blogs.show', $post->slug))->assertOk()
+            ->assertSee('<strong>Study</strong>', false)->assertSee('<img src="/post-images/photo.png">', false)
+            ->assertDontSee('onerror', false)->assertDontSee('javascript:', false)->assertDontSee('alert(2)', false);
+    }
 
     public function test_homepage_shows_the_latest_eight_published_blogs(): void
     {

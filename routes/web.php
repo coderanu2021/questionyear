@@ -21,6 +21,7 @@ Route::get('/', [WebsiteController::class, 'index'])->name('home');
 Route::post('/language', [WebsiteLanguageController::class, 'update'])->name('website.language');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 Route::get('/blogs', [PostController::class, 'blogs'])->name('blogs.index');
+Route::get('/post-images/{filename}', [PostController::class, 'image'])->where('filename', '[A-Za-z0-9]+\.(jpg|jpeg|png|webp|gif)')->name('posts.image');
 Route::get('/blogs/{slug}', [PostController::class, 'show'])->name('blogs.show');
 Route::get('/login', [WebsiteController::class, 'index'])->name('login');
 Route::get('/register', [WebsiteController::class, 'index'])->name('register');
@@ -82,6 +83,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/posts', [PostController::class, 'index'])->name('admin.posts.index');
     Route::get('/admin/posts/create', [PostController::class, 'create'])->name('admin.posts.create');
     Route::post('/admin/posts', [PostController::class, 'store'])->name('admin.posts.store');
+    Route::post('/admin/posts/images', [PostController::class, 'uploadImage'])->middleware('throttle:30,1')->name('admin.posts.images');
     Route::get('/admin/posts/{post}/edit', [PostController::class, 'edit'])->name('admin.posts.edit');
     Route::put('/admin/posts/{post}', [PostController::class, 'update'])->name('admin.posts.update');
     Route::delete('/admin/posts/{post}', [PostController::class, 'destroy'])->name('admin.posts.destroy');

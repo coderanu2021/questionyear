@@ -4,13 +4,34 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PostController extends Controller
 {
+    public function uploadImage(Request $request): JsonResponse
+    {
+        $this->authorizeAdmin($request);
+        $request->validate(['upload' => ['required', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120', 'dimensions:max_width=6000,max_height=6000']]);
+        $path = $request->file('upload')->store('post-images', 'local');
+        abort_unless($path, 500, 'Image could not be uploaded.');
+
+        return response()->json(['url' => route('posts.image', basename($path))]);
+    }
+
+    public function image(string $filename): StreamedResponse
+    {
+        $path = 'post-images/'.$filename;
+        abort_unless(Storage::disk('local')->exists($path), 404);
+
+        return Storage::disk('local')->response($path, null, ['Cache-Control' => 'public, max-age=86400', 'X-Content-Type-Options' => 'nosniff']);
+    }
+
     private function authorizeAdmin(Request $request): void
     {
         abort_unless($request->user()?->role === 'admin' && $request->user()?->status === 'active', 403);
