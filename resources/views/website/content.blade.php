@@ -6,7 +6,9 @@
 <main class="wrap" style="min-height:60vh;padding-top:48px;padding-bottom:64px"><div class="crumb"><a href="{{ route('home') }}">{{ __('Home') }}</a><span>/</span><b>{{ $title }}</b></div><h1>{{ $title }}</h1><p class="sub" style="white-space:pre-line">{{ $description }}</p>
 @if(session('status'))<p class="box" role="status" style="padding:20px">{{ session('status') }}</p>@endif
 @if($errors->any())<div class="box" role="alert" style="padding:20px">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>@endif
-@if($page === 'feedback')
+@if(in_array($page, ['privacy', 'terms'], true))
+@include('website.partials.legal')
+@elseif($page === 'feedback')
 <div class="feedback-layout"><aside class="feedback-intro"><span class="daily-label">YOUR VOICE MATTERS</span><h2>Let's make learning better, together.</h2><p>Have an idea, found a problem or enjoyed an MCQ? We'd love to hear from you.</p><div class="box feedback-note"><h3>What happens next?</h3><p>Our team reviews your feedback in the admin panel. Your feedback and email stay private.</p></div><p class="site-contact-line">Email us at <a href="mailto:{{ $siteSettings['contact_email'] }}">{{ $siteSettings['contact_email'] }}</a>.</p></aside>
 <form class="box content-form feedback-form" method="POST" action="{{ route('feedback.send') }}">@csrf
 <label for="feedback-name">{{ __('Your name') }}<input id="feedback-name" name="name" value="{{ old('name', auth()->user()?->name) }}" required maxlength="100" autocomplete="name"></label>
