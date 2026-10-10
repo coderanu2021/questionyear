@@ -1,3 +1,1 @@
-@if($siteFaviconUrl)
-<link rel="icon" href="{{ $siteFaviconUrl }}">
-@endif
+<link rel="icon" href="{{ $siteFaviconUrl ?? $siteLogoUrl ?? asset('favicon.ico') }}">
