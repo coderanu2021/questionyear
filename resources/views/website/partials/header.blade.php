@@ -10,7 +10,6 @@
 
 
 
-@include('website.partials.language-scripts')
 <script>window.SITE_TITLE={{ Illuminate\Support\Js::from($siteSettings['site_title']) }};</script>
 <header>
   <div class="wrap top">
@@ -24,16 +23,6 @@
       <li class="mnav" id="msi"><a href="/login">{{ __('Sign in') }}</a></li>
     </ul></nav>
     <span class="sp"></span>
-    <form class="website-language" action="{{ route('website.language') }}" method="post">
-      @csrf
-      <input type="hidden" name="return_to" value="{{ request()->getRequestUri() }}">
-      <label for="website-language">{{ __('Language') }}</label>
-      <select id="website-language" name="language" onchange="this.form.requestSubmit()">
-        <option value="en" @selected(app()->getLocale() === 'en')>English</option>
-        <option value="hi" @selected(app()->getLocale() === 'hi')>हिंदी</option>
-      </select>
-      <noscript><button type="submit">{{ __('Apply') }}</button></noscript>
-    </form>
     @if(auth()->user()?->role === 'admin' && auth()->user()?->status === 'active')
       <a class="btn btn-o" href="{{ route('admin') }}">{{ __('Admin panel') }}</a>
     @endif

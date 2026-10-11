@@ -1,6 +1,6 @@
 const mcqText=text=>String(text??"").replace(/\bquiz(?:zes)?\b/gi,word=>word.toLowerCase()==="quizzes"?"MCQs":"MCQ");
-const localizedPath=path=>(window.WEBSITE_LANGUAGE==='hi'?'/hi':'')+path;
-const tr=(key,values={})=>window.websiteText(key,values);
+const localizedPath=path=>path;
+const tr=(key,values={})=>{let text=String(key);for(const [name,value] of Object.entries(values))text=text.replaceAll(':'+name,String(value));return text;};
 async function api(url,data){const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify(data)});const result=await response.json();if(!response.ok){const error=Error(result.message||'Request failed');error.code=result.code;throw error}return result;}
 const SITE_TITLE=window.SITE_TITLE||"questionyear";const S=window.CURRICULUM.S;
 const CH=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>`;
@@ -15,7 +15,7 @@ function mono(n){const w=n.replace("&","").split(/\s+/).filter(Boolean);return w
 function render(){
   fl.innerHTML=cats.map(c=>`<button class="chip" aria-pressed="${c===cat}" data-c="${c}">${esc(tr(c))}</button>`).join("");
   const r=SUB.filter(x=>(cat==="All"||x.cat===cat)&&(x.n+" "+tr(x.n)).toLowerCase().includes(term));
-  gr.innerHTML=r.map(x=>`<a href="${window.WEBSITE_LANGUAGE==='hi'?'/hi':''}/subject/${x.id}" class="card" style="--c:${x.c}"><div class="card-h"><div class="ic">${mono(x.n)}</div><div><small>${esc(tr(x.cat))}</small><h3>${esc(tr(x.n))}</h3></div></div><p>${esc(x.d)}</p><div class="card-f"><span>${["current-affairs","general-knowledge"].includes(x.id)?subjectQuizzes(x).length+" MCQs":x.ch.length+" chapters"}</span><b>View ${["current-affairs","general-knowledge"].includes(x.id)?"MCQs":"chapters"} ${CH}</b></div></a>`).join("");
+  gr.innerHTML=r.map(x=>`<a href="/subject/${x.id}" class="card" style="--c:${x.c}"><div class="card-h"><div class="ic">${mono(x.n)}</div><div><small>${esc(tr(x.cat))}</small><h3>${esc(tr(x.n))}</h3></div></div><p>${esc(x.d)}</p><div class="card-f"><span>${["current-affairs","general-knowledge"].includes(x.id)?subjectQuizzes(x).length+" MCQs":x.ch.length+" chapters"}</span><b>View ${["current-affairs","general-knowledge"].includes(x.id)?"MCQs":"chapters"} ${CH}</b></div></a>`).join("");
   em.style.display=r.length?"none":"block";
 }
 fl.onclick=e=>{const b=e.target.closest("[data-c]");if(b){cat=b.dataset.c;render()}};
@@ -56,8 +56,8 @@ dn.onclick=()=>{if(i<Q.length-1)i++;else{i=0;sc=0;$("ds").textContent="Score: 0"
 load();
 window.addEventListener("scroll",()=>document.querySelector("header").classList.toggle("scrolled",scrollY>4),{passive:true});
 const dt=new Date();document.getElementById("dd").textContent=dt.getDate();
-document.getElementById("dm").textContent=dt.toLocaleDateString(window.WEBSITE_LANGUAGE==="hi"?"hi-IN":"en-IN",{month:"long",year:"numeric"});
-document.getElementById("dw").textContent=dt.toLocaleDateString(window.WEBSITE_LANGUAGE==="hi"?"hi-IN":"en-IN",{weekday:"long"});
+document.getElementById("dm").textContent=dt.toLocaleDateString("en-IN",{month:"long",year:"numeric"});
+document.getElementById("dw").textContent=dt.toLocaleDateString("en-IN",{weekday:"long"});
 
 /* ===== QUESTIONS: key = subjectId:chapterIndex ===== */
 const QB=window.CURRICULUM.QB;const LN=window.CURRICULUM.LN;
@@ -107,7 +107,7 @@ function learnPage(x,i){
     return `<section class="bk-s" id="bk${n}"><div class="bk-h"><span class="bk-no">SECTION ${String(n+1).padStart(2,"0")}</span><h2><i class="fa-solid ${s.i}"></i>${esc(s.h)}</h2></div>${ps}${tb}${c}</section>`}).join("");
   const sib=k=>LN[x.id+":"+k]?window.CURRICULUM.chapterUrls[x.id+":"+k]:null,pv=sib(i-1),nx=sib(i+1);
   $("learn").innerHTML=`<div class="rp"><i id="rpi"></i></div>
-  <div class="bk-hero"><div class="wrap"><div class="crumb"><a href="${localizedPath('/')}">${tr("Home")}</a><span>/</span><a href="${window.WEBSITE_LANGUAGE==='hi'?'/hi':''}/subject/${x.id}">${esc(tr(x.n))}</a><span>/</span><b>${esc(t)}</b></div>
+  <div class="bk-hero"><div class="wrap"><div class="crumb"><a href="${localizedPath('/')}">${tr("Home")}</a><span>/</span><a href="/subject/${x.id}">${esc(tr(x.n))}</a><span>/</span><b>${esc(t)}</b></div>
   <span class="bk-lab">Chapter ${i+1} &middot; ${esc(tr(x.n))}</span><h1>${esc(t)}</h1><p class="bk-sub">${esc(d.sub)}</p>
   <div class="bk-meta"><span><i class="fa-regular fa-clock"></i>${esc(d.time)}</span><span><i class="fa-solid fa-list"></i>${d.s.length} sections</span>${q?`<span><i class="fa-solid fa-circle-question"></i>${q.length} practice questions</span>`:""}</div></div><i class="fa-solid ${d.icon} bk-wm"></i></div>
   <div class="wrap bk-lay"><article class="bk-art">${secs}
@@ -173,14 +173,14 @@ function tick(){const remaining=Math.max(0,(quizSettings()?.duration||15)*60-Mat
 function drawQ(){
   if(!window.CURRENT_USER&&window.GUEST_QUESTIONS_USED>=25){accountGate();return}
   const q=qs[qi];
-  $("qb").innerHTML=`<div class="qtop"><span>${tr("Question :number of :total",{number:qi+1,total:qs.length})}</span><span id="tm">${fmt()}</span></div><div class="prog"><i style="width:${qi/qs.length*100}%"></i></div><h2 class="qt">${esc(q[0])}</h2>`+q[1].map((o,k)=>`<button class="qo" data-k="${k}"><b>${"ABCD"[k]}</b>${esc(o)}</button>`).join("")+`<div id="qe">${questionTools(qi)}</div><div class="qf"><a href="${window.WEBSITE_LANGUAGE==='hi'?'/hi':''}/subject/${curId}" class="btn btn-l">${tr("Exit MCQ")}</a><button class="btn btn-o" id="qn" hidden>${tr("Next question")}</button></div>`;
+  $("qb").innerHTML=`<div class="qtop"><span>${tr("Question :number of :total",{number:qi+1,total:qs.length})}</span><span id="tm">${fmt()}</span></div><div class="prog"><i style="width:${qi/qs.length*100}%"></i></div><h2 class="qt">${esc(q[0])}</h2>`+q[1].map((o,k)=>`<button class="qo" data-k="${k}"><b>${"ABCD"[k]}</b>${esc(o)}</button>`).join("")+`<div id="qe">${questionTools(qi)}</div><div class="qf"><a href="/subject/${curId}" class="btn btn-l">${tr("Exit MCQ")}</a><button class="btn btn-o" id="qn" hidden>${tr("Next question")}</button></div>`;
 }
 function accountGate(){clearInterval(tmr);$("qb").innerHTML=`<div class="res"><h2>${tr("Create an account to continue")}</h2><p>You have completed your 25 free guest questions. Log in or create a free account to solve more questions.</p><div class="cta2"><a class="btn btn-o" href="${localizedPath('/register')}">${tr("Create free account")}</a><a class="btn btn-l" href="${localizedPath('/login')}">${tr("Log in")}</a></div></div>`}
 function startQuiz(){qi=0;qsc=0;qans=[];t0=Date.now();clearInterval(tmr);if(!window.CURRENT_USER&&window.GUEST_QUESTIONS_USED>=25){accountGate();return}tmr=setInterval(tick,1000);drawQ()}
 function quizPage(x,i){
   curId=x.id;curIdx=i;qs=QB[x.id+":"+i];const settings=quizSettings(),t=["current-affairs","general-knowledge"].includes(x.id)?mcqText(settings?.title||x.ch[i]):x.ch[i];document.title=window.PAGE_SEO_TITLE||window.CHAPTER_SEO_TITLE||t+" MCQ – "+SITE_TITLE;
   const ln=LN[x.id+":"+i]?`<span>/</span><a href="${localizedPath(`/learn/${x.id}/${i}`)}">${tr("Notes")}</a>`:"";
-  $("qc").innerHTML=`<a href="${localizedPath('/')}">${tr("Home")}</a><span>/</span><a href="${window.WEBSITE_LANGUAGE==='hi'?'/hi':''}/subject/${x.id}">${esc(tr(x.n))}</a>${ln}<span>/</span><b>${esc(t)}</b>${settings?.quiz_date?`<span>/</span><time datetime="${esc(settings.quiz_date)}">${esc(settings.date_label)}</time>`:''}`;
+  $("qc").innerHTML=`<a href="${localizedPath('/')}">${tr("Home")}</a><span>/</span><a href="/subject/${x.id}">${esc(tr(x.n))}</a>${ln}<span>/</span><b>${esc(t)}</b>${settings?.quiz_date?`<span>/</span><time datetime="${esc(settings.quiz_date)}">${esc(settings.date_label)}</time>`:''}`;
   if(["current-affairs","general-knowledge"].includes(x.id))initCurrentAffairsReader();else startQuiz();
 }
 function initCurrentAffairsReader(){
@@ -212,7 +212,7 @@ async function results(){
   clearInterval(tmr);const pct=Math.round(qsc/qs.length*100);
   const msg=pct>=80?tr("Excellent work"):pct>=50?tr("Good effort"):tr("Keep practicing");
   const rev=LN[curId+":"+curIdx]?`<a class="btn btn-l" href="${localizedPath(`/learn/${curId}/${curIdx}`)}">${tr("Revise notes")}</a>`:"";
-  $("qb").innerHTML=`<div class="res"><div class="sb">${qsc}<span>/${qs.length}</span></div><h2>${msg}</h2><p class="sub" style="margin:0 auto 20px">${tr("You scored :score% in :time.",{score:pct,time:fmt()})}</p><div class="cta2"><button class="btn btn-o" id="qr">${tr("Try again")}</button>${rev}<a class="btn btn-l" href="/my-learning">Revise mistakes / Next 10 questions</a><a class="btn btn-l" href="${window.WEBSITE_LANGUAGE==='hi'?'/hi':''}/subject/${curId}">Back to ${["current-affairs","general-knowledge"].includes(curId)?"MCQs":"chapters"}</a></div></div><div class="rv"><h3>${tr("Review answers")}</h3>`+qs.map((q,i)=>{const ok=qans[i]===q[2];return `<div><div class="t">${i+1}. ${esc(q[0])}</div><span style="color:var(--${ok?"ok":"bad"});font-weight:600">${ok?tr("Correct"):esc(tr("Your answer: :answer",{answer:q[1][qans[i]]??tr("Not answered")}))}</span><div>${esc(tr("Correct answer: :answer",{answer:q[1][q[2]]}))}</div>${questionTools(i,true)}</div>`}).join("")+`</div>`;
+  $("qb").innerHTML=`<div class="res"><div class="sb">${qsc}<span>/${qs.length}</span></div><h2>${msg}</h2><p class="sub" style="margin:0 auto 20px">${tr("You scored :score% in :time.",{score:pct,time:fmt()})}</p><div class="cta2"><button class="btn btn-o" id="qr">${tr("Try again")}</button>${rev}<a class="btn btn-l" href="/my-learning">Revise mistakes / Next 10 questions</a><a class="btn btn-l" href="/subject/${curId}">Back to ${["current-affairs","general-knowledge"].includes(curId)?"MCQs":"chapters"}</a></div></div><div class="rv"><h3>${tr("Review answers")}</h3>`+qs.map((q,i)=>{const ok=qans[i]===q[2];return `<div><div class="t">${i+1}. ${esc(q[0])}</div><span style="color:var(--${ok?"ok":"bad"});font-weight:600">${ok?tr("Correct"):esc(tr("Your answer: :answer",{answer:q[1][qans[i]]??tr("Not answered")}))}</span><div>${esc(tr("Correct answer: :answer",{answer:q[1][q[2]]}))}</div>${questionTools(i,true)}</div>`}).join("")+`</div>`;
 }
 $("qb").addEventListener("click",e=>{
   const o=e.target.closest(".qo");
@@ -279,7 +279,7 @@ document.addEventListener("click",e=>{if(!e.target.closest("#um"))$("umd").hidde
 renderUser();
 
 function route(){
-  const h="#"+location.pathname.replace(/^\/hi(?=\/|$)/, "");let m=h.match(/^#\/(subject|quiz|learn)\/([^/]+)(?:\/(\d+))?$/);
+  const h="#"+location.pathname;let m=h.match(/^#\/(subject|quiz|learn)\/([^/]+)(?:\/(\d+))?$/);
   if(!m){const entry=Object.entries(window.CURRICULUM.chapterUrls).find(([key,url])=>new URL(url,location.origin).pathname===location.pathname);if(entry){const [subject,index]=entry[0].split(":");m=["","learn",subject,index]}}
   if(!m){const entry=Object.entries(window.CURRICULUM.quizUrls).find(([key,url])=>new URL(url,location.origin).pathname===location.pathname);if(entry){const [subject,index]=entry[0].split(":");m=["","quiz",subject,index]}}
   clearInterval(tmr);mg.classList.remove("open");sb.setAttribute("aria-expanded","false");nav.classList.remove("show");

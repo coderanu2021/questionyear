@@ -74,7 +74,7 @@ class PostsTest extends TestCase
     {
         $blogs = Post::factory()->published()->count(10)->create();
 
-        $response = $this->get(route('home'))->assertOk()->assertSee('नए ब्लॉग')->assertSee('home-blog-grid');
+        $response = $this->get(route('home'))->assertOk()->assertSee('Latest blogs')->assertSee('home-blog-grid');
         $response->assertViewHas('latestBlogs', fn ($latestBlogs): bool => $latestBlogs->pluck('id')->all() === $blogs->reverse()->take(8)->pluck('id')->all());
         foreach ($blogs->reverse()->take(8) as $blog) {
             $response->assertSee($blog->title);

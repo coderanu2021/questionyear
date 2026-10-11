@@ -6,10 +6,6 @@
     ], ['seoChapter' => $seoChapter ?? null, 'post' => $post ?? null, 'errorPage' => $errorPage ?? null]);
     foreach (['title', 'description', 'keywords'] as $field) {
         $pageMetadata[$field] = App\WebsiteText::mcq($pageMetadata[$field] ?? '');
-        if (app()->getLocale() === 'hi') {
-            $dictionary = App\HindiContent::dictionary();
-            $pageMetadata[$field] = $dictionary[$pageMetadata[$field]] ?? $pageMetadata[$field];
-        }
     }
 @endphp
 <title>{{ $pageMetadata['title'] }}</title>
