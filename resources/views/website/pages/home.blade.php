@@ -26,21 +26,6 @@
   <div><strong data-n="{{ $questionCount }}">0</strong><span>{{ __('Practice questions') }}</span></div>
 </div></div>
 
-@if(request()->routeIs('home'))
-@if($latestNews->isNotEmpty())
-<section id="news"><div class="wrap">
-  <h2>Latest news</h2>
-  <p class="sub">Exam announcements, education news and updates.</p>
-  <div class="home-blog-grid blog-grid">
-    @foreach($latestNews as $entry)
-    @include('website.partials.blog-card', ['blog' => $entry])
-    @endforeach
-  </div>
-  <p style="margin-top:24px"><a class="btn btn-o" href="{{ route('news.index') }}">View all news</a></p>
-</div></section>
-@endif
-@endif
-
 <section id="subjects"><div class="wrap">
   <h2>{{ __('Choose a subject') }}</h2>
   <p class="sub">Pick a subject to start an MCQ. Every subject has topic-wise sets, timed tests and previous-style questions.</p>
@@ -93,4 +78,19 @@
   <p style="margin-top:24px"><a class="btn btn-o" href="{{ route('blogs.index') }}">View all blogs</a></p>
 </div></section>
 @endif
+@if(request()->routeIs('home'))
+@if($latestNews->isNotEmpty())
+<section id="news"><div class="wrap">
+  <h2>Latest news</h2>
+  <p class="sub">Exam announcements, education news and updates.</p>
+  <div class="home-blog-grid blog-grid">
+    @foreach($latestNews as $entry)
+    @include('website.partials.blog-card', ['blog' => $entry])
+    @endforeach
+  </div>
+  <p style="margin-top:24px"><a class="btn btn-o" href="{{ route('news.index') }}">View all news</a></p>
+</div></section>
+@endif
+@endif
+
 </main>
