@@ -10,7 +10,7 @@ const SUB=S.map(x=>({n:x[0],cat:x[1],d:x[2],ch:x[3],c:CC[x[1]],id:slug(x[0])}));
 const subjectQuizzes=x=>x.ch.flatMap((_,i)=>window.CURRICULUM.tests[x.id+":"+i]||[]);
 const cats=["All",...new Set(SUB.map(x=>x.cat))];let cat="All",term="";
 const gr=document.getElementById("gr"),fl=document.getElementById("fl"),em=document.getElementById("em");
-function esc(t){return String(t??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function esc(t){return String(tr(t??"")).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function mono(n){const w=n.replace("&","").split(/\s+/).filter(Boolean);return w.length>1?(w[0][0]+w[1][0]).toUpperCase():n.slice(0,2)}
 function render(){
   fl.innerHTML=cats.map(c=>`<button class="chip" aria-pressed="${c===cat}" data-c="${c}">${esc(tr(c))}</button>`).join("");

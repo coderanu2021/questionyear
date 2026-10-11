@@ -11,7 +11,7 @@ class WebsiteLocale
 
     public static function englishPath(string $path): string
     {
-        return preg_replace('~^/hi(?=/|$)~', '', $path) ?: '/';
+        return preg_replace('~^/(?:hi|en)(?=/|$)~', '', $path) ?: '/';
     }
 
     public static function hindiPath(string $path): string

@@ -116,3 +116,6 @@ foreach (iterator_to_array(Route::getRoutes()) as $route) {
         Route::getRoutes()->add($localizedRoute);
     }
 }
+
+$englishHome = Route::get('/en', [WebsiteController::class, 'index'])->name('en.home');
+$englishHome->setAction(array_merge($englishHome->getAction(), ['website_name' => 'home']));

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\HindiContent;
 use App\WebsiteLocale;
 use Closure;
 use Illuminate\Http\Request;
@@ -18,7 +19,7 @@ class SetWebsiteLocale
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $isHindi = $request->is('hi', 'hi/*');
+        $isHindi = $request->is('/', 'hi', 'hi/*');
         app()->setLocale($isHindi ? 'hi' : 'en');
         if ($name = $request->route()?->getAction('website_name')) {
             $action = $request->route()->getAction();
@@ -27,7 +28,7 @@ class SetWebsiteLocale
         }
         URL::formatPathUsing(function (string $path, ?Route $route): string {
             return app()->getLocale() === 'hi' && $route && in_array($route->getName(), WebsiteLocale::ROUTES, true)
-                ? WebsiteLocale::hindiPath($path) : $path;
+                ? WebsiteLocale::hindiPath($path) : ($route?->getName() === 'home' ? '/en/' : $path);
         });
 
         $response = $next($request);
@@ -40,7 +41,11 @@ class SetWebsiteLocale
 
                 return $match[1].'="'.WebsiteLocale::hindiPath($match[2]).'"';
             }, $response->getContent());
-            $response->setContent($html);
+            $original = $response instanceof \Illuminate\Http\Response ? $response->original : null;
+            $response->setContent(HindiContent::translateHtml($html));
+            if ($response instanceof \Illuminate\Http\Response) {
+                $response->original = $original;
+            }
         }
 
         return $response;

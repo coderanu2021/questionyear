@@ -14,7 +14,7 @@ class CanonicalUrlTest extends TestCase
     {
         foreach (['/', '/about', '/daily-quiz', '/weekly-quiz', '/monthly-quiz', '/upcoming', '/weekly-leaderboard'] as $path) {
             $response = $this->get($path.'?utm_source=google')->assertOk();
-            $response->assertSee('<link rel="canonical" href="'.url($path).'">', false);
+            $response->assertSee('<link rel="canonical" href="'.url($path === '/' ? '/hi/' : $path).'">', false);
             $this->assertSame(1, substr_count($response->getContent(), 'rel="canonical"'));
         }
     }

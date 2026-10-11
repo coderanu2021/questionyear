@@ -22,6 +22,10 @@ class WebsiteLanguageController extends Controller
             $returnTo = $data['language'] === 'hi' ? WebsiteLocale::hindiPath($returnTo) : WebsiteLocale::englishPath($returnTo);
         }
 
+        if ($data['language'] === 'en' && $returnTo === '/') {
+            $returnTo = '/en/';
+        }
+
         return redirect()->to($returnTo);
     }
 }

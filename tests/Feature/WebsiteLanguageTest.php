@@ -17,7 +17,8 @@ class WebsiteLanguageTest extends TestCase
     public function test_language_switch_translates_navigation_and_persists_between_pages(): void
     {
         Http::preventStrayRequests();
-        $this->get('/')->assertOk()->assertSee('<html lang="en">', false)->assertSee('Daily MCQ');
+        $this->get('/')->assertOk()->assertSee('<html lang="hi">', false)->assertSee('दैनिक MCQ');
+        $this->get('/en/')->assertOk()->assertSee('<html lang="en">', false)->assertSee('Daily MCQ');
         $this->post(route('website.language'), ['language' => 'hi', 'return_to' => '/daily-quiz'])
             ->assertRedirect('/hi/daily-quiz')->assertSessionHas('website_language', 'hi');
         $this->get('/hi/daily-quiz')->assertOk()->assertSee('<html lang="hi">', false)
@@ -51,7 +52,7 @@ class WebsiteLanguageTest extends TestCase
 
     public function test_unsupported_session_language_falls_back_and_admin_stays_in_english(): void
     {
-        $this->withSession(['website_language' => 'invalid'])->get('/')->assertOk()->assertSee('<html lang="en">', false);
+        $this->withSession(['website_language' => 'invalid'])->get('/')->assertOk()->assertSee('<html lang="hi">', false);
         $this->actingAs(User::factory()->create(['role' => 'admin']))->withSession(['website_language' => 'hi'])
             ->get('/admin')->assertOk()->assertSee('Dashboard');
         $this->assertSame('en', app()->getLocale());
@@ -68,7 +69,7 @@ class WebsiteLanguageTest extends TestCase
                     ->assertSee('<link rel="alternate" hreflang="hi" href="'.url('/hi'.$path).'">', false);
             }
         }
-        $this->withSession(['website_language' => 'hi'])->get('/')->assertOk()->assertSee('<html lang="en">', false);
+        $this->withSession(['website_language' => 'hi'])->get('/')->assertOk()->assertSee('<html lang="hi">', false);
         $this->get('/hi/')->assertOk()->assertSee('<html lang="hi">', false)->assertSee('href="/hi/#popular"', false);
         $this->get('/hi/admin')->assertNotFound();
         $this->get('/sitemap.xml')->assertOk()->assertSee(url('/hi/about'), false);
