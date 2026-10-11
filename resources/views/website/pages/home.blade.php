@@ -65,6 +65,18 @@
   </div>
 </div></section>
 @if(request()->routeIs('home'))
+@if($latestNews->isNotEmpty())
+<section id="news"><div class="wrap">
+  <h2>Latest news</h2>
+  <p class="sub">Exam announcements, education news and updates.</p>
+  <div class="home-blog-grid blog-grid">
+    @foreach($latestNews as $entry)
+    @include('website.partials.blog-card', ['blog' => $entry])
+    @endforeach
+  </div>
+  <p style="margin-top:24px"><a class="btn btn-o" href="{{ route('news.index') }}">View all news</a></p>
+</div></section>
+@endif
 <section id="blogs"><div class="wrap">
   <h2>Latest blogs</h2>
   <p class="sub">Ideas and study tips for your next step.</p>

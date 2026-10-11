@@ -40,9 +40,9 @@ class SitemapController extends Controller
                 }
             }
         }
-        foreach (Post::where('type', 'blog')->where('status', 'published')->where('published_at', '<=', now())->get() as $post) {
-            $urls[route('blogs.index')] = null;
-            $urls[route('blogs.show', $post->slug)] = $post->updated_at;
+        foreach (Post::whereIn('type', ['blog', 'news'])->where('status', 'published')->where('published_at', '<=', now())->get() as $post) {
+            $urls[route($post->type === 'news' ? 'news.index' : 'blogs.index')] = null;
+            $urls[route($post->type === 'news' ? 'news.show' : 'blogs.show', $post->slug)] = $post->updated_at;
         }
         foreach (Quiz::published()->whereNotNull('subject_id')->with('subject')->get() as $quiz) {
             $urls[route('subject', $quiz->subject->slug)] = $quiz->subject->updated_at;

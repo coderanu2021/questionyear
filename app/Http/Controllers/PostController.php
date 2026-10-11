@@ -46,12 +46,30 @@ class PostController extends Controller
         return view('website.blogs', ['posts' => $posts]);
     }
 
+    public function news(): View
+    {
+        $posts = Post::where('type', 'news')->where('status', 'published')->where('published_at', '<=', now())
+            ->orderByDesc('published_at')->orderByDesc('id')->paginate(9);
+
+        return view('website.blogs', ['posts' => $posts]);
+    }
+
+    public function showNews(string $slug): View
+    {
+        return $this->showPublishedPost($slug, 'news');
+    }
+
     public function show(string $slug): View
     {
-        $post = Post::where('slug', $slug)->where('type', 'blog')->where('status', 'published')
+        return $this->showPublishedPost($slug, 'blog');
+    }
+
+    private function showPublishedPost(string $slug, string $type): View
+    {
+        $post = Post::where('slug', $slug)->where('type', $type)->where('status', 'published')
             ->where('published_at', '<=', now())->firstOrFail();
 
-        $latestBlogs = Post::where('type', 'blog')->where('status', 'published')->where('published_at', '<=', now())
+        $latestBlogs = Post::where('type', $type)->where('status', 'published')->where('published_at', '<=', now())
             ->where('id', '!=', $post->id)->orderByDesc('published_at')->orderByDesc('id')->limit(4)->get();
 
         return view('website.blogs', ['post' => $post, 'latestBlogs' => $latestBlogs]);

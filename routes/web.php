@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [WebsiteController::class, 'index'])->name('home');
 Route::post('/language', [WebsiteLanguageController::class, 'update'])->name('website.language');
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
+Route::get('/news', [PostController::class, 'news'])->name('news.index');
+Route::get('/news/{slug}', [PostController::class, 'showNews'])->name('news.show');
 Route::get('/blogs', [PostController::class, 'blogs'])->name('blogs.index');
 Route::get('/post-images/{filename}', [PostController::class, 'image'])->where('filename', '[A-Za-z0-9]+\.(jpg|jpeg|png|webp|gif)')->name('posts.image');
 Route::get('/blogs/{slug}', [PostController::class, 'show'])->name('blogs.show');

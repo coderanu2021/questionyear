@@ -89,17 +89,25 @@ class PostsTest extends TestCase
         $blog = Post::factory()->published()->create(['content' => '<script>alert(1)</script>']);
         $draft = Post::factory()->create();
         $news = Post::factory()->published()->create(['type' => 'news']);
+        $draftNews = Post::factory()->create(['type' => 'news']);
+        $futureNews = Post::factory()->published()->create(['type' => 'news', 'published_at' => now()->addDay()]);
         $future = Post::factory()->published()->create(['published_at' => now()->addDay()]);
 
         foreach (['/', '/blogs'] as $url) {
-            $this->get($url)->assertOk()->assertSee($blog->title)->assertDontSee($draft->title)->assertDontSee($news->title)->assertDontSee($future->title);
+            $this->get($url)->assertOk()->assertSee($blog->title)->assertDontSee($draft->title)->assertDontSee($future->title);
         }
         $this->get(route('blogs.show', $blog->slug))->assertOk()->assertSee($blog->content)->assertDontSee($blog->content, false);
         foreach ([$draft, $news, $future] as $hidden) {
             $this->get(route('blogs.show', $hidden->slug))->assertNotFound();
         }
-        $this->get('/news')->assertNotFound();
-        $this->get('/news/'.$news->slug)->assertNotFound();
+        $this->get('/')->assertOk()->assertSee($news->title)->assertSee(route('news.show', $news->slug));
+        $this->get('/blogs')->assertOk()->assertDontSee($news->title);
+        $this->get(route('news.index'))->assertOk()->assertSee($news->title)->assertDontSee($draftNews->title)->assertDontSee($futureNews->title)->assertDontSee($blog->title)->assertDontSee($draft->title)->assertDontSee($future->title);
+        $this->get(route('news.show', $news->slug))->assertOk()->assertSee($news->title);
+        foreach ([$draft, $blog, $future, $draftNews, $futureNews] as $hidden) {
+            $this->get(route('news.show', $hidden->slug))->assertNotFound();
+        }
+        $this->get(route('sitemap'))->assertOk()->assertSee(route('news.show', $news->slug));
     }
 
     public function test_active_admin_can_manage_blogs_and_news(): void
