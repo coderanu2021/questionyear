@@ -26,5 +26,5 @@
 @endif
 </main>
 @include('website.partials.footer')@include('website.partials.content-protection')
-<script src="{{ asset('js/navigation.js') }}"></script>
+<script src="{{ asset('js/navigation.js') }}?v={{ filemtime(public_path('js/navigation.js')) }}"></script>
 </body></html>
