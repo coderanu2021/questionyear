@@ -13,6 +13,7 @@ use App\Http\Controllers\SiteSettingsController;
 use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\WebsiteLanguageController;
 use App\Http\Controllers\WordImportController;
+use App\WebsiteLocale;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -104,3 +105,14 @@ Route::get('/{category}/{chapterSlug}', [WebsiteController::class, 'historyChapt
     ->whereIn('category', ['ancient-history', 'medieval-history', 'modern-history'])
     ->where('chapterSlug', '[a-z0-9]+(?:-[a-z0-9]+)*')
     ->name('chapter');
+
+foreach (iterator_to_array(Route::getRoutes()) as $route) {
+    if (in_array($route->getName(), WebsiteLocale::ROUTES, true)) {
+        $localizedRoute = clone $route;
+        $action = $localizedRoute->getAction();
+        $action['website_name'] = $route->getName();
+        $action['as'] = 'hi.'.$route->getName();
+        $localizedRoute->setAction($action)->setUri(rtrim('hi/'.ltrim($route->uri(), '/'), '/'));
+        Route::getRoutes()->add($localizedRoute);
+    }
+}

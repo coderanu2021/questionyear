@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use App\Models\Quiz;
 use App\Models\Subject;
+use App\WebsiteLocale;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -53,6 +54,12 @@ class SitemapController extends Controller
                 $urls[route($set->period)] = null;
                 $urls[route($set->period.'.set', ['set' => $set->id])] = Carbon::parse($set->updated_at ?? $set->created_at);
             }
+        }
+        foreach ($urls as $url => $updatedAt) {
+            $path = parse_url($url, PHP_URL_PATH) ?: '/';
+            $actualPath = parse_url($url, PHP_URL_PATH) ?? '';
+            $root = $actualPath === '' ? $url : substr($url, 0, strlen($url) - strlen($actualPath));
+            $urls[$root.WebsiteLocale::hindiPath($path)] = $updatedAt;
         }
         $xml = new \XMLWriter;
         $xml->openMemory();

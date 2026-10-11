@@ -97,7 +97,7 @@ class WebsiteController extends Controller
                 abort_unless(isset($selected->chapters[$chapter]), 404);
                 $key = $subject.':'.$chapter;
                 abort_if($request->routeIs('learn', 'chapter') && ! isset($curriculum['LN'][$key]), 404);
-                abort_if($request->is('quiz/*') && ! isset($curriculum['QB'][$key]), 404);
+                abort_if($request->routeIs('quiz', 'quiz.show') && ! isset($curriculum['QB'][$key]), 404);
                 if ($request->routeIs('quiz')) {
                     return redirect()->to($curriculum['quizUrls'][$key], 301);
                 }
