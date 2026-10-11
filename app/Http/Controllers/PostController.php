@@ -51,7 +51,10 @@ class PostController extends Controller
         $post = Post::where('slug', $slug)->where('type', 'blog')->where('status', 'published')
             ->where('published_at', '<=', now())->firstOrFail();
 
-        return view('website.blogs', ['post' => $post]);
+        $latestBlogs = Post::where('type', 'blog')->where('status', 'published')->where('published_at', '<=', now())
+            ->where('id', '!=', $post->id)->orderByDesc('published_at')->orderByDesc('id')->limit(4)->get();
+
+        return view('website.blogs', ['post' => $post, 'latestBlogs' => $latestBlogs]);
     }
 
     public function index(Request $request): View

@@ -11,14 +11,42 @@
 <main @class(['wrap', 'blog-main', 'blog-detail' => isset($post)])>
 <div class="crumb"><a href="{{ route('home') }}">{{ __('Home') }}</a><span>/</span>@if(isset($post))<a href="{{ route('blogs.index') }}">{{ __('Blogs') }}</a><span>/</span><b>{{ $post->title }}</b>@else<b>{{ __('Blogs') }}</b>@endif</div>
 @if(isset($post))
-<article class="blog-article">
+<div class="blog-detail-layout">
+<article class="blog-article" id="blog-article">
 <span class="blog-label">STUDY &amp; LEARNING</span>
 <h1>{{ $post->title }}</h1>
-<div class="blog-meta"><time datetime="{{ $post->published_at->toDateString() }}">📅 {{ $post->published_at->format('d M Y') }}</time><span>⏱ {{ $post->readingMinutes() }} min read</span><span>✍ {{ $siteSettings['site_title'] }}</span></div>
+<div class="blog-meta"><span class="blog-author-mark" aria-hidden="true">Q</span><time datetime="{{ $post->published_at->toDateString() }}">📅 {{ $post->published_at->format('d M Y') }}</time><span>⏱ {{ $post->readingMinutes() }} min read</span><span>✍ {{ $siteSettings['site_title'] }}</span></div>
 @if($post->excerpt)<p class="blog-lead">{{ $post->excerpt }}</p>@endif
 <div class="blog-content">{!! App\PostContent::render($post->content) !!}</div>
 <a class="blog-back" href="{{ route('blogs.index') }}">← All blogs</a>
 </article>
+<aside class="blog-sidebar" aria-label="Article resources">
+    <section class="blog-sidebar-card blog-toc" hidden>
+        <h2>Table of contents</h2>
+        <nav aria-label="Article sections"><ol id="blog-toc-list"></ol></nav>
+    </section>
+    <section class="blog-sidebar-card blog-prep-card">
+        <span class="blog-label">PREPARE WITH CONFIDENCE</span>
+        <h2>Turn learning into practice</h2>
+        <p>Build your knowledge with chapter-wise questions and track your preparation.</p>
+        <a class="btn btn-o" href="{{ route('learning') }}">Start practising <span aria-hidden="true">→</span></a>
+    </section>
+    @if($latestBlogs->isNotEmpty())
+    <section class="blog-sidebar-card">
+        <h2>Latest articles</h2>
+        <div class="blog-latest-list">
+            @foreach($latestBlogs as $entry)
+            <a class="blog-latest-item" href="{{ route('blogs.show', $entry->slug) }}">
+                <strong>{{ $entry->title }}</strong>
+                <span>{{ $entry->published_at->format('d M Y') }} · {{ $entry->readingMinutes() }} min read</span>
+            </a>
+            @endforeach
+        </div>
+        <a class="blog-sidebar-link" href="{{ route('blogs.index') }}">Explore all blogs <span aria-hidden="true">→</span></a>
+    </section>
+    @endif
+</aside>
+</div>
 @else
 <span class="daily-label">KEEP LEARNING</span><h1>{{ __('Blogs') }}</h1><p class="sub">Study tips, fresh perspectives and ideas to help you prepare with confidence.</p>
 <div class="blog-grid">@forelse($posts as $entry)@include('website.partials.blog-card', ['blog' => $entry])@empty<div class="box" style="padding:32px"><h2>New blogs are on the way</h2><p>Check back soon for study tips and learning insights.</p></div>@endforelse</div>

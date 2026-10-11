@@ -14,3 +14,35 @@ document.querySelectorAll('.blog-content table').forEach(table=>{
     table.before(wrapper);
     wrapper.appendChild(table);
 });
+
+const articleHeadings=[...document.querySelectorAll('.blog-content h2,.blog-content h3')];
+const articleContents=document.getElementById('blog-toc-list');
+if(articleContents&&articleHeadings.length){
+    articleHeadings.forEach((heading,index)=>{
+        heading.id=`article-section-${index+1}`;
+        const item=document.createElement('li');
+        if(heading.tagName==='H3')item.className='blog-toc-subsection';
+        const link=document.createElement('a');
+        link.href=`#${heading.id}`;
+        link.textContent=heading.textContent;
+        item.appendChild(link);
+        articleContents.appendChild(item);
+    });
+    articleContents.closest('.blog-toc').hidden=false;
+    const links=[...articleContents.querySelectorAll('a')];
+    const updateActiveSection=()=>{
+        let activeIndex=0;
+        articleHeadings.forEach((heading,index)=>{if(heading.getBoundingClientRect().top<=150)activeIndex=index;});
+        links.forEach((link,index)=>{
+            if(index===activeIndex)link.setAttribute('aria-current','location');
+            else link.removeAttribute('aria-current');
+        });
+    };
+    let sectionUpdatePending=false;
+    window.addEventListener('scroll',()=>{
+        if(sectionUpdatePending)return;
+        sectionUpdatePending=true;
+        requestAnimationFrame(()=>{updateActiveSection();sectionUpdatePending=false;});
+    },{passive:true});
+    updateActiveSection();
+}
