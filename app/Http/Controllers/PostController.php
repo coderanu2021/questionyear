@@ -78,9 +78,20 @@ class PostController extends Controller
     public function index(Request $request): View
     {
         $this->authorizeAdmin($request);
-        $filters = $request->validate(['type' => ['nullable', Rule::in(['blog', 'news'])]]);
-        $posts = Post::query()->when($filters['type'] ?? null, fn ($query, $type) => $query->where('type', $type))
-            ->latest()->paginate(15)->withQueryString();
+        $filters = $request->validate([
+            'type' => ['nullable', Rule::in(['blog', 'news'])],
+            'status' => ['nullable', Rule::in(['draft', 'published'])],
+            'search' => ['nullable', 'string', 'max:255'],
+            'sort' => ['nullable', Rule::in(['title', 'type', 'status', 'created_at'])],
+            'direction' => ['nullable', Rule::in(['asc', 'desc'])],
+            'per_page' => ['nullable', 'integer', Rule::in([10, 15, 25, 50])],
+        ]);
+        $posts = Post::query()
+            ->when($filters['type'] ?? null, fn ($query, $type) => $query->where('type', $type))
+            ->when($filters['status'] ?? null, fn ($query, $status) => $query->where('status', $status))
+            ->when(trim($filters['search'] ?? ''), fn ($query, $search) => $query->where(fn ($query) => $query->where('title', 'like', '%'.$search.'%')->orWhere('slug', 'like', '%'.$search.'%')))
+            ->orderBy($filters['sort'] ?? 'created_at', $filters['direction'] ?? 'desc')->orderByDesc('id')
+            ->paginate((int) ($filters['per_page'] ?? 15))->withQueryString();
 
         return view('admin.index', ['page' => 'posts', 'state' => $this->adminState(), 'posts' => $posts]);
     }

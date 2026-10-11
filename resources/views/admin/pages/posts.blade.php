@@ -15,15 +15,52 @@
 <div class="f"><label for="post-content">Content</label><textarea id="post-content" name="content" rows="16" required maxlength="100000" data-upload-url="{{ route('admin.posts.images') }}" placeholder="Write your post here.">{{ old('content', $post->content) }}</textarea><p>Use the image button or drag an image into the editor. JPG, PNG, WebP or GIF, up to 5 MB.</p><p id="post-editor-status" role="status"></p></div>
 <style>.ck-editor__editable_inline{min-height:350px}.ck-content img{max-width:100%}</style>
 <script src="{{ asset('js/post-editor.js') }}?v={{ filemtime(public_path('js/post-editor.js')) }}" defer></script>
-<p style="margin-bottom:20px">Only published blogs appear on the website. News stays in the admin panel for now.</p>
+<p style="margin-bottom:20px">Published blogs and news appear on the website.</p>
 <button class="btn pri" type="submit">Save post</button>
 </form>
 @else
-<div class="head"><div><h2>Blogs &amp; News</h2><p>Manage your articles. Only published blogs are visible on the website.</p></div><a class="btn pri" href="{{ route('admin.posts.create') }}">+ Add post</a></div>
-<form method="GET" action="{{ route('admin.posts.index') }}" style="margin-bottom:20px;display:flex;gap:12px;align-items:center"><label for="post-filter">Filter</label><select id="post-filter" name="type"><option value="">All posts</option><option value="blog" @selected(request('type') === 'blog')>Blogs</option><option value="news" @selected(request('type') === 'news')>News</option></select><button class="btn">Apply</button></form>
-@forelse($posts as $entry)
-<div class="card" style="padding:22px;margin-bottom:14px"><div class="head"><div><h3>{{ $entry->title }}</h3><p>{{ ucfirst($entry->type) }} · {{ ucfirst($entry->status) }} · {{ $entry->created_at->format('d M Y') }}</p></div><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="{{ route('admin.posts.edit', $entry) }}">Edit</a>@if($entry->type === 'blog' && $entry->status === 'published')<a class="btn" href="{{ route('blogs.show', $entry->slug) }}">View blog</a>@endif<form method="POST" action="{{ route('admin.posts.destroy', $entry) }}" onsubmit="return confirm('Delete this post?')">@csrf @method('DELETE')<button class="btn dng" type="submit">Delete</button></form></div></div><p>{{ $entry->excerpt }}</p></div>
-@empty<div class="card empty">No posts yet. Add your first blog or news post.</div>@endforelse
-<div style="margin-top:24px">@if($posts->hasPages())<nav aria-label="Pagination" style="display:flex;gap:16px;align-items:center">@if($posts->previousPageUrl())<a class="btn" href="{{ $posts->previousPageUrl() }}">← Previous</a>@endif<span>Page {{ $posts->currentPage() }} of {{ $posts->lastPage() }}</span>@if($posts->nextPageUrl())<a class="btn" href="{{ $posts->nextPageUrl() }}">Next →</a>@endif</nav>@endif</div>
+<div class="head"><div><h2>Blogs &amp; News</h2><p>Manage your articles. Published blogs and news are visible on the website.</p></div><a class="btn pri" href="{{ route('admin.posts.create') }}">+ Add post</a></div>
+<div class="card tc posts-table-card">
+<form class="posts-table-toolbar" method="GET" action="{{ route('admin.posts.index') }}">
+    <div class="f"><label for="post-search">Search posts</label><input id="post-search" type="search" name="search" value="{{ request('search') }}" maxlength="255" placeholder="Search title or slug"></div>
+    <div class="f"><label for="post-filter">Type</label><select id="post-filter" name="type"><option value="">All types</option><option value="blog" @selected(request('type') === 'blog')>Blogs</option><option value="news" @selected(request('type') === 'news')>News</option></select></div>
+    <div class="f"><label for="post-status-filter">Status</label><select id="post-status-filter" name="status"><option value="">All statuses</option><option value="draft" @selected(request('status') === 'draft')>Draft</option><option value="published" @selected(request('status') === 'published')>Published</option></select></div>
+    <div class="f"><label for="post-per-page">Rows</label><select id="post-per-page" name="per_page">@foreach([10, 15, 25, 50] as $count)<option value="{{ $count }}" @selected((int) request('per_page', 15) === $count)>{{ $count }}</option>@endforeach</select></div>
+    <input type="hidden" name="sort" value="{{ request('sort', 'created_at') }}">
+    <input type="hidden" name="direction" value="{{ request('direction', 'desc') }}">
+    <button class="btn pri" type="submit">Apply</button><a class="btn" href="{{ route('admin.posts.index') }}">Reset</a>
+</form>
+<div class="tw" tabindex="0" role="region" aria-label="Posts data table">
+<table class="posts-data-table">
+    <caption class="posts-table-caption">Blogs and news posts</caption>
+    <thead><tr>
+        @foreach(['title' => 'Title', 'type' => 'Type', 'status' => 'Status', 'created_at' => 'Created'] as $column => $label)
+        @php
+            $isSorted = request('sort', 'created_at') === $column;
+            $direction = $isSorted && request('direction', 'desc') === 'asc' ? 'desc' : 'asc';
+        @endphp
+        <th scope="col" aria-sort="{{ $isSorted ? (request('direction', 'desc') === 'asc' ? 'ascending' : 'descending') : 'none' }}"><a href="{{ route('admin.posts.index', array_merge(request()->except('page'), ['sort' => $column, 'direction' => $direction])) }}">{{ $label }} <span aria-hidden="true">{{ $isSorted ? (request('direction', 'desc') === 'asc' ? '↑' : '↓') : '↕' }}</span></a></th>
+        @endforeach
+        <th scope="col">Actions</th>
+    </tr></thead>
+    <tbody>
+        @forelse($posts as $entry)
+        <tr>
+            <td class="posts-title"><a href="{{ route('admin.posts.edit', $entry) }}"><strong>{{ $entry->title }}</strong></a><small>{{ $entry->slug }}</small></td>
+            <td><span class="badge b-info">{{ ucfirst($entry->type) }}</span></td>
+            <td><span @class(['badge', 'b-ok' => $entry->status === 'published', 'b-warn' => $entry->status === 'draft'])>{{ ucfirst($entry->status) }}</span></td>
+            <td><time datetime="{{ $entry->created_at->toAtomString() }}">{{ $entry->created_at->format('d M Y') }}</time></td>
+            <td><div class="posts-actions"><a class="btn" href="{{ route('admin.posts.edit', $entry) }}">Edit</a>@if($entry->status === 'published' && $entry->published_at?->lte(now()))<a class="btn" href="{{ route($entry->type === 'news' ? 'news.show' : 'blogs.show', $entry->slug) }}">View {{ $entry->type }}</a>@endif<form method="POST" action="{{ route('admin.posts.destroy', $entry) }}" onsubmit="return confirm('Delete this post?')">@csrf @method('DELETE')<button class="btn dng" type="submit">Delete</button></form></div></td>
+        </tr>
+        @empty
+        <tr><td colspan="5" class="posts-table-empty">No posts found. Try different filters or add a new post.</td></tr>
+        @endforelse
+    </tbody>
+</table>
+</div>
+<div class="posts-table-footer"><span>Showing {{ $posts->firstItem() ?? 0 }}–{{ $posts->lastItem() ?? 0 }} of {{ $posts->total() }} posts</span>
+@if($posts->hasPages())<nav aria-label="Posts pagination">@if($posts->previousPageUrl())<a class="btn" href="{{ $posts->previousPageUrl() }}">← Previous</a>@endif<span>Page {{ $posts->currentPage() }} of {{ $posts->lastPage() }}</span>@if($posts->nextPageUrl())<a class="btn" href="{{ $posts->nextPageUrl() }}">Next →</a>@endif</nav>@endif
+</div>
+</div>
 @endif
 

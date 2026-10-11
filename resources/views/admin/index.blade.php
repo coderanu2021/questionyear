@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
-<link rel="stylesheet" href="{{ asset("css/admin.css") }}"><meta name="csrf-token" content="{{ csrf_token() }}">
+<link rel="stylesheet" href="{{ asset("css/admin.css") }}?v={{ filemtime(public_path("css/admin.css")) }}"><meta name="csrf-token" content="{{ csrf_token() }}">
 @if($page === 'import')<link rel="stylesheet" href="{{ asset('css/admin-import.css') }}">@endif
 @if($page === 'practice')<link rel="stylesheet" href="{{ asset('css/admin-practice.css') }}?v={{ filemtime(public_path('css/admin-practice.css')) }}">@endif
 @include('website.partials.favicon')

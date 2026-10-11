@@ -77,7 +77,7 @@ class SiteSettingsTest extends TestCase
         $originalLogo = $settings['logo_path'];
         Storage::disk('local')->assertExists($originalLogo);
         $url = SiteSettings::logoUrl($settings);
-        $this->get(route('home'))->assertSee($url, false);
+        $this->get(route('home'))->assertSee($url, false)->assertSee('<link rel="icon" type="image/png" sizes="192x192" href="'.asset('favicon.png').'">', false)->assertDontSee('<link rel="icon" href="'.$url.'">', false);
         $this->get($url)->assertOk()->assertHeader('Content-Type', 'image/png')->assertHeader('X-Content-Type-Options', 'nosniff');
         $this->put(route('admin.settings.update'), [...$this->payload(), 'logo_path' => '../private-file'])->assertRedirect();
         $this->assertSame($originalLogo, SiteSettings::values()['logo_path']);
@@ -131,7 +131,7 @@ class SiteSettingsTest extends TestCase
         $this->put(route('admin.settings.update'), [...$this->payload(), 'remove_favicon' => '1'])->assertRedirect();
         $this->assertNull(SiteSettings::values()['favicon_path']);
         Storage::disk('local')->assertMissing($replacementFavicon);
-        $this->get(route('home'))->assertDontSee('<link rel="icon"', false);
+        $this->get(route('home'))->assertSee('<link rel="icon" type="image/png" sizes="192x192" href="'.asset('favicon.png').'">', false);
         $this->get('/site-favicon/config.php')->assertNotFound();
     }
 

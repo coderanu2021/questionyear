@@ -110,6 +110,26 @@ class PostsTest extends TestCase
         $this->get(route('sitemap'))->assertOk()->assertSee(route('news.show', $news->slug));
     }
 
+    public function test_admin_posts_table_searches_filters_sorts_and_paginates(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => 'admin', 'status' => 'active']));
+        $first = Post::factory()->published()->create(['title' => 'Alpha exam update', 'slug' => 'alpha-update', 'type' => 'news']);
+        $second = Post::factory()->published()->create(['title' => 'Beta exam update', 'slug' => 'beta-update', 'type' => 'news']);
+        $draft = Post::factory()->create(['title' => 'Draft exam update', 'type' => 'news']);
+        $blog = Post::factory()->published()->create(['title' => 'Blog exam update']);
+
+        $this->get(route('admin.posts.index', ['search' => 'exam update', 'type' => 'news', 'status' => 'published', 'sort' => 'title', 'direction' => 'asc', 'per_page' => 10]))
+            ->assertOk()->assertSee('posts-data-table')->assertSeeInOrder([$first->title, $second->title])
+            ->assertDontSee($draft->title)->assertDontSee($blog->title)
+            ->assertViewHas('posts', fn ($posts): bool => $posts->total() === 2 && $posts->perPage() === 10);
+        $this->get(route('admin.posts.index', ['search' => 'alpha-update']))->assertOk()->assertSee($first->title)->assertDontSee($second->title);
+        $this->get(route('admin.posts.index', ['search' => 'no-matching-post']))->assertOk()->assertSee('No posts found.');
+        Post::factory()->count(11)->create();
+        $this->get(route('admin.posts.index', ['per_page' => 10, 'page' => 2]))->assertOk()
+            ->assertViewHas('posts', fn ($posts): bool => $posts->currentPage() === 2 && $posts->count() === 5);
+        $this->get(route('admin.posts.index', ['sort' => 'content', 'direction' => 'invalid']))->assertSessionHasErrors(['sort', 'direction']);
+    }
+
     public function test_active_admin_can_manage_blogs_and_news(): void
     {
         $this->actingAs(User::factory()->create(['role' => 'admin', 'status' => 'active']));
