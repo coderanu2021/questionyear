@@ -84,7 +84,7 @@ class SiteSettingsController extends Controller
     public function favicon(string $filename): StreamedResponse
     {
         $settings = SiteSettings::values();
-        abort_unless($settings['favicon_path'] && basename($settings['favicon_path']) === $filename && Storage::disk('local')->exists($settings['favicon_path']), 404);
+        abort_unless($settings['favicon_path'] && ($filename === 'current' || basename($settings['favicon_path']) === $filename) && Storage::disk('local')->exists($settings['favicon_path']), 404);
 
         return Storage::disk('local')->response($settings['favicon_path'], null, ['Cache-Control' => 'public, max-age=86400', 'X-Content-Type-Options' => 'nosniff']);
     }

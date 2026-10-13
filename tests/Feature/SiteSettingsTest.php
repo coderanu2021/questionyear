@@ -115,6 +115,8 @@ class SiteSettingsTest extends TestCase
         $settings = SiteSettings::values();
         $originalFavicon = $settings['favicon_path'];
         $url = SiteSettings::faviconUrl($settings);
+        $originalFileUrl = route('site.favicon', ['filename' => basename($originalFavicon)]);
+        $this->assertSame(route('site.favicon.current'), $url);
         Storage::disk('local')->assertExists($originalFavicon);
         $this->get($url)->assertOk()->assertHeader('Content-Type', 'image/png')->assertHeader('X-Content-Type-Options', 'nosniff');
         foreach (['/', '/about', '/daily-quiz', '/upcoming', '/missing-page', '/admin/settings'] as $page) {
@@ -127,10 +129,13 @@ class SiteSettingsTest extends TestCase
         $this->assertNotSame($originalFavicon, $replacementFavicon);
         Storage::disk('local')->assertMissing($originalFavicon);
         Storage::disk('local')->assertExists($replacementFavicon);
-        $this->get($url)->assertNotFound();
+        $this->assertSame($url, SiteSettings::faviconUrl(SiteSettings::values()));
+        $this->get($url)->assertOk()->assertHeader('Content-Type', 'image/png');
+        $this->get($originalFileUrl)->assertNotFound();
         $this->put(route('admin.settings.update'), [...$this->payload(), 'remove_favicon' => '1'])->assertRedirect();
         $this->assertNull(SiteSettings::values()['favicon_path']);
         Storage::disk('local')->assertMissing($replacementFavicon);
+        $this->get($url)->assertNotFound();
         $this->get(route('home'))->assertSee('<link rel="icon" type="image/png" sizes="192x192" href="'.asset('favicon.png').'">', false);
         $this->get('/site-favicon/config.php')->assertNotFound();
     }

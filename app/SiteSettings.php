@@ -40,6 +40,6 @@ class SiteSettings
     /** @param array{favicon_path: ?string} $settings */
     public static function faviconUrl(array $settings): ?string
     {
-        return $settings['favicon_path'] ? route('site.favicon', ['filename' => basename($settings['favicon_path'])]) : null;
+        return $settings['favicon_path'] ? route('site.favicon.current') : null;
     }
 }
