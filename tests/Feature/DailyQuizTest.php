@@ -43,7 +43,7 @@ class DailyQuizTest extends TestCase
         $this->assertDatabaseCount('daily_quiz_attempts', 3);
         $this->app['session']->flush();
         $this->get(route('monthly'))->assertViewHas('questions', []);
-        $this->get(route('progress'))->assertSee('Monthly quiz')->assertSee('199/200 marks');
+        $this->get(route('progress'))->assertSee('Monthly MCQ')->assertSee('199/200 marks');
         Http::assertNothingSent();
     }
 
