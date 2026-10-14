@@ -104,4 +104,54 @@ class HistoryStudyGuideTest extends TestCase
         $this->assertSame(9, Chapter::where('subject_id', $chapter->subject_id)->count());
         $this->assertSame(1, $chapter->quizzes()->where('title', 'Vedic Age — Explained Practice MCQs')->count());
     }
+
+    public function test_deployment_simplifies_only_the_unchanged_generated_vedic_guide(): void
+    {
+        $this->seed(HistoryStudyGuideSeeder::class);
+        $originalGuides = json_decode(file_get_contents(database_path('seeders/history-study-guides.json')), true, flags: JSON_THROW_ON_ERROR);
+        $originalVedicGuide = collect($originalGuides)->firstWhere('title', 'Vedic Age')['notes'];
+        $chapter = Chapter::where('title', 'Vedic Age')->firstOrFail();
+        $chapter->update(['study_guide' => $originalVedicGuide, 'content' => '<p>Keep my original chapter</p>']);
+        $quiz = $chapter->quizzes()->firstOrFail();
+        $questions = $quiz->questions;
+        $migration = require database_path('migrations/2026_10_14_053257_simplify_generated_vedic_age_study_guide.php');
+        $migration->up();
+        $migration->down();
+        $this->assertStringContainsString('A hymn is a song of praise.', $chapter->fresh()->study_guide['s'][0]['p'][0]);
+        $this->assertSame('<p>Keep my original chapter</p>', $chapter->fresh()->content);
+        $this->assertSame($questions, $quiz->fresh()->questions);
+        $editedGuide = $chapter->fresh()->study_guide;
+        $editedGuide['s'][0]['p'][0] = 'My own edited explanation';
+        $chapter->update(['study_guide' => $editedGuide]);
+        $migration->up();
+        $this->assertSame($editedGuide, $chapter->fresh()->study_guide);
+        $this->get('/ancient-history/vedic-age')->assertOk()->assertSee('My own edited explanation')->assertSee('Keep my original chapter');
+    }
+
+    public function test_remaining_guides_are_simplified_without_replacing_admin_edits_or_quizzes(): void
+    {
+        $this->seed(HistoryStudyGuideSeeder::class);
+        $originalGuides = json_decode(file_get_contents(database_path('seeders/history-study-guides.json')), true, flags: JSON_THROW_ON_ERROR);
+        $simpleGuides = json_decode(file_get_contents(database_path('seeders/history-simple-guides.json')), true, flags: JSON_THROW_ON_ERROR);
+        $simpleGuides['Vedic Age'] = json_decode(file_get_contents(database_path('seeders/vedic-age-simple-guide.json')), true, flags: JSON_THROW_ON_ERROR);
+        foreach ($originalGuides as $guide) {
+            Chapter::where('title', $guide['title'])->firstOrFail()->update(['study_guide' => $guide['notes']]);
+        }
+        $editedChapter = Chapter::where('title', 'Mughal Empire')->firstOrFail();
+        $editedGuide = $editedChapter->study_guide;
+        $editedGuide['s'][0]['p'][0] = 'My custom Mughal introduction';
+        $editedChapter->update(['study_guide' => $editedGuide]);
+        $originalQuizzes = Quiz::orderBy('id')->get()->map->getAttributes()->all();
+        $migration = require database_path('migrations/2026_10_14_053532_simplify_remaining_generated_history_study_guides.php');
+        $migration->up();
+        $migration->up();
+        $migration->down();
+        foreach ($originalGuides as $guide) {
+            $chapter = Chapter::where('title', $guide['title'])->firstOrFail();
+            $expectedGuide = $guide['title'] === 'Mughal Empire' ? $editedGuide : $simpleGuides[$guide['title']];
+            $this->assertSame($expectedGuide, $chapter->study_guide);
+        }
+        $this->assertSame($originalQuizzes, Quiz::orderBy('id')->get()->map->getAttributes()->all());
+        $this->assertSame(9, Chapter::count());
+    }
 }
