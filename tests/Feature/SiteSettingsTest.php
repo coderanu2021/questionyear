@@ -140,6 +140,23 @@ class SiteSettingsTest extends TestCase
         $this->get('/site-favicon/config.php')->assertNotFound();
     }
 
+    public function test_favicon_cache_revalidates_and_detects_replacement_at_the_same_url(): void
+    {
+        Storage::fake('local');
+        $this->actingAs(User::factory()->create(['role' => 'admin']));
+        $this->put(route('admin.settings.update'), [...$this->payload(), 'favicon' => UploadedFile::fake()->image('icon.png', 192, 192)])->assertRedirect();
+        $url = SiteSettings::faviconUrl(SiteSettings::values());
+        $response = $this->get($url)->assertOk()->assertHeader('Cache-Control', 'no-cache, public')->assertHeader('Last-Modified');
+        $etag = $response->headers->get('ETag');
+        $this->assertNotEmpty($etag);
+        $this->get($url, ['If-None-Match' => $etag])->assertStatus(304)->assertContent('');
+        $this->put(route('admin.settings.update'), [...$this->payload(), 'favicon' => UploadedFile::fake()->image('changed.png', 96, 96)])->assertRedirect();
+        $this->assertSame($url, SiteSettings::faviconUrl(SiteSettings::values()));
+        $updated = $this->get($url, ['If-None-Match' => $etag])->assertOk();
+        $this->assertNotSame($etag, $updated->headers->get('ETag'));
+        $this->get($url, ['If-None-Match' => $updated->headers->get('ETag')])->assertStatus(304)->assertContent('');
+    }
+
     public function test_unsafe_and_oversized_favicons_are_rejected(): void
     {
         Storage::fake('local');

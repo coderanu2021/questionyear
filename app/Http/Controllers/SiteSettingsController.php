@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\SiteSettings;
+use DateTimeImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
@@ -81,11 +83,19 @@ class SiteSettingsController extends Controller
         return Storage::disk('local')->response($settings['logo_path'], null, ['Cache-Control' => 'public, max-age=86400', 'X-Content-Type-Options' => 'nosniff']);
     }
 
-    public function favicon(string $filename): StreamedResponse
+    public function favicon(Request $request, string $filename): Response
     {
         $settings = SiteSettings::values();
         abort_unless($settings['favicon_path'] && ($filename === 'current' || basename($settings['favicon_path']) === $filename) && Storage::disk('local')->exists($settings['favicon_path']), 404);
 
-        return Storage::disk('local')->response($settings['favicon_path'], null, ['Cache-Control' => 'public, max-age=86400', 'X-Content-Type-Options' => 'nosniff']);
+        $disk = Storage::disk('local');
+        $response = $disk->response($settings['favicon_path'], null, ['Cache-Control' => 'public, no-cache', 'X-Content-Type-Options' => 'nosniff']);
+        $response->setEtag(hash_file('sha256', $disk->path($settings['favicon_path'])));
+        $response->setLastModified(new DateTimeImmutable('@'.$disk->lastModified($settings['favicon_path'])));
+        if ($response->isNotModified($request)) {
+            return new Response(null, 304, $response->headers->all());
+        }
+
+        return $response;
     }
 }
