@@ -14,7 +14,7 @@ class SitemapController extends Controller
     public function __invoke(): Response
     {
         $urls = [];
-        foreach (['home', 'learning.leaderboard'] as $name) {
+        foreach (['home', 'learning.leaderboard', 'notifications.index'] as $name) {
             $urls[route($name)] = null;
         }
         foreach (['about', 'contact', 'help', 'careers', 'privacy', 'terms', 'cookies', 'leaderboard'] as $page) {
@@ -24,6 +24,9 @@ class SitemapController extends Controller
             $urls[route('exam', $exam)] = null;
         }
         $subjects = Subject::with(['chapters' => fn ($query) => $query->where('status', 'published')->orderBy('id'), 'chapters.quizzes'])->orderBy('id')->get();
+        foreach (['upsc', 'railways'] as $exam) {
+            $urls[route('notifications.show', ['exam' => $exam])] = Carbon::parse('2026-10-14', 'Asia/Kolkata');
+        }
         foreach ($subjects as $subject) {
             foreach ($subject->chapters as $index => $chapter) {
                 $chapter->setRelation('subject', $subject);

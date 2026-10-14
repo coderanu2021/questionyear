@@ -85,8 +85,11 @@ class DailyQuizTest extends TestCase
 
     public function test_exam_redirects_and_custom_404_work(): void
     {
-        foreach (['ssc', 'upsc', 'banking', 'railways', 'railway'] as $exam) {
+        foreach (['ssc', 'banking'] as $exam) {
             $this->get(route('exam', $exam))->assertRedirect(route('upcoming', ['exam' => $exam]));
+        }
+        foreach (['upsc' => 'upsc', 'railways' => 'railways', 'railway' => 'railways'] as $exam => $target) {
+            $this->get(route('exam', $exam))->assertRedirect(route('notifications.show', ['exam' => $target]));
         }
         $this->get('/missing-page')->assertNotFound()->assertSee('A wrong turn. A fresh start.');
     }

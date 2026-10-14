@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DailyQuizController;
+use App\Http\Controllers\ExamNotificationController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\LearningController;
 use App\Http\Controllers\PageController;
@@ -65,6 +66,8 @@ foreach (['weekly', 'monthly'] as $period) {
     Route::post('/'.$period.'-quiz', [DailyQuizController::class, 'submit'])->defaults('period', $period)->name($period.'.submit')->middleware('throttle:10,1')->block(10, 10);
 }
 Route::view('/upcoming', 'website.upcoming')->name('upcoming');
+Route::get('/notifications/2027', [ExamNotificationController::class, 'index'])->name('notifications.index');
+Route::get('/notifications/2027/{exam}', [ExamNotificationController::class, 'index'])->whereIn('exam', ['upsc', 'railways'])->name('notifications.show');
 Route::get('/site-logo/{filename}', [SiteSettingsController::class, 'logo'])->where('filename', '[A-Za-z0-9]+\.(jpg|jpeg|png|webp|gif)')->name('site.logo');
 Route::get('/site-favicon/current', [SiteSettingsController::class, 'favicon'])->defaults('filename', 'current')->name('site.favicon.current');
 Route::get('/site-favicon/{filename}', [SiteSettingsController::class, 'favicon'])->where('filename', '[A-Za-z0-9]+\.(ico|jpg|jpeg|png|webp|gif)')->name('site.favicon');

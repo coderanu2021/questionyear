@@ -19,6 +19,7 @@
       <li><a href="/#popular">{{ __('MCQs') }}</a></li><li><a href="{{ route('daily') }}">{{ __('Daily MCQ') }}</a></li><li><a href="{{ route('weekly') }}">{{ __('Weekly MCQ') }}</a></li><li><a href="{{ route('monthly') }}">{{ __('Monthly MCQ') }}</a></li>
       <li><a href="{{ route('blogs.index') }}">{{ __('Blogs') }}</a></li>
       <li><a href="{{ route('news.index') }}">{{ __('News') }}</a></li>
+      <li><a href="{{ route('notifications.index') }}">Notifications</a></li>
       <li><a href="/subject/current-affairs">{{ __('Current Affairs') }}</a></li>
       <li class="mnav" id="msi"><a href="/login">{{ __('Sign in') }}</a></li>
     </ul></nav>

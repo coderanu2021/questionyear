@@ -79,6 +79,9 @@ class PageController extends Controller
 
     public function exam(string $exam): View|RedirectResponse
     {
+        if (in_array($exam, ['upsc', 'railways', 'railway'], true)) {
+            return redirect()->route('notifications.show', ['exam' => $exam === 'railway' ? 'railways' : $exam]);
+        }
         if (in_array($exam, ['ssc', 'upsc', 'banking', 'baking', 'railways', 'railway'], true)) {
             return redirect()->route('upcoming', ['exam' => $exam]);
         }

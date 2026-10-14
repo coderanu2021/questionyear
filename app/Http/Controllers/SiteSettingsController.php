@@ -26,7 +26,7 @@ class SiteSettingsController extends Controller
             'contact_description' => 'required|string|max:3000',
             'logo' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048|dimensions:max_width=3000,max_height=3000',
             'remove_logo' => 'nullable|boolean',
-            'favicon' => 'nullable|file|mimes:ico,png,jpg,jpeg,webp,gif|max:1024',
+            'favicon' => 'nullable|file|mimes:ico,png,jpg,jpeg,gif|max:1024|dimensions:min_width=8,min_height=8,ratio=1',
             'remove_favicon' => 'nullable|boolean',
         ]);
         $settings = SiteSettings::values();

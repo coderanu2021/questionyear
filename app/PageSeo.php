@@ -25,6 +25,7 @@ class PageSeo
             $pages['route:'.$name] = ['label' => $label, 'group' => 'Page type defaults', 'url' => null];
         }
         $pages['error:404'] = ['label' => 'Page not found (404)', 'group' => 'Pages', 'url' => null];
+        $pages['route:notifications.index'] = ['label' => '2027 exam notifications', 'group' => 'Pages', 'url' => route('notifications.index')];
         foreach (['upsc', 'ssc', 'banking', 'baking', 'railways', 'railway', 'neet', 'jee', 'cbse-board', 'state-psc'] as $exam) {
             $pages['exam:'.$exam] = ['label' => strtoupper(str_replace('-', ' ', $exam)), 'group' => 'Exams', 'url' => route('exam', ['exam' => $exam])];
         }
@@ -69,7 +70,7 @@ class PageSeo
             $keys = ['defaults', 'error:'.$context['errorPage']];
         } elseif ($routeName === 'page') {
             $keys[] = 'page:'.$request->route('page');
-        } elseif ($routeName === 'exam') {
+        } elseif (in_array($routeName, ['exam', 'notifications.show'], true)) {
             $keys[] = 'exam:'.$request->route('exam');
         } elseif ($routeName === 'upcoming' && is_string($request->query('exam'))) {
             $keys[] = 'exam:'.$request->query('exam');

@@ -146,6 +146,8 @@ class SiteSettingsTest extends TestCase
         $this->actingAs(User::factory()->create(['role' => 'admin']));
         $this->put(route('admin.settings.update'), [...$this->payload(), 'favicon' => UploadedFile::fake()->create('unsafe.svg', 1, 'image/svg+xml')])->assertSessionHasErrors('favicon');
         $this->put(route('admin.settings.update'), [...$this->payload(), 'favicon' => UploadedFile::fake()->image('too-large.png')->size(1025)])->assertSessionHasErrors('favicon');
+        $this->put(route('admin.settings.update'), [...$this->payload(), 'favicon' => UploadedFile::fake()->image('not-square.png', 120, 40)])->assertSessionHasErrors('favicon');
+        $this->put(route('admin.settings.update'), [...$this->payload(), 'favicon' => UploadedFile::fake()->image('unsupported.webp', 192, 192)])->assertSessionHasErrors('favicon');
         $this->assertNull(SiteSettings::values()['favicon_path']);
         $this->assertCount(0, Storage::disk('local')->allFiles());
     }
