@@ -18,7 +18,7 @@ class Chapter extends Model
 
     protected function casts(): array
     {
-        return ['notes' => 'array'];
+        return ['notes' => 'array', 'study_guide' => 'array'];
     }
 
     public function subject(): BelongsTo

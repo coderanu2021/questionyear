@@ -80,6 +80,17 @@ class WebsiteController extends Controller
                 } elseif ($item->slug !== 'current-affairs' && $entry->notes) {
                     $curriculum['LN'][$key] = $entry->notes;
                 }
+                if ($item->slug === 'history' && filled($entry->study_guide)) {
+                    $notes = $curriculum['LN'][$key] ?? $entry->study_guide;
+                    if (isset($curriculum['LN'][$key])) {
+                        $notes['s'] = array_merge($entry->study_guide['s'] ?? [], $notes['s'] ?? []);
+                        $notes['sum'] = array_merge($notes['sum'] ?? [], $entry->study_guide['sum'] ?? []);
+                    }
+                    if (blank($notes['sub'] ?? null)) {
+                        $notes['sub'] = $entry->study_guide['sub'] ?? '';
+                    }
+                    $curriculum['LN'][$key] = $notes;
+                }
                 $curriculum['tests'][$key] = $entry->quizzes->map(fn ($q) => ['id' => $q->id, 'title' => $q->title, 'quiz_date' => $q->quiz_date?->toDateString(), 'date_label' => $q->quiz_date?->format('d M Y'), 'duration' => $q->duration, 'pass' => $q->passing_score, 'count' => count($q->questions), 'url' => $q->publicUrl()])->all();
                 $selectedTest = $test ?? ($request->routeIs('quiz') ? $request->integer('test') : null);
                 $quiz = $selectedTest && $subject === $item->slug && $chapter === $index ? $entry->quizzes->firstWhere('id', $selectedTest) : $entry->quizzes->first();

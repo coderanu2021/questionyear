@@ -19,5 +19,6 @@ class DatabaseSeeder extends Seeder
 
         $this->call(CurriculumSeeder::class);
         $this->call(IndusValleyContentSeeder::class);
+        $this->call(HistoryStudyGuideSeeder::class);
     }
 }
