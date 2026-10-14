@@ -1,5 +1,14 @@
 <!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="csrf-token" content="{{ csrf_token() }}">@include('website.partials.seo', ['defaultTitle' => 'Coming soon – '.$siteSettings['site_title']])<link rel="stylesheet" href="{{ asset('css/website.css') }}">@include('website.partials.favicon')@include('website.partials.canonical')
+@php
+    $examLabels = ['ssc' => 'SSC', 'banking' => 'Banking', 'upsc' => 'UPSC', 'railways' => 'Railway'];
+    $requestedExam = request()->query('exam');
+    $examLabel = is_string($requestedExam) ? ($examLabels[$requestedExam] ?? null) : null;
+    $upcomingTitle = ($examLabel ? $examLabel.' practice coming soon' : 'More exam practice coming soon').' – '.$siteSettings['site_title'];
+    $upcomingDescription = $examLabel
+        ? $examLabel.' practice sets are being prepared on '.$siteSettings['site_title'].'. Try the daily MCQ while you wait for dedicated '.$examLabel.' practice.'
+        : 'Dedicated exam practice sets are being prepared on '.$siteSettings['site_title'].'. Keep revising with daily MCQs and available subject notes.';
+@endphp
+<html lang="{{ app()->getLocale() }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="csrf-token" content="{{ csrf_token() }}">@include('website.partials.seo', ['defaultTitle' => $upcomingTitle, 'defaultDescription' => $upcomingDescription])<meta name="robots" content="noindex,follow"><link rel="stylesheet" href="{{ asset('css/website.css') }}">@include('website.partials.favicon')@include('website.partials.canonical')
 </head><body>
 @include('website.partials.header')
 <script>window.CURRENT_USER={{ Illuminate\Support\Js::from(auth()->user()?->only('name', 'email')) }};</script>

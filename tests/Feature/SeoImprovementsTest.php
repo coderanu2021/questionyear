@@ -80,7 +80,12 @@ class SeoImprovementsTest extends TestCase
     {
         foreach (['daily', 'weekly', 'monthly'] as $period) {
             $id = DB::table('practice_sets')->insertGetId(['period' => $period, 'starts_on' => '2026-10-01', 'questions' => json_encode([['q' => 'Sample question', 'o' => ['A', 'B', 'C', 'D'], 'c' => 0]]), 'created_at' => now(), 'updated_at' => now()]);
-            $this->get(route('sitemap'))->assertOk()->assertSee(route($period.'.set', ['set' => $id]), false)->assertSee(route($period), false);
+            $sitemap = $this->get(route('sitemap'))->assertOk()->assertSee(route($period.'.set', ['set' => $id]), false);
+            if ($period === 'monthly') {
+                $sitemap->assertDontSee('<loc>'.route($period).'</loc>', false);
+            } else {
+                $sitemap->assertSee('<loc>'.route($period).'</loc>', false);
+            }
             $this->get(route($period))->assertDontSee('name="robots" content="noindex', false);
         }
         $this->assertStringContainsString('Sitemap: https://questionyear.in/sitemap.xml', file_get_contents(public_path('robots.txt')));

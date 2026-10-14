@@ -80,7 +80,7 @@ class PageController extends Controller
     public function exam(string $exam): View|RedirectResponse
     {
         if (in_array($exam, ['upsc', 'railways', 'railway'], true)) {
-            return redirect()->route('notifications.show', ['exam' => $exam === 'railway' ? 'railways' : $exam]);
+            return redirect()->route('notifications.show', ['exam' => $exam === 'railway' ? 'railways' : $exam], 301);
         }
         if (in_array($exam, ['ssc', 'upsc', 'banking', 'baking', 'railways', 'railway'], true)) {
             return redirect()->route('upcoming', ['exam' => $exam]);
@@ -88,7 +88,14 @@ class PageController extends Controller
         $exams = ['upsc' => ['History', 'Geography', 'Political Science', 'Economics', 'Environment'], 'ssc' => ['Mathematics', 'Reasoning', 'English', 'General Knowledge'], 'banking' => ['Mathematics', 'Reasoning', 'English', 'Economics'], 'railways' => ['Mathematics', 'Reasoning', 'Physics', 'General Knowledge'], 'neet' => ['Biology', 'Physics', 'Chemistry'], 'jee' => ['Mathematics', 'Physics', 'Chemistry'], 'cbse-board' => ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'English'], 'state-psc' => ['History', 'Geography', 'Political Science', 'General Knowledge']];
         abort_unless(isset($exams[$exam]), 404);
 
-        return view('website.content', ['page' => 'exam', 'title' => strtoupper(str_replace('-', ' ', $exam)).' practice', 'description' => 'Explore relevant subjects and available chapter MCQs.', 'subjects' => Subject::whereIn('name', $exams[$exam])->get()]);
+        $description = match ($exam) {
+            'neet' => 'Prepare for NEET with Biology, Physics and Chemistry chapter notes and available practice MCQs. Choose a subject to start revising.',
+            'jee' => 'Revise Mathematics, Physics and Chemistry for JEE with chapter notes and available practice MCQs. Explore each subject at your own pace.',
+            'cbse-board' => 'Find CBSE subject notes and practice MCQs in Mathematics, Physics, Chemistry, Biology and English. Choose a chapter for revision.',
+            'state-psc' => 'Prepare for State PSC exams with History, Geography, Political Science and General Knowledge notes and available practice MCQs.',
+        };
+
+        return view('website.content', ['page' => 'exam', 'title' => strtoupper(str_replace('-', ' ', $exam)).' practice', 'description' => $description, 'subjects' => Subject::whereIn('name', $exams[$exam])->get()]);
     }
 
     public function forgot(Request $request): RedirectResponse

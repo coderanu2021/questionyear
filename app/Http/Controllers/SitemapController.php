@@ -53,7 +53,9 @@ class SitemapController extends Controller
         }
         foreach (DB::table('practice_sets')->whereIn('period', ['daily', 'weekly', 'monthly'])->orderBy('id')->get() as $set) {
             if (count(json_decode($set->questions, true) ?? []) > 0) {
-                $urls[route($set->period)] = null;
+                if ($set->period !== 'monthly') {
+                    $urls[route($set->period)] = null;
+                }
                 $urls[route($set->period.'.set', ['set' => $set->id])] = Carbon::parse($set->updated_at ?? $set->created_at);
             }
         }

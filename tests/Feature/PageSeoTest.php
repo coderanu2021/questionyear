@@ -135,6 +135,44 @@ class PageSeoTest extends TestCase
         $this->assertDatabaseCount('page_seo', 0);
     }
 
+    public function test_quiz_metadata_does_not_inherit_saved_chapter_metadata(): void
+    {
+        $chapter = Chapter::factory()->create(['meta_title' => 'Chapter title only', 'meta_description' => 'Chapter description only']);
+        $quiz = Quiz::factory()->for($chapter)->create(['title' => 'Distinct practice set']);
+        $this->get($chapter->readingUrl(0))->assertOk()->assertSee('<title>Chapter title only</title>', false);
+        $this->get($quiz->publicUrl())->assertOk()->assertSee('Distinct practice set')
+            ->assertDontSee('<title>Chapter title only</title>', false)
+            ->assertDontSee('name="description" content="Chapter description only"', false);
+    }
+
+    public function test_exam_pages_and_weekly_leaderboard_have_distinct_descriptions(): void
+    {
+        $descriptions = [];
+        foreach (['neet', 'jee', 'cbse-board', 'state-psc'] as $exam) {
+            $html = $this->get(route('exam', $exam))->assertOk()->getContent();
+            $this->assertSame(1, preg_match('/name="description" content="([^"]+)"/', $html, $matches));
+            $descriptions[] = $matches[1];
+        }
+        $this->assertCount(4, array_unique($descriptions));
+        $this->get(route('learning.leaderboard'))->assertOk()->assertSee('See this week’s learner rankings');
+    }
+
+    public function test_coming_soon_exam_variants_have_unique_metadata_and_are_not_indexable(): void
+    {
+        $titles = [];
+        $descriptions = [];
+        foreach ([[], ['exam' => 'ssc'], ['exam' => 'banking']] as $parameters) {
+            $html = $this->get(route('upcoming', $parameters))->assertOk()
+                ->assertSee('name="robots" content="noindex,follow"', false)->getContent();
+            $this->assertSame(1, preg_match('/<title>([^<]+)<\/title>/', $html, $matches));
+            $titles[] = $matches[1];
+            $this->assertSame(1, preg_match('/name="description" content="([^"]+)"/', $html, $matches));
+            $descriptions[] = $matches[1];
+        }
+        $this->assertCount(3, array_unique($titles));
+        $this->assertCount(3, array_unique($descriptions));
+    }
+
     private function saveSeo(string $key, string $title): void
     {
         $this->put(route('admin.seo.update'), ['page_key' => $key, 'meta_title' => $title, 'meta_description' => 'Description <safe>', 'meta_keywords' => 'study, practice'])
