@@ -1,3 +1,4 @@
+<link rel="icon" href="/favicon.ico">
 @if($siteFaviconUrl ?? null)
 <link rel="icon" href="{{ $siteFaviconUrl }}">
 @else
