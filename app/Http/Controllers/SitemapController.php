@@ -24,7 +24,7 @@ class SitemapController extends Controller
             $urls[route('exam', $exam)] = null;
         }
         $subjects = Subject::with(['chapters' => fn ($query) => $query->where('status', 'published')->orderBy('id'), 'chapters.quizzes'])->orderBy('id')->get();
-        foreach (['upsc', 'railways'] as $exam) {
+        foreach (['railways', ...array_keys(ExamNotificationController::NOTICES)] as $exam) {
             $urls[route('notifications.show', ['exam' => $exam])] = Carbon::parse('2026-10-14', 'Asia/Kolkata');
         }
         foreach ($subjects as $subject) {

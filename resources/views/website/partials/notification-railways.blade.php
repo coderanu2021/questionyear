@@ -1,8 +1,9 @@
 <article class="box notification-article" id="railways-notice" aria-labelledby="railways-title">
-    <div class="notification-badges"><span>RAILWAYS</span><span class="notification-confirmed">CEN 06/2026 notice published</span><span>Fresh 2027 CEN not verified here</span></div>
-    <h2 id="railways-title">Railway exams: plan for 2027</h2>
+    <div class="notification-badges"><span>RAILWAYS</span><span>{{ $notices[$exam]['status'] }}</span><span>Fresh 2027 CEN not verified here</span></div>
+    <h2 id="railways-title">{{ $notices[$exam]['title'] }}</h2>
     <p>Railway jobs do not share one set of entry rules. Choose a post first. Then read its notice. RRB means Railway Recruitment Board. CEN is the number used to identify a recruitment notice.</p>
     <p>A notice issued in 2026 may use an age date in 2027. That does not turn it into a new 2027 recruitment. This guide keeps those two things separate.</p>
+    @if($exam === 'rrb-ntpc-graduate-cen-06-2026')
     <section>
         <h3>Published notice: NTPC Graduate, CEN 06/2026</h3>
         <p>The Ministry of Railways has announced 3,548 posts. NTPC means Non-Technical Popular Categories. This is a 2026 notice with an age cut-off in 2027.</p>
@@ -16,12 +17,16 @@
         </tbody></table></div>
         <p class="notification-source">Source: <a href="https://www.pib.gov.in/PressReleasePage.aspx?PRID=2321873&amp;lang=2&amp;reg=48&amp;v=1" target="_blank" rel="noopener noreferrer">Ministry of Railways PIB release, 11 October 2026</a>. Check later changes and the full CEN before you apply.</p>
     </section>
+    @endif
+    @if($exam === 'rrb-ntpc-undergraduate-cen-07-2025')
     <section>
         <h3>NTPC Undergraduate: a prior notice, not a 2027 promise</h3>
         <p>The cited CEN 07/2025 uses Class 12 or an equivalent as its education route. Its post table lists a 50% marks rule, with exceptions. Check the exact exception before assuming the rule excludes you.</p>
         <p>Undergraduate here describes the entry level of the post. It does not mean you must be studying for a degree. For a fresh 2027 cycle, use its own age dates, marks rules and post table. No such fresh notice is verified on this page.</p>
         <p class="notification-source">Reference: <a href="https://www.rrbchennai.gov.in/downloads/CEN-07-2025-NTPC-UnderGraduate-English.pdf" target="_blank" rel="noopener noreferrer">RRB Chennai: detailed NTPC Undergraduate CEN 07/2025</a>, post parameters and education notes.</p>
     </section>
+    @endif
+    @if($exam === 'rrb-group-d-cen-09-2025')
     <section>
         <h3>Group D / Level 1: prior-year eligibility</h3>
         <p>Group D is a common name for Level 1 recruitment. These reference rules come from CEN 09/2025, updated in January 2026. They are not confirmed rules for a fresh 2027 cycle.</p>
@@ -33,6 +38,7 @@
         </tbody></table></div>
         <p class="notification-source">Source: <a href="https://rrbajmer.gov.in/Upload_PDF/Final-Detailed%20CEN%2009-2025%20Level-1-updated%20on%2030012026-639054049190206941.pdf" target="_blank" rel="noopener noreferrer">RRB Ajmer: Level 1 CEN 09/2025</a>, sections 5, 6, 14 and Annexure A. Read later corrections too.</p>
     </section>
+    @endif
     <section>
         <h3>How to avoid a wrong application</h3>
         <p>Imagine you have passed Class 12 and see an NTPC vacancy. First check whether the post needs Class 12 or a degree. A similar exam name does not mean the entry rule is the same.</p>

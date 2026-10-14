@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Http\Controllers\ExamNotificationController;
 use App\Models\Chapter;
 use App\Models\Post;
 use App\Models\Quiz;
@@ -26,6 +27,9 @@ class PageSeo
         }
         $pages['error:404'] = ['label' => 'Page not found (404)', 'group' => 'Pages', 'url' => null];
         $pages['route:notifications.index'] = ['label' => '2027 exam notifications', 'group' => 'Pages', 'url' => route('notifications.index')];
+        foreach (ExamNotificationController::NOTICES as $slug => $notice) {
+            $pages['notification:'.$slug] = ['label' => $notice['title'], 'group' => 'Notifications', 'url' => route('notifications.show', ['exam' => $slug])];
+        }
         foreach (['upsc', 'ssc', 'banking', 'baking', 'railways', 'railway', 'neet', 'jee', 'cbse-board', 'state-psc'] as $exam) {
             $pages['exam:'.$exam] = ['label' => strtoupper(str_replace('-', ' ', $exam)), 'group' => 'Exams', 'url' => route('exam', ['exam' => $exam])];
         }
@@ -70,7 +74,12 @@ class PageSeo
             $keys = ['defaults', 'error:'.$context['errorPage']];
         } elseif ($routeName === 'page') {
             $keys[] = 'page:'.$request->route('page');
-        } elseif (in_array($routeName, ['exam', 'notifications.show'], true)) {
+        } elseif ($routeName === 'notifications.show') {
+            if (in_array($request->route('exam'), ['upsc', 'railways'], true)) {
+                $keys[] = 'exam:'.$request->route('exam');
+            }
+            $keys[] = 'notification:'.$request->route('exam');
+        } elseif ($routeName === 'exam') {
             $keys[] = 'exam:'.$request->route('exam');
         } elseif ($routeName === 'upcoming' && is_string($request->query('exam'))) {
             $keys[] = 'exam:'.$request->query('exam');
