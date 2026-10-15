@@ -10,6 +10,37 @@ class ExamNotificationTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_every_notice_has_specific_salary_guidance_and_faqs(): void
+    {
+        $expectedQuestions = [
+            'upsc' => 'What is UPSC?',
+            'rrb-ntpc-graduate-cen-06-2026' => 'What is the RRB NTPC Graduate salary?',
+            'rrb-ntpc-undergraduate-cen-07-2025' => 'What is the RRB NTPC Undergraduate salary?',
+            'rrb-group-d-cen-09-2025' => 'What is the Railway Group D salary?',
+            'ssc-selection-posts-phase-xiv-2026' => 'What is SSC?',
+            'canara-bank-graduate-apprentices-2026' => 'What is the Canara Bank apprentice salary or stipend?',
+            'upsc-civil-services-mains-2026-admit-card' => 'Does an admit card confirm selection or salary?',
+            'upsc-engineering-services-mains-2026-result' => 'What is the UPSC Engineering Services salary?',
+        ];
+
+        foreach ($expectedQuestions as $slug => $question) {
+            $html = $this->get(route('notifications.show', ['exam' => $slug]))->assertOk()
+                ->assertSee($question)->assertSee('15 October 2026')->assertSee('In-hand salary')
+                ->getContent();
+            $this->assertSame(1, substr_count($html, 'id="notification-salary"'));
+            $this->assertSame(1, substr_count($html, 'id="notification-faqs"'));
+        }
+
+        $this->get(route('notifications.show', ['exam' => 'upsc']))
+            ->assertSee('₹56,100')->assertSee('₹1,77,500')->assertSee('IAS_PAY_Rules2016.pdf');
+        $this->get(route('notifications.show', ['exam' => 'rrb-ntpc-undergraduate-cen-07-2025']))
+            ->assertSee('₹19,900–₹21,700')->assertSee('cited 2025 notice');
+        $this->get(route('notifications.show', ['exam' => 'canara-bank-graduate-apprentices-2026']))
+            ->assertSee('2026 apprentice stipend has not been verified')->assertSee('prior-cycle reference only');
+        $this->get(route('notifications.show', ['exam' => 'upsc-engineering-services-mains-2026-result']))
+            ->assertSee('does not establish a salary range')->assertDontSee('₹56,100');
+    }
+
     public function test_government_job_categories_filter_guides_and_show_honest_empty_states(): void
     {
         $this->get(route('jobs.index'))->assertOk()->assertSee('Latest Government Jobs')

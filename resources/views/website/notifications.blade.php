@@ -68,10 +68,6 @@
                         <section><h2>{{ $heading }}</h2><p>{{ $paragraph }}</p></section>
                     @endforeach
                     <section><h2>Important official links</h2><p><a href="{{ $jobDetails[$exam]['source'] }}" target="_blank" rel="noopener noreferrer">Read the official source ↗</a></p><p class="notification-source">Source checked: 15 October 2026. {{ $jobDetails[$exam]['verification'] }}</p></section>
-                    <section><h2>Frequently asked questions</h2>
-                        <h3>Does this page confirm my eligibility or selection?</h3><p>No. The issuing authority's notice and your documents determine eligibility. A result update must be checked against your own roll number.</p>
-                        <h3>Where should I check corrections?</h3><p>Use the official source above and look for later notices for the same examination cycle.</p>
-                    </section>
                     <section><h2>Preparation and next steps</h2><p>Follow the official syllabus for your examination. Practise regularly and review mistakes before increasing speed.</p><a class="btn btn-o" href="{{ route('daily') }}">Practise daily MCQs</a></section>
                 </article>
             @elseif($exam === 'upsc')
@@ -88,7 +84,7 @@
                         <tr><th scope="row">Total vacancies</th><td>{{ $jobDetails[$exam]['vacancies'] }}. Use the official post-wise and category-wise table.</td></tr>
                         <tr><th scope="row">Educational qualification</th><td>{{ $categories[$jobDetails[$exam]['qualification']] }}: see the guide above for the applicable cycle and additional conditions.</td></tr>
                         <tr><th scope="row">Age limit and relaxation</th><td>See the cycle-specific reference above. Check the age cut-off and category conditions in the full notice.</td></tr>
-                        <tr><th scope="row">Salary and pay scale</th><td>@if($exam === 'rrb-ntpc-graduate-cen-06-2026')Initial basic pay: ₹35,400 (Level 6) for Chief Commercial cum Ticket Supervisor; ₹29,200 (Level 5) for the other three categories. Allowances follow the applicable rules. <a href="https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321933&amp;lang=9&amp;reg=1" target="_blank" rel="noopener noreferrer">Ministry of Railways PIB source</a>, verified 15 October 2026.@else Not verified in this guide. Check the post-wise pay level in the official notice.@endif</td></tr>
+                        <tr><th scope="row">Salary and pay scale</th><td>See the salary section below for the pay reference, applicable cycle and official sources.</td></tr>
                         <tr><th scope="row">Application dates</th><td>See the dated source above. Prior-year dates do not apply to a fresh cycle.</td></tr>
                         <tr><th scope="row">Application fee</th><td>Category-wise fees, exemptions and refund conditions have not been verified in this guide.</td></tr>
                         <tr><th scope="row">Selection process</th><td>Use the full notice for every stage and any post-specific skill, physical or medical requirements.</td></tr>
@@ -105,6 +101,27 @@
                     <div class="notification-actions"><a class="btn btn-o" href="{{ route('daily') }}">Daily practice</a><a class="btn btn-l" href="{{ route('subject', ['subject' => 'mathematics']) }}">Maths quizzes</a></div>
                     <h3>Admit cards and results</h3>
                     <p>No admit card or result release is confirmed by this guide. <a href="{{ route('jobs.category', ['category' => 'admit-cards']) }}">Browse admit card updates</a> or <a href="{{ route('jobs.category', ['category' => 'results']) }}">browse result updates</a>, then check the official recruitment website.</p>
+                </section>
+            @endif
+            @if($exam !== null && $exam !== 'railways')
+                <section class="box notification-article" aria-labelledby="notification-salary">
+                    <h2 id="notification-salary">{{ $exam === 'canara-bank-graduate-apprentices-2026' ? 'Salary and stipend' : 'Salary and pay scale' }}</h2>
+                    <p>{{ $salaryGuides[$exam]['summary'] }}</p>
+                    <p>{{ $salaryGuides[$exam]['note'] }}</p>
+                    <p>Basic pay is the fixed pay component. Gross salary includes applicable allowances. In-hand salary is the amount left after deductions. These amounts should not be treated as interchangeable.</p>
+                    <ul class="notification-source">
+                        @foreach($salaryGuides[$exam]['sources'] as $sourceLabel => $sourceUrl)
+                            <li><a href="{{ $sourceUrl }}" target="_blank" rel="noopener noreferrer">{{ $sourceLabel }}</a></li>
+                        @endforeach
+                    </ul>
+                    <p class="notification-source">Pay references checked on <time datetime="2026-10-15">15 October 2026</time>. Some references were available through the official document's search index. Prior-cycle references are labelled above; check later amendments before relying on pay figures.</p>
+                </section>
+                <section class="box notification-article" aria-labelledby="notification-faqs">
+                    <h2 id="notification-faqs">Frequently asked questions</h2>
+                    @foreach($faqs[$exam] as $question => $answer)
+                        <h3>{{ $question }}</h3>
+                        <p>{{ $answer }}</p>
+                    @endforeach
                 </section>
             @endif
         </div>

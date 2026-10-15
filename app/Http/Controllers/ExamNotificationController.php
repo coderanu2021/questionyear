@@ -72,6 +72,97 @@ class ExamNotificationController extends Controller
                 'Next steps' => 'Follow only the dates and document instructions in the official result and subsequent notices. This summary does not announce an interview date or confirm an individual candidate outcome.',
             ]],
         ];
+        $salaryGuides = [
+            'upsc' => [
+                'summary' => 'UPSC does not have one salary for all successful candidates. As an IAS example, Level 10 basic pay runs from ₹56,100 to ₹1,77,500 per month under the IAS Pay Rules, 2016. ₹56,100 is the first cell; the upper figure is reached through pay progression, not on joining.',
+                'note' => 'This is an existing IAS pay-rule reference, not confirmation of every service or the final CSE 2027 terms. Service, grade, posting, allowances and deductions affect actual pay.',
+                'sources' => ['DoPT: IAS Pay Rules, 2016, pay matrix' => 'https://dopt.gov.in/sites/default/files/IAS_PAY_Rules2016.pdf'],
+            ],
+            'rrb-ntpc-graduate-cen-06-2026' => [
+                'summary' => 'Initial basic pay is ₹29,200–₹35,400 per month across the advertised posts. Chief Commercial cum Ticket Supervisor starts at ₹35,400 (Level 6). Goods Train Manager, Junior Accounts Assistant cum Typist and Senior Clerk cum Typist start at ₹29,200 (Level 5).',
+                'note' => 'This is the range of starting basic pay across posts, not an in-hand salary range. Applicable allowances and deductions change the amount received.',
+                'sources' => ['Ministry of Railways: CEN 06/2026 pay details' => 'https://www.pib.gov.in/PressReleaseIframePage.aspx?PRID=2321873&lang=2&reg=48'],
+            ],
+            'rrb-ntpc-undergraduate-cen-07-2025' => [
+                'summary' => 'The CEN 07/2025 post table gives starting basic pay of ₹19,900–₹21,700 per month. Commercial cum Ticket Clerk starts at ₹21,700 (Level 3). Accounts Clerk cum Typist, Junior Clerk cum Typist and Trains Clerk start at ₹19,900 (Level 2).',
+                'note' => 'These figures belong to the cited 2025 notice. They do not confirm pay for a fresh 2026 or 2027 notice. Starting basic pay excludes applicable allowances and deductions.',
+                'sources' => ['RRB Chennai: CEN 07/2025, Annexure A' => 'https://www.rrbchennai.gov.in/downloads/CEN-07-2025-NTPC-UnderGraduate-English.pdf'],
+            ],
+            'rrb-group-d-cen-09-2025' => [
+                'summary' => 'The CEN 09/2025 indicative-advertisement corrigendum gives ₹18,000 per month as initial basic pay for Level 1 posts. This source states a starting amount, not a take-home salary range.',
+                'note' => 'This is a prior-notice reference. Check the applicable detailed notice and pay rules for progression, allowances and deductions; a new cycle may have different terms.',
+                'sources' => ['RRB Ajmer: CEN 09/2025 indicative-advertisement corrigendum' => 'https://www.rrbajmer.gov.in/Upload_PDF/corrigendum%20for%20indicative%20ad%2009-2025-639045045354077724.pdf'],
+            ],
+            'ssc-selection-posts-phase-xiv-2026' => [
+                'summary' => 'SSC Selection Posts do not have one common salary. The Phase XIV/2026 annexure lists Library Attendant (CR13126) at Level 1 and Senior Research Assistant (CR13426) at Level 7. The government pay-matrix reference gives starting basic pay of ₹18,000 at Level 1 and ₹44,900 at Level 7.',
+                'note' => 'These are two post examples, not the minimum and maximum for every Selection Post. Match your post code to its pay level. In-hand pay depends on allowances and deductions.',
+                'sources' => ['SSC: Phase XIV/2026 post annexure' => 'https://ssc.gov.in/api/attachment/uploads/masterData/NoticeBoards/Notice_of_RHQ_2026_phase_xiv.pdf', 'Department of Expenditure: Seventh CPC pay matrix reference' => 'https://doe.gov.in/files/cenetral-pay_document/7cpc_report_eng.pdf'],
+            ],
+            'canara-bank-graduate-apprentices-2026' => [
+                'summary' => 'The 2026 apprentice stipend has not been verified in this guide. As a prior-cycle reference only, Canara Bank notification CB/AT/2025 provides a monthly stipend of ₹15,000, including the applicable government subsidy. Do not treat that as confirmed 2026 pay.',
+                'note' => 'A stipend is a training payment. The cited 2025 notice says apprentices are not bank employees and do not receive employee benefits. Read the 2026 notification for its own amount and conditions.',
+                'sources' => ['Canara Bank: CB/AT/2025 apprenticeship notice (prior-cycle reference)' => 'https://canarabank.bank.in/documents/d/guest/notification-app-22'],
+            ],
+            'upsc-engineering-services-mains-2026-result' => [
+                'summary' => 'This written-result notice does not establish a salary range. Service-specific Engineering Services pay has not been verified for this guide. Check the relevant service rules and appointment terms before relying on a figure.',
+                'note' => 'A written result is an examination-stage update. It does not itself confirm appointment or entitlement to pay. IAS pay figures should not be used as Engineering Services pay.',
+                'sources' => ['UPSC: Engineering Services (Main) Examination, 2026' => $jobDetails['upsc-engineering-services-mains-2026-result']['source']],
+            ],
+        ];
+        $salaryGuides['upsc-civil-services-mains-2026-admit-card'] = $salaryGuides['upsc'];
+        $salaryGuides['upsc-civil-services-mains-2026-admit-card']['note'] = 'This existing IAS pay-rule example relates to a possible service after selection. An admit card is not an appointment or salary entitlement; other Civil Services have their own rules.';
+
+        $faqs = [
+            'upsc' => [
+                'What is UPSC?' => 'UPSC stands for Union Public Service Commission. It conducts examinations and recruitment for various Union government services and posts. Civil Services is one of its examinations.',
+                'What is the UPSC salary?' => $salaryGuides['upsc']['summary'],
+                'Is UPSC the same as IAS?' => 'No. UPSC is the recruiting commission; IAS is the Indian Administrative Service. Civil Services candidates may be allocated different services under the applicable rules.',
+                'Are all CSE 2027 rules confirmed?' => 'The calendar is a planning reference. This guide has not verified the complete CSE 2027 notice; its prior-year eligibility information must be checked against the new notice.',
+            ],
+            'rrb-ntpc-graduate-cen-06-2026' => [
+                'What is RRB NTPC Graduate recruitment?' => 'RRB means Railway Recruitment Board. NTPC means Non-Technical Popular Categories. Graduate-level posts require the degree qualification and other conditions stated in the applicable notice.',
+                'What is the RRB NTPC Graduate salary?' => $salaryGuides['rrb-ntpc-graduate-cen-06-2026']['summary'],
+                'Is the quoted Railway salary an in-hand amount?' => 'No. The figures shown are basic pay. Allowances may be added and deductions may apply, so actual take-home pay varies.',
+                'Does a 2027 age cut-off make this a 2027 recruitment?' => 'No. This guide concerns CEN 06/2026. The date used to calculate age does not change the notice number or recruitment cycle.',
+            ],
+            'rrb-ntpc-undergraduate-cen-07-2025' => [
+                'What is RRB NTPC Undergraduate recruitment?' => 'It is the undergraduate-level Non-Technical Popular Categories recruitment conducted by Railway Recruitment Boards. The cited notice uses a Class 12 entry route; undergraduate here does not mean a university degree is required.',
+                'What is the RRB NTPC Undergraduate salary?' => $salaryGuides['rrb-ntpc-undergraduate-cen-07-2025']['summary'],
+                'Is a degree required for the cited undergraduate posts?' => 'The cited posts use Class 12 or equivalent qualifications with the applicable marks rules and exceptions. Read the exact post requirements, including typing requirements where relevant.',
+                'Can I use this pay figure for a new notification?' => 'Use it only as a reference for CEN 07/2025. A fresh notice must confirm its own pay, vacancies, eligibility and dates.',
+            ],
+            'rrb-group-d-cen-09-2025' => [
+                'What is Railway Group D recruitment?' => 'Group D is the common name used for Railway Level 1 recruitment. The exact posts and requirements are listed in the relevant Centralised Employment Notice.',
+                'What is the Railway Group D salary?' => $salaryGuides['rrb-group-d-cen-09-2025']['summary'],
+                'Is ₹18,000 the amount received after deductions?' => 'No. It is initial basic pay in the cited source. Applicable allowances and deductions determine the amount received.',
+                'Are these confirmed terms for Group D 2027?' => 'No. This page uses CEN 09/2025 as a prior-notice reference. Read a fresh official notice before applying for a later cycle.',
+            ],
+            'ssc-selection-posts-phase-xiv-2026' => [
+                'What is SSC?' => 'SSC stands for Staff Selection Commission. It recruits for posts in various government ministries, departments and organisations through its notified selection processes.',
+                'What are SSC Selection Posts?' => 'Selection Posts are individual advertised posts with their own post codes, qualifications and conditions. Check the row for the exact post you want.',
+                'What is the SSC Selection Posts salary?' => $salaryGuides['ssc-selection-posts-phase-xiv-2026']['summary'],
+                'Is Phase XIV/2026 open for fresh applications?' => 'The original application window listed in this guide ended on 4 May 2026. Check SSC for any later official correction or reopening notice.',
+            ],
+            'canara-bank-graduate-apprentices-2026' => [
+                'What is the Canara Bank graduate apprenticeship?' => 'It is a graduate apprenticeship opportunity listed in the official IBPS recruitment directory. Read the bank notice for the training conditions; do not assume it is a permanent bank job.',
+                'What is the Canara Bank apprentice salary or stipend?' => $salaryGuides['canara-bank-graduate-apprentices-2026']['summary'],
+                'Does an apprenticeship guarantee a permanent job?' => 'Do not assume that it does. The cited prior-cycle notice treats apprentices as trainees rather than bank employees. Check the current contract and notification for its terms.',
+                'Where should I verify the 2026 stipend?' => 'Read the bank notification linked from the official recruitment entry. The application-directory dates alone do not confirm the stipend or employee benefits.',
+            ],
+            'upsc-civil-services-mains-2026-admit-card' => [
+                'What is UPSC?' => 'UPSC stands for Union Public Service Commission. This page concerns its Civil Services (Main) Examination, 2026 admit-card update.',
+                'What is the UPSC Civil Services salary?' => $salaryGuides['upsc-civil-services-mains-2026-admit-card']['summary'],
+                'Does an admit card confirm selection or salary?' => 'No. An admit card relates to admission to an examination under its conditions. Selection and appointment are separate stages.',
+                'Can I still download this archived admit card?' => 'Current download availability has not been verified. Check the official examination page; an archived entry does not guarantee an active download.',
+            ],
+            'upsc-engineering-services-mains-2026-result' => [
+                'What is UPSC Engineering Services?' => 'It is the Engineering Services examination conducted by the Union Public Service Commission. This page covers the 2026 Main written-result stage, not the Civil Services examination.',
+                'What is the UPSC Engineering Services salary?' => $salaryGuides['upsc-engineering-services-mains-2026-result']['summary'],
+                'Does the written result confirm a government appointment?' => 'No. Follow the official result instructions and later stages. A written-result listing alone does not confirm final appointment or pay.',
+                'How can I check my written result?' => 'Open the official UPSC Engineering Services examination page and follow its written-result document. Search your roll number and read the accompanying instructions.',
+            ],
+        ];
+
         $notices = self::NOTICES;
         if ($exam === 'railways') {
             $notices = array_filter($notices, fn (string $slug): bool => $jobDetails[$slug]['category'] === 'railway', ARRAY_FILTER_USE_KEY);
@@ -88,6 +179,8 @@ class ExamNotificationController extends Controller
             'category' => $category,
             'categories' => self::CATEGORIES,
             'jobDetails' => $jobDetails,
+            'salaryGuides' => $salaryGuides,
+            'faqs' => $faqs,
             'notices' => $notices,
             'title' => $exam === null ? self::CATEGORIES[$category] : match ($exam) {
                 'upsc' => 'UPSC CSE 2027: dates and eligibility',
