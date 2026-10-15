@@ -14,8 +14,13 @@ class SitemapController extends Controller
     public function __invoke(): Response
     {
         $urls = [];
-        foreach (['home', 'learning.leaderboard', 'notifications.index'] as $name) {
+        foreach (['home', 'learning.leaderboard', 'notifications.index', 'jobs.index'] as $name) {
             $urls[route($name)] = null;
+        }
+        foreach (array_keys(ExamNotificationController::CATEGORIES) as $category) {
+            if ($category !== 'all') {
+                $urls[route('jobs.category', ['category' => $category])] = null;
+            }
         }
         foreach (['about', 'contact', 'help', 'careers', 'privacy', 'terms', 'cookies', 'leaderboard'] as $page) {
             $urls[route('page', $page)] = null;

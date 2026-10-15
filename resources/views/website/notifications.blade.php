@@ -13,28 +13,99 @@
 @include('website.partials.header')
 @if(auth()->check())<script>window.CURRENT_USER={{ Illuminate\Support\Js::from(auth()->user()->only('name', 'email')) }};</script>@endif
 <main class="wrap notification-page">
-    <div class="crumb"><a href="{{ route('home') }}">Home</a><span>/</span><a href="{{ route('notifications.index') }}">2027 notifications</a>@if($exam)<span>/</span><b>{{ $exam === 'upsc' ? 'UPSC' : 'Railways' }}</b>@endif</div>
-    <span class="daily-label">PLAN YOUR NEXT STEP</span>
+    <div class="crumb"><a href="{{ route('home') }}">Home</a><span>/</span><a href="{{ route('notifications.index') }}">Notifications</a>@if($exam)<span>/</span><b>{{ $exam === 'railways' ? 'Railways' : $notices[$exam]['title'] }}</b>@endif</div>
+    <span class="daily-label">QUESTIONYEAR · GOVERNMENT JOBS</span>
     <h1>{{ $title }}</h1>
     <p class="sub">{{ $description }}</p>
-    <p class="notification-checked">Last checked: <time datetime="2026-10-14">14 October 2026</time>. Please check the official notification for the latest updates.</p>
+    @if($exam === null)
+        <p>Browse all available recruitment guides below. Open a guide for its dates, eligibility and official sources. Check the status on each card: a prior-year reference does not confirm a new recruitment cycle.</p>
+        <div class="jobs-filters" role="group" aria-label="Government job categories">
+            @foreach($categories as $filter => $label)
+                <a href="{{ $filter === 'all' ? route('jobs.index') : route('jobs.category', ['category' => $filter]) }}" @if($category === $filter) aria-current="page" @endif>{{ $filter === 'all' ? 'All Jobs' : $label }}</a>
+            @endforeach
+        </div>
+    @endif
+    @if($exam && isset($jobDetails[$exam]['verified']))
+        <p class="notification-checked">Source check: <time datetime="{{ $jobDetails[$exam]['verified'] }}">15 October 2026</time>. {{ $jobDetails[$exam]['verification'] }}</p>
+    @else
+        <p class="notification-checked">Existing guide references last checked: <time datetime="2026-10-14">14 October 2026</time>. New entries show their own source-check date and limitations. Please check the official notification for the latest updates.</p>
+    @endif
     <div class="notification-layout">
         <div class="notification-content">
             @if($exam === null || $exam === 'railways')
                 <div class="notification-list">
                     @foreach($notices as $slug => $notice)
-                        <a class="card notification-list-card" href="{{ route('notifications.show', ['exam' => $slug]) }}">
-                            <span class="daily-label">{{ $notice['status'] }}</span>
-                            <h2>{{ $notice['title'] }}</h2>
+                        <article class="card notification-list-card">
+                            <div class="notification-badges"><span>{{ strtoupper($jobDetails[$slug]['category']) }}</span><span>{{ $notice['status'] }}</span></div>
+                            <h2><a href="{{ route('notifications.show', ['exam' => $slug]) }}">{{ $notice['title'] }}</a></h2>
+                            <p>{{ $jobDetails[$slug]['organization'] }} · {{ isset($jobDetails[$slug]['type']) ? 'Exam-stage update' : ($jobDetails[$slug]['qualification'] === 'all' ? 'Post-specific qualification' : $categories[$jobDetails[$slug]['qualification']]) }}</p>
+                            <dl class="job-facts"><div><dt>{{ isset($jobDetails[$slug]['type']) ? 'Update type' : 'Vacancies' }}</dt><dd>{{ isset($jobDetails[$slug]['type']) ? $categories[$jobDetails[$slug]['type']] : $jobDetails[$slug]['vacancies'] }}</dd></div><div><dt>{{ isset($jobDetails[$slug]['type']) ? 'Notice reference' : 'Last date' }}</dt><dd>{{ $jobDetails[$slug]['deadline'] }}</dd></div></dl>
                             <p>{{ $notice['summary'] }}</p>
-                            <span>Read full notice guide →</span>
-                        </a>
+                            @if(isset($jobDetails[$slug]['verified']))<p class="notification-source">Source checked: 15 October 2026. {{ $jobDetails[$slug]['verification'] }}</p>@endif
+                            <div class="job-card-links"><a class="btn btn-o" href="{{ route('notifications.show', ['exam' => $slug]) }}">View notification →</a><a href="{{ $jobDetails[$slug]['source'] }}" target="_blank" rel="noopener noreferrer">Check official source ↗</a></div>
+                        </article>
                     @endforeach
+                    @if(count($notices) === 0)
+                        <div class="box jobs-empty"><h2>{{ $title }} updates</h2><p>No verified {{ $category === 'admit-cards' ? 'admit card notices' : ($category === 'results' ? 'result notices' : 'recruitment guides') }} are listed in this section yet.</p><p>Use the official websites below to check new announcements. A missing listing here does not mean an announcement has not been released.</p><a class="btn btn-o" href="{{ route('jobs.index') }}">Browse all jobs</a></div>
+                    @endif
                 </div>
+                <section class="box jobs-sources" aria-labelledby="official-job-sources">
+                    <h2 id="official-job-sources">Official recruitment websites</h2>
+                    <p>Use these websites to find notifications, application links, admit cards and results. Check the notice number before following any update.</p>
+                    <div class="notification-table"><table><thead><tr><th scope="col">Official website</th><th scope="col">Recruitment category</th></tr></thead><tbody>
+                        <tr><td><a href="https://ssc.gov.in/" target="_blank" rel="noopener noreferrer">SSC ↗</a></td><td>GD, CGL, CHSL, MTS</td></tr>
+                        <tr><td><a href="https://www.upsc.gov.in/" target="_blank" rel="noopener noreferrer">UPSC ↗</a></td><td>Civil Services, NDA, CDS</td></tr>
+                        <tr><td><a href="https://www.rrbcdg.gov.in/" target="_blank" rel="noopener noreferrer">RRB Chandigarh ↗</a></td><td>Railway NTPC, ALP, Technician and other RRB notices</td></tr>
+                        <tr><td><a href="https://ncs.gov.in/" target="_blank" rel="noopener noreferrer">National Career Service ↗</a></td><td>Government and other job listings</td></tr>
+                        <tr><td><a href="https://ibps.in/" target="_blank" rel="noopener noreferrer">IBPS ↗</a></td><td>PO, clerical and Regional Rural Bank recruitment</td></tr>
+                    </tbody></table></div>
+                </section>
+            @elseif(isset($jobDetails[$exam]['details']))
+                <article class="box notification-article">
+                    <div class="notification-badges"><span>{{ strtoupper($jobDetails[$exam]['category']) }}</span><span>{{ $notices[$exam]['status'] }}</span></div>
+                    <p>{{ $notices[$exam]['summary'] }}</p>
+                    @foreach($jobDetails[$exam]['details'] as $heading => $paragraph)
+                        <section><h2>{{ $heading }}</h2><p>{{ $paragraph }}</p></section>
+                    @endforeach
+                    <section><h2>Important official links</h2><p><a href="{{ $jobDetails[$exam]['source'] }}" target="_blank" rel="noopener noreferrer">Read the official source ↗</a></p><p class="notification-source">Source checked: 15 October 2026. {{ $jobDetails[$exam]['verification'] }}</p></section>
+                    <section><h2>Frequently asked questions</h2>
+                        <h3>Does this page confirm my eligibility or selection?</h3><p>No. The issuing authority's notice and your documents determine eligibility. A result update must be checked against your own roll number.</p>
+                        <h3>Where should I check corrections?</h3><p>Use the official source above and look for later notices for the same examination cycle.</p>
+                    </section>
+                    <section><h2>Preparation and next steps</h2><p>Follow the official syllabus for your examination. Practise regularly and review mistakes before increasing speed.</p><a class="btn btn-o" href="{{ route('daily') }}">Practise daily MCQs</a></section>
+                </article>
             @elseif($exam === 'upsc')
                 @include('website.partials.notification-upsc')
             @else
                 @include('website.partials.notification-railways')
+            @endif
+            @if($exam !== null && $exam !== 'railways' && ! isset($jobDetails[$exam]['details']))
+                <section class="box notification-article" aria-labelledby="application-checklist">
+                    <h2 id="application-checklist">Application details and checklist</h2>
+                    <p>The guide above identifies its recruitment cycle and sources. Fields marked below still need checking against the full official notification; do not use an older notice as confirmation of new rules.</p>
+                    <div class="notification-table"><table><tbody>
+                        <tr><th scope="row">Organization</th><td>{{ $jobDetails[$exam]['organization'] }}</td></tr>
+                        <tr><th scope="row">Total vacancies</th><td>{{ $jobDetails[$exam]['vacancies'] }}. Use the official post-wise and category-wise table.</td></tr>
+                        <tr><th scope="row">Educational qualification</th><td>{{ $categories[$jobDetails[$exam]['qualification']] }}: see the guide above for the applicable cycle and additional conditions.</td></tr>
+                        <tr><th scope="row">Age limit and relaxation</th><td>See the cycle-specific reference above. Check the age cut-off and category conditions in the full notice.</td></tr>
+                        <tr><th scope="row">Salary and pay scale</th><td>@if($exam === 'rrb-ntpc-graduate-cen-06-2026')Initial basic pay: ₹35,400 (Level 6) for Chief Commercial cum Ticket Supervisor; ₹29,200 (Level 5) for the other three categories. Allowances follow the applicable rules. <a href="https://www.pib.gov.in/PressReleseDetailm.aspx?PRID=2321933&amp;lang=9&amp;reg=1" target="_blank" rel="noopener noreferrer">Ministry of Railways PIB source</a>, verified 15 October 2026.@else Not verified in this guide. Check the post-wise pay level in the official notice.@endif</td></tr>
+                        <tr><th scope="row">Application dates</th><td>See the dated source above. Prior-year dates do not apply to a fresh cycle.</td></tr>
+                        <tr><th scope="row">Application fee</th><td>Category-wise fees, exemptions and refund conditions have not been verified in this guide.</td></tr>
+                        <tr><th scope="row">Selection process</th><td>Use the full notice for every stage and any post-specific skill, physical or medical requirements.</td></tr>
+                        <tr><th scope="row">Exam pattern and syllabus</th><td>Marks, timing, negative marking and the complete syllabus have not been verified in this guide. Read the official exam scheme before planning.</td></tr>
+                    </tbody></table></div>
+                    <h3>How to apply online</h3>
+                    <ol><li>Open the official recruitment website and find the exact notice number.</li><li>Read the detailed notification and any corrections. Confirm that applications are open.</li><li>Follow the application link in that notice, register and enter your details.</li><li>Upload the required documents in the specified format and pay any applicable fee.</li><li>Check the preview, submit before the deadline and save the confirmation.</li></ol>
+                    <h3>Required documents</h3>
+                    <p>Prepare age proof, education certificates, a recent photograph, signature and any applicable category or disability certificate. The notice determines the accepted documents, formats and deadlines.</p>
+                    <h3>Important official links</h3>
+                    <p><a href="{{ $jobDetails[$exam]['source'] }}" target="_blank" rel="noopener noreferrer">Official source for this guide ↗</a>. Notification PDF links, where available, appear beside the relevant reference above. Use the issuing authority's website to find the current application, admit card and result links.</p>
+                    <h3>Preparation tips</h3>
+                    <p>Start with the official syllabus. Set a daily revision target, practise timed questions and keep a list of mistakes. QuestionYear quizzes support revision; check their topics against your exam syllabus.</p>
+                    <div class="notification-actions"><a class="btn btn-o" href="{{ route('daily') }}">Daily practice</a><a class="btn btn-l" href="{{ route('subject', ['subject' => 'mathematics']) }}">Maths quizzes</a></div>
+                    <h3>Admit cards and results</h3>
+                    <p>No admit card or result release is confirmed by this guide. <a href="{{ route('jobs.category', ['category' => 'admit-cards']) }}">Browse admit card updates</a> or <a href="{{ route('jobs.category', ['category' => 'results']) }}">browse result updates</a>, then check the official recruitment website.</p>
+                </section>
             @endif
         </div>
         <aside class="box notification-sidebar">

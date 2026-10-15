@@ -1,5 +1,26 @@
 
+.jobs-menu{position:relative}
+.jobs-menu summary{display:flex;align-items:center;gap:6px;height:38px;padding:0 6px;border-radius:6px;font-size:15px;font-weight:700;cursor:pointer;list-style:none}
+.jobs-menu summary::-webkit-details-marker{display:none}
+.jobs-menu summary::after{content:'⌄';font-size:16px}
+.jobs-menu details[open] summary,.jobs-menu summary:hover{background:var(--bg)}
+.jobs-dropdown{position:absolute;top:100%;right:0;width:285px;padding:10px;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 30px #0002;max-height:70vh;overflow:auto}
+.jobs-dropdown a{display:flex;height:auto;min-height:38px;padding:8px 12px;white-space:normal;font-size:14px}
+.jobs-filters{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0}
+.jobs-filters a{padding:8px 14px;border:1px solid var(--line);border-radius:24px;background:var(--card);font-size:14px;font-weight:600}
+.jobs-filters a:hover,.jobs-filters a[aria-current=page]{background:var(--accent);border-color:var(--accent);color:#fff}
+.job-facts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:18px 0;padding:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.job-facts dt{font-size:13px;color:var(--muted)}
+.job-facts dd{margin:3px 0 0;font-size:19px;font-weight:700}
+.job-card-links{display:flex;align-items:center;gap:18px;flex-wrap:wrap;font-size:14px;font-weight:600;color:var(--link)}
+.jobs-empty,.jobs-sources{padding:24px;line-height:1.7}
+.jobs-empty h2,.jobs-sources h2{font-size:23px;margin-bottom:12px}
+.jobs-empty p{margin-bottom:16px}
+.jobs-sources a{color:var(--link);text-decoration:underline}
 .notification-page{padding-top:38px;padding-bottom:64px;min-height:60vh}
+@media(max-width:1100px){header .top{flex-wrap:wrap;height:auto;min-height:95px}header #nav:not(.show){margin-left:8px}header #nav a,header #nav button,header .jobs-menu summary{font-size:14px}}
+@media(max-width:900px){.jobs-dropdown{position:static;width:100%;box-shadow:none;margin:8px 0}.jobs-menu summary{padding:0 6px}.jobs-menu{width:100%}}
+@media(max-width:600px){.job-facts{gap:10px}.job-facts dd{font-size:16px}.job-card-links .btn{width:100%}}
 .notification-page h1{font-size:clamp(28px,4vw,42px);line-height:1.2;margin:12px 0}
 .notification-checked,.notification-source{color:var(--muted);font-size:14px;line-height:1.6}
 .notification-actions{display:flex;flex-wrap:wrap;gap:12px;margin:24px 0}

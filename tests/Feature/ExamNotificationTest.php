@@ -10,6 +10,28 @@ class ExamNotificationTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_government_job_categories_filter_guides_and_show_honest_empty_states(): void
+    {
+        $this->get(route('jobs.index'))->assertOk()->assertSee('Latest Government Jobs')
+            ->assertSee('Official recruitment websites')->assertSee('Vacancies');
+
+        foreach (['10th-pass' => 'rrb-group-d-cen-09-2025', '12th-pass' => 'rrb-ntpc-undergraduate-cen-07-2025', 'graduate' => 'rrb-ntpc-graduate-cen-06-2026', 'upcoming' => 'upsc'] as $category => $slug) {
+            $this->get(route('jobs.category', ['category' => $category]))->assertOk()
+                ->assertSee(route('notifications.show', ['exam' => $slug]), false);
+        }
+
+        $this->get(route('jobs.category', ['category' => '10th-pass']))->assertOk()
+            ->assertDontSee('RRB NTPC Graduate — CEN 06/2026');
+        foreach (['ssc' => 'SSC Selection Posts Phase XIV 2026', 'banking' => 'Canara Bank Graduate Apprentices 2026', 'admit-cards' => 'UPSC Civil Services Mains 2026 Admit Card', 'results' => 'UPSC Engineering Services Mains 2026 Written Result'] as $category => $title) {
+            $this->get(route('jobs.category', ['category' => $category]))->assertOk()
+                ->assertSee($title)->assertSee('15 October 2026')->assertDontSee('No verified');
+        }
+        $this->get(route('jobs.category', ['category' => 'admit-cards']))->assertDontSee('Written result published');
+        $this->get(route('jobs.category', ['category' => 'results']))->assertDontSee('Archived admit card notice');
+        $this->get('/government-jobs/invalid')->assertNotFound();
+        $this->get('/notifications/2027')->assertRedirect(route('notifications.index'))->assertStatus(301);
+    }
+
     public function test_hub_and_exam_pages_show_dated_official_sources_and_pending_rules(): void
     {
         $this->get(route('notifications.index'))->assertOk()
@@ -62,6 +84,6 @@ class ExamNotificationTest extends TestCase
             $this->assertSame(1, preg_match('/<meta name="description" content="([^"]+)"/', $html, $matches));
             $descriptions[] = $matches[1];
         }
-        $this->assertCount(6, array_unique($descriptions));
+        $this->assertCount(count(ExamNotificationController::NOTICES) + 2, array_unique($descriptions));
     }
 }
