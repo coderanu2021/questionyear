@@ -20,7 +20,7 @@ class OctoberCurrentAffairsSeeder extends Seeder
             $subject = Subject::firstOrCreate(['slug' => 'current-affairs'], ['name' => 'Current Affairs', 'category' => 'General', 'description' => 'Daily current affairs questions and answers']);
 
             foreach ($days as $day) {
-                $quiz = Quiz::firstOrCreate([
+                $quiz = Quiz::updateOrCreate([
                     'subject_id' => $subject->id,
                     'chapter_id' => null,
                     'title' => $day['title'],
@@ -32,8 +32,9 @@ class OctoberCurrentAffairsSeeder extends Seeder
                     'questions' => $day['questions'],
                 ]);
 
-                DB::table('page_seo')->insertOrIgnore([
+                DB::table('page_seo')->updateOrInsert([
                     'page_key' => 'quiz:'.$quiz->id,
+                ], [
                     'meta_title' => $day['meta_title'],
                     'meta_description' => $day['meta_description'],
                     'created_at' => now(),
