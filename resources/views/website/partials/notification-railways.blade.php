@@ -1,5 +1,5 @@
 <article class="box notification-article" id="railways-notice" aria-labelledby="railways-title">
-    <div class="notification-badges"><span>RAILWAYS</span><span>{{ $notices[$exam]['status'] }}</span><span>Fresh 2027 CEN not verified here</span></div>
+    <div class="notification-badges"><span>RAILWAYS</span><span>{{ $notices[$exam]['status'] }}</span></div>
     <h2 id="railways-title">{{ $notices[$exam]['title'] }}</h2>
     <p>Railway jobs do not share one set of entry rules. Choose a post first. Then read its notice. RRB means Railway Recruitment Board. CEN is the number used to identify a recruitment notice.</p>
     <p>A notice issued in 2026 may use an age date in 2027. That does not turn it into a new 2027 recruitment. This guide keeps those two things separate.</p>
