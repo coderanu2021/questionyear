@@ -29,6 +29,7 @@ class ExamNotificationController extends Controller
     public const NOTICES = [
         'upsc' => ['title' => 'UPSC Civil Services 2027', 'summary' => 'Calendar dates, prior-year eligibility and attempt rules.', 'status' => '2027 calendar published'],
         'rrb-ntpc-graduate-cen-06-2026' => ['title' => 'RRB NTPC Graduate — CEN 06/2026', 'summary' => 'Application dates, degree rules and the 1 January 2027 age cut-off.', 'status' => 'Published 2026 notice'],
+        'rrb-ntpc-undergraduate-cen-07-2026' => ['title' => 'RRB NTPC Undergraduate Recruitment 2026 — CEN 07/2026', 'summary' => '1,688 vacancies for 12th-pass candidates. Apply from 15 October to 13 November 2026; fee payment deadline: 15 November 2026.', 'status' => '2026 recruitment guide'],
         'rrb-ntpc-undergraduate-cen-07-2025' => ['title' => 'RRB NTPC Undergraduate — CEN 07/2025', 'summary' => 'Class 12 entry rules from the prior notice. Fresh 2027 terms are not verified.', 'status' => 'Prior-year reference'],
         'rrb-group-d-cen-09-2025' => ['title' => 'RRB Group D / Level 1 — CEN 09/2025', 'summary' => 'Prior-notice education, age and fitness rules for planning your next step.', 'status' => 'Prior-year reference'],
         'ssc-selection-posts-phase-xiv-2026' => ['title' => 'SSC Selection Posts Phase XIV 2026', 'summary' => 'The published application window was 13 April to 4 May 2026. Check post-specific qualifications in the official notice.', 'status' => 'Application window ended'],
@@ -43,6 +44,22 @@ class ExamNotificationController extends Controller
         abort_unless(isset(self::CATEGORIES[$category]), 404);
 
         $jobDetails = [
+            'rrb-ntpc-undergraduate-cen-07-2026' => ['category' => 'railway', 'qualification' => '12th-pass', 'organization' => 'Railway Recruitment Boards', 'vacancies' => '1,688 (provisional)', 'deadline' => '13 November 2026, 11:59 PM', 'source' => 'https://rrb.indianrailways.gov.in/', 'upcoming' => false, 'verified' => '2026-10-16', 'verification' => 'User-supplied recruitment details checked against a third-party-hosted copy of CEN 07/2026. The issuing RRB website copy has not been independently verified.', 'overview' => [
+                'Recruiting body' => 'Railway Recruitment Boards',
+                'Notification' => 'CEN 07/2026',
+                'Detailed notification date' => '14 October 2026',
+                'Total vacancies' => '1,688 (provisional)',
+                'Qualification' => '12th pass or equivalent, subject to applicable marks requirements and exemptions',
+                'Age limit' => '18–30 years as of 1 January 2027, with applicable relaxations',
+                'Applications open' => '15 October 2026',
+                'Last date' => '13 November 2026, 11:59 PM',
+                'Fee payment deadline' => '15 November 2026 (for submitted applications)',
+            ], 'details' => [
+                'Recruitment overview' => 'This guide covers the 2026 undergraduate recruitment. Undergraduate describes the Class 12 entry level; a university degree is not the basic qualification. The 2027 age reference date does not change the recruitment year.',
+                'Notification date and application deadline' => '14 October 2026 refers to the detailed notification date supplied for this update. The notice copy separately records 26 September 2026 as the indicative Employment News notice date. Submit the form by 13 November; the later fee deadline does not extend form submission.',
+                'Eligibility and selection' => 'Check the current CEN for marks exemptions, category relaxations, post preferences and medical standards. Do not carry forward typing-test rules from CEN 07/2025 without checking the 2026 selection provisions.',
+                'How to apply' => 'Open the official RRB website, find CEN 07/2026 and follow its application link. Check your eligibility, complete the form, upload the prescribed documents, pay the applicable fee and save your submitted application.',
+            ]],
             'upsc' => ['category' => 'upsc', 'qualification' => 'graduate', 'organization' => 'Union Public Service Commission', 'vacancies' => 'To be announced', 'deadline' => 'See calendar in guide', 'source' => 'https://www.upsc.gov.in/', 'upcoming' => true],
             'rrb-ntpc-graduate-cen-06-2026' => ['category' => 'railway', 'qualification' => 'graduate', 'organization' => 'Railway Recruitment Boards', 'vacancies' => '3,548', 'deadline' => '6 November 2026', 'source' => 'https://www.pib.gov.in/PressReleasePage.aspx?PRID=2321873', 'upcoming' => false],
             'rrb-ntpc-undergraduate-cen-07-2025' => ['category' => 'railway', 'qualification' => '12th-pass', 'organization' => 'Railway Recruitment Boards', 'vacancies' => 'Prior-year reference', 'deadline' => 'Prior-year reference', 'source' => 'https://www.rrbchennai.gov.in/', 'upcoming' => false],
@@ -73,6 +90,11 @@ class ExamNotificationController extends Controller
             ]],
         ];
         $salaryGuides = [
+            'rrb-ntpc-undergraduate-cen-07-2026' => [
+                'summary' => 'The reviewed CEN copy lists initial monthly basic pay of ₹21,700 (Level 3) for Commercial cum Ticket Clerk and ₹19,900 (Level 2) for Accounts Clerk cum Typist, Junior Clerk cum Typist and Trains Clerk.',
+                'note' => 'These are starting basic-pay figures, excluding allowances and deductions. The reviewed copy is hosted by a third party; confirm it against the issuing RRB notification before relying on it.',
+                'sources' => ['CEN 07/2026 notification copy (third-party mirror)' => 'https://rank.qmaths.in/pdfs/rrb-ntpc-ug-cen-07-2026/RRB-NTPC-Undergraduate-CEN-07-2026-Detailed-Notification.pdf', 'Official RRB website' => 'https://rrb.indianrailways.gov.in/'],
+            ],
             'upsc' => [
                 'summary' => 'UPSC does not have one salary for all successful candidates. As an IAS example, Level 10 basic pay runs from ₹56,100 to ₹1,77,500 per month under the IAS Pay Rules, 2016. ₹56,100 is the first cell; the upper figure is reached through pay progression, not on joining.',
                 'note' => 'This is an existing IAS pay-rule reference, not confirmation of every service or the final CSE 2027 terms. Service, grade, posting, allowances and deductions affect actual pay.',
@@ -113,6 +135,12 @@ class ExamNotificationController extends Controller
         $salaryGuides['upsc-civil-services-mains-2026-admit-card']['note'] = 'This existing IAS pay-rule example relates to a possible service after selection. An admit card is not an appointment or salary entitlement; other Civil Services have their own rules.';
 
         $faqs = [
+            'rrb-ntpc-undergraduate-cen-07-2026' => [
+                'What is RRB NTPC Undergraduate recruitment?' => 'RRB means Railway Recruitment Board and NTPC means Non-Technical Popular Categories. This guide covers CEN 07/2026 for undergraduate-level posts.',
+                'What is the last date to apply?' => '13 November 2026, 11:59 PM. The fee payment deadline is 15 November 2026 for applications already submitted.',
+                'What is the age limit?' => '18–30 years as of 1 January 2027, with applicable category relaxations under the notice.',
+                'What is the RRB NTPC Undergraduate salary?' => $salaryGuides['rrb-ntpc-undergraduate-cen-07-2026']['summary'],
+            ],
             'upsc' => [
                 'What is UPSC?' => 'UPSC stands for Union Public Service Commission. It conducts examinations and recruitment for various Union government services and posts. Civil Services is one of its examinations.',
                 'What is the UPSC salary?' => $salaryGuides['upsc']['summary'],

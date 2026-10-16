@@ -26,7 +26,7 @@
         </div>
     @endif
     @if($exam && isset($jobDetails[$exam]['verified']))
-        <p class="notification-checked">Source check: <time datetime="{{ $jobDetails[$exam]['verified'] }}">15 October 2026</time>. {{ $jobDetails[$exam]['verification'] }}</p>
+        <p class="notification-checked">Source check: <time datetime="{{ $jobDetails[$exam]['verified'] }}">{{ date('j F Y', strtotime($jobDetails[$exam]['verified'])) }}</time>. {{ $jobDetails[$exam]['verification'] }}</p>
     @else
         <p class="notification-checked">Existing guide references last checked: <time datetime="2026-10-14">14 October 2026</time>. New entries show their own source-check date and limitations. Please check the official notification for the latest updates.</p>
     @endif
@@ -41,7 +41,7 @@
                             <p>{{ $jobDetails[$slug]['organization'] }} · {{ isset($jobDetails[$slug]['type']) ? 'Exam-stage update' : ($jobDetails[$slug]['qualification'] === 'all' ? 'Post-specific qualification' : $categories[$jobDetails[$slug]['qualification']]) }}</p>
                             <dl class="job-facts"><div><dt>{{ isset($jobDetails[$slug]['type']) ? 'Update type' : 'Vacancies' }}</dt><dd>{{ isset($jobDetails[$slug]['type']) ? $categories[$jobDetails[$slug]['type']] : $jobDetails[$slug]['vacancies'] }}</dd></div><div><dt>{{ isset($jobDetails[$slug]['type']) ? 'Notice reference' : 'Last date' }}</dt><dd>{{ $jobDetails[$slug]['deadline'] }}</dd></div></dl>
                             <p>{{ $notice['summary'] }}</p>
-                            @if(isset($jobDetails[$slug]['verified']))<p class="notification-source">Source checked: 15 October 2026. {{ $jobDetails[$slug]['verification'] }}</p>@endif
+                            @if(isset($jobDetails[$slug]['verified']))<p class="notification-source">Source checked: {{ date('j F Y', strtotime($jobDetails[$slug]['verified'])) }}. {{ $jobDetails[$slug]['verification'] }}</p>@endif
                             <div class="job-card-links"><a class="btn btn-o" href="{{ route('notifications.show', ['exam' => $slug]) }}">View notification →</a><a href="{{ $jobDetails[$slug]['source'] }}" target="_blank" rel="noopener noreferrer">Check official source ↗</a></div>
                         </article>
                     @endforeach
@@ -64,10 +64,17 @@
                 <article class="box notification-article">
                     <div class="notification-badges"><span>{{ strtoupper($jobDetails[$exam]['category']) }}</span><span>{{ $notices[$exam]['status'] }}</span></div>
                     <p>{{ $notices[$exam]['summary'] }}</p>
+                    @if(isset($jobDetails[$exam]['overview']))
+                        <div class="notification-table"><table><caption>Recruitment details: CEN 07/2026</caption><thead><tr><th scope="col">Details</th><th scope="col">Information</th></tr></thead><tbody>
+                            @foreach($jobDetails[$exam]['overview'] as $label => $value)
+                                <tr><th scope="row">{{ $label }}</th><td>{{ $value }}</td></tr>
+                            @endforeach
+                        </tbody></table></div>
+                    @endif
                     @foreach($jobDetails[$exam]['details'] as $heading => $paragraph)
                         <section><h2>{{ $heading }}</h2><p>{{ $paragraph }}</p></section>
                     @endforeach
-                    <section><h2>Important official links</h2><p><a href="{{ $jobDetails[$exam]['source'] }}" target="_blank" rel="noopener noreferrer">Read the official source ↗</a></p><p class="notification-source">Source checked: 15 October 2026. {{ $jobDetails[$exam]['verification'] }}</p></section>
+                    <section><h2>Important official links</h2><p><a href="{{ $jobDetails[$exam]['source'] }}" target="_blank" rel="noopener noreferrer">Read the official source ↗</a></p><p class="notification-source">Source checked: {{ date('j F Y', strtotime($jobDetails[$exam]['verified'])) }}. {{ $jobDetails[$exam]['verification'] }}</p></section>
                     <section><h2>Preparation and next steps</h2><p>Follow the official syllabus for your examination. Practise regularly and review mistakes before increasing speed.</p><a class="btn btn-o" href="{{ route('daily') }}">Practise daily MCQs</a></section>
                 </article>
             @elseif($exam === 'upsc')
@@ -114,7 +121,11 @@
                             <li><a href="{{ $sourceUrl }}" target="_blank" rel="noopener noreferrer">{{ $sourceLabel }}</a></li>
                         @endforeach
                     </ul>
-                    <p class="notification-source">Pay references checked on <time datetime="2026-10-15">15 October 2026</time>. Some references were available through the official document's search index. Prior-cycle references are labelled above; check later amendments before relying on pay figures.</p>
+                    @if($exam === 'rrb-ntpc-undergraduate-cen-07-2026')
+                        <p class="notification-source">Pay reference checked on <time datetime="2026-10-16">16 October 2026</time> using the notification mirror linked above. The issuing RRB website copy has not been independently verified.</p>
+                    @else
+                        <p class="notification-source">Pay references checked on <time datetime="2026-10-15">15 October 2026</time>. Some references were available through the official document's search index. Prior-cycle references are labelled above; check later amendments before relying on pay figures.</p>
+                    @endif
                 </section>
                 <section class="box notification-article" aria-labelledby="notification-faqs">
                     <h2 id="notification-faqs">Frequently asked questions</h2>

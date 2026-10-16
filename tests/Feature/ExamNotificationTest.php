@@ -10,6 +10,31 @@ class ExamNotificationTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_undergraduate_2026_guide_shows_current_recruitment_details(): void
+    {
+        $slug = 'rrb-ntpc-undergraduate-cen-07-2026';
+
+        $this->get(route('notifications.show', ['exam' => $slug]))->assertOk()
+            ->assertSee('CEN 07/2026')->assertSee('1,688 (provisional)')
+            ->assertSee('14 October 2026')->assertSee('15 October 2026')
+            ->assertSee('13 November 2026, 11:59 PM')->assertSee('15 November 2026')
+            ->assertSee('18–30 years as of 1 January 2027')->assertSee('marks requirements and exemptions')
+            ->assertSee('26 September 2026')->assertSee('16 October 2026')
+            ->assertSee('third-party-hosted copy')->assertSee('₹21,700')->assertSee('₹19,900')
+            ->assertDontSee('Fresh 2027 CEN not verified here');
+
+        foreach (['all', 'railway', '12th-pass'] as $category) {
+            $this->get(route('jobs.category', ['category' => $category]))->assertOk()
+                ->assertSee(route('notifications.show', ['exam' => $slug]), false)
+                ->assertSee('1,688 (provisional)')->assertSee('13 November 2026, 11:59 PM');
+        }
+
+        $this->get(route('notifications.show', ['exam' => 'railways']))->assertOk()
+            ->assertSee(route('notifications.show', ['exam' => $slug]), false);
+        $this->get(route('sitemap'))->assertOk()
+            ->assertSee(route('notifications.show', ['exam' => $slug]), false);
+    }
+
     public function test_every_notice_has_specific_salary_guidance_and_faqs(): void
     {
         $expectedQuestions = [
