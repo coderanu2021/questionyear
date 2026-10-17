@@ -1,0 +1,74 @@
+name: Generate queued chapter drafts
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chapter-content-worker
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    name: Process source-backed chapter drafts
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    env:
+      LIGHTSAIL_HOST: ${{ secrets.LIGHTSAIL_HOST || '13.127.237.199' }}
+      LIGHTSAIL_USER: ${{ secrets.LIGHTSAIL_USER || 'admin' }}
+      LIGHTSAIL_SSH_KEY_B64: ${{ secrets.LIGHTSAIL_SSH_KEY_B64 }}
+      LIGHTSAIL_KNOWN_HOSTS: ${{ secrets.LIGHTSAIL_KNOWN_HOSTS }}
+      LIGHTSAIL_DEPLOY_PATH: ${{ secrets.LIGHTSAIL_DEPLOY_PATH || '/home/admin/questionyear' }}
+
+    steps:
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          : "${LIGHTSAIL_SSH_KEY_B64:?Missing deployment SSH credential}"
+          : "${LIGHTSAIL_KNOWN_HOSTS:?Missing verified SSH host keys}"
+          [[ "$LIGHTSAIL_HOST" =~ ^[A-Za-z0-9][A-Za-z0-9.-]*$ ]]
+          [[ "$LIGHTSAIL_USER" =~ ^[a-z_][a-z0-9_-]*$ ]]
+          [[ "$LIGHTSAIL_DEPLOY_PATH" =~ ^/[A-Za-z0-9/_-]+$ ]]
+          [[ "$LIGHTSAIL_DEPLOY_PATH" != / && "$LIGHTSAIL_DEPLOY_PATH" != *..* ]]
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s' "$LIGHTSAIL_SSH_KEY_B64" | base64 --decode > "$HOME/.ssh/lightsail"
+          printf '%s\n' "$LIGHTSAIL_KNOWN_HOSTS" | tr -d '\r' > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/lightsail" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -P '' -f "$HOME/.ssh/lightsail" > /dev/null
+          cat > "$HOME/.ssh/config" <<CONFIG
+          Host lightsail-deploy
+            HostName $LIGHTSAIL_HOST
+            User $LIGHTSAIL_USER
+            IdentityFile ~/.ssh/lightsail
+            IdentitiesOnly yes
+            BatchMode yes
+            StrictHostKeyChecking yes
+            ConnectTimeout 20
+            ServerAliveInterval 15
+            ServerAliveCountMax 3
+          CONFIG
+          chmod 600 "$HOME/.ssh/config"
+
+      - name: Generate pending sections without publishing
+        run: |
+          set -euo pipefail
+          ssh lightsail-deploy "bash -s -- $(printf '%q' "$LIGHTSAIL_DEPLOY_PATH")" <<'REMOTE'
+          set -euo pipefail
+          cd "$1"
+          [[ "$(git rev-parse --show-toplevel)" == "$(pwd -P)" ]]
+          [[ "$(git branch --show-current)" == main ]]
+          [[ -f .env && -f artisan ]]
+          flock -n storage/framework/chapter-content-worker.lock \
+            php artisan queue:work chapter-content --queue=chapter-content \
+            --stop-when-empty --timeout=65 --tries=3 --max-time=900 --max-jobs=40 --no-interaction
+          REMOTE
+
+      - name: Remove runner SSH credentials
+        if: always()
+        run: rm -f "$HOME/.ssh/lightsail" "$HOME/.ssh/known_hosts" "$HOME/.ssh/config"
