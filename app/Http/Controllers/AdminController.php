@@ -183,6 +183,13 @@ class AdminController extends Controller
         DB::transaction(function () use ($data) {
             abort_unless(hash_equals($this->state()['version'], $data['version']), 409, 'Data changed in another tab. Reload before saving.');
             $chapterIds = array_column($data['chapters'], 'id');
+            if (Chapter::whereNotNull('content_verified_at')->whereNotIn('id', $chapterIds)->exists()) {
+                throw ValidationException::withMessages(['chapters' => 'Verified chapters must be managed through Chapter content review.']);
+            }
+            $reviewedQuizIds = Chapter::whereNotNull('content_verified_at')->get()->map(fn (Chapter $chapter): ?int => $chapter->content_evidence['quiz_id'] ?? null)->filter()->all();
+            if (array_diff($reviewedQuizIds, array_column($data['tests'], 'id'))) {
+                throw ValidationException::withMessages(['tests' => 'Reviewed chapter quizzes cannot be deleted through the bulk editor.']);
+            }
             foreach ($data['tests'] as $test) {
                 $existingQuiz = Quiz::find($test['id']);
                 $standaloneSubject = ($test['current_affairs'] ?? false) ? 'current-affairs' : (($test['general_knowledge'] ?? false) ? 'general-knowledge' : null);
@@ -204,11 +211,32 @@ class AdminController extends Controller
                 }
                 $subject = Subject::firstOrCreate(['name' => $chapter['subject']], ['slug' => Str::slug(str_replace('&', '', $chapter['subject'])), 'category' => 'General', 'description' => 'Explore '.$chapter['subject']]);
                 $record = Chapter::find($chapter['id']) ?? new Chapter;
+                if ($record->content_verified_at) {
+                    $saved = collect($this->state()['chapters'])->firstWhere('id', $record->id);
+                    if (array_map(fn (mixed $value): string => (string) $value, $saved) != array_map(fn (mixed $value): string => (string) $value, $chapter)) {
+                        throw ValidationException::withMessages(['chapters' => 'Use Chapter content review to replace verified content.']);
+                    }
+
+                    continue;
+                }
                 $record->id = $chapter['id'];
                 $record->fill(['subject_id' => $subject->id, 'category' => $subject->slug === 'history' ? (array_key_exists('category', $chapter) ? $chapter['category'] : $record->category) : null, 'title' => $chapter['title'], 'lessons' => $chapter['lessons'], 'status' => $chapter['status'], 'description' => $chapter['desc'] ?? '', 'content' => $this->sanitize($chapter['content'] ?? ''), 'meta_title' => array_key_exists('meta_title', $chapter) ? $chapter['meta_title'] : $record->meta_title, 'meta_description' => array_key_exists('meta_description', $chapter) ? $chapter['meta_description'] : $record->meta_description, 'meta_keywords' => array_key_exists('meta_keywords', $chapter) ? $chapter['meta_keywords'] : $record->meta_keywords])->save();
             }
             foreach ($data['tests'] as $test) {
                 $record = Quiz::find($test['id']) ?? new Quiz;
+                if (in_array($record->id, $reviewedQuizIds, true)) {
+                    $savedQuiz = collect($this->state()['tests'])->firstWhere('id', $record->id);
+                    $normalizeQuestions = fn (array $questions): array => array_map(fn (array $question): array => isset($question['answer'])
+                        ? ['q' => $question['q'], 'answer' => $question['answer']]
+                        : ['q' => $question['q'], 'o' => $question['o'], 'c' => $question['c'], 'explanation' => (string) ($question['explanation'] ?? '')], $questions);
+                    $savedQuiz['qs'] = $normalizeQuestions($savedQuiz['qs']);
+                    $test['qs'] = $normalizeQuestions($test['qs']);
+                    if (array_intersect_key($savedQuiz, $test) != $test) {
+                        throw ValidationException::withMessages(['tests' => 'Replace reviewed practice questions through Chapter content review.']);
+                    }
+
+                    continue;
+                }
                 $record->id = $test['id'];
                 if (($test['current_affairs'] ?? false) || ($test['general_knowledge'] ?? false)) {
                     $previousQuestions = $record->questions ?? [];

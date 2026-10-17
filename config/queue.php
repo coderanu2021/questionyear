@@ -31,6 +31,15 @@ return [
 
     'connections' => [
 
+        'chapter-content' => [
+            'driver' => 'database',
+            'connection' => env('DB_QUEUE_CONNECTION'),
+            'table' => 'jobs',
+            'queue' => 'chapter-content',
+            'retry_after' => 180,
+            'after_commit' => true,
+        ],
+
         'sync' => [
             'driver' => 'sync',
         ],

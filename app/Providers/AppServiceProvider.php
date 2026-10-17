@@ -19,7 +19,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->useLangPath(resource_path('lang'));
         DB::prohibitDestructiveCommands($this->app->isProduction());
 
-        View::composer(['website.*', 'errors.*', 'errors::*', 'admin.index', 'admin.pages.settings'], function (\Illuminate\View\View $view): void {
+        View::composer(['website.*', 'errors.*', 'errors::*', 'admin.index', 'admin.pages.settings', 'admin.pages.chapter-content'], function (\Illuminate\View\View $view): void {
             $settings = SiteSettings::values();
             $view->with('siteSettings', $settings)->with('siteLogoUrl', SiteSettings::logoUrl($settings))->with('siteFaviconUrl', SiteSettings::faviconUrl($settings));
         });
