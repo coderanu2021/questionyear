@@ -10,6 +10,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use RuntimeException;
 use Throwable;
 
 class GenerateChapterSection implements ShouldQueue
@@ -47,7 +48,14 @@ class GenerateChapterSection implements ShouldQueue
             return;
         }
         DB::table('chapter_content_revisions')->where('id', $this->revisionId)->update(['generation_state' => 'generating', 'updated_at' => now()]);
-        $result = $generator->generate($revision, $this->stage);
+        try {
+            $result = $generator->generate($revision, $this->stage);
+        } catch (RuntimeException $exception) {
+            if (get_class($exception) === RuntimeException::class) {
+                DB::table('chapter_content_revisions')->where('id', $this->revisionId)->where('status', 'draft')->update(['last_error' => $exception->getMessage(), 'updated_at' => now()]);
+            }
+            throw $exception;
+        }
         DB::transaction(function () use ($workflow, $result): void {
             DB::table('chapter_content_revisions')->where('id', $this->revisionId)->lockForUpdate()->first();
             $current = $workflow->revision($this->revisionId);
@@ -90,7 +98,7 @@ class GenerateChapterSection implements ShouldQueue
     public function failed(?Throwable $exception): void
     {
         DB::table('chapter_content_revisions')->where('id', $this->revisionId)->where('status', 'draft')->update([
-            'generation_state' => 'failed', 'last_error' => 'Section '.($this->stage + 1).' failed after retries. Check provider configuration, source coverage and response format; resume to retry this section.', 'updated_at' => now(),
+            'generation_state' => 'failed', 'last_error' => $exception && get_class($exception) === RuntimeException::class ? $exception->getMessage() : 'Section '.($this->stage + 1).' failed after retries. Check provider configuration, source coverage and response format; resume to retry this section.', 'updated_at' => now(),
         ]);
         Log::error('Chapter section generation failed', ['revision_id' => $this->revisionId, 'stage' => $this->stage, 'exception_type' => $exception ? get_class($exception) : null]);
     }

@@ -248,6 +248,7 @@ class ChapterContentWorkflowTest extends TestCase
             $job->failed($exception);
         }
         $this->assertSame([], $workflow->revision($id)['payload']);
+        $this->assertSame('Provider output was incomplete or blocked; section retained for retry.', $workflow->revision($id)['last_error']);
         $this->assertDatabaseHas('chapter_content_revisions', ['id' => $id, 'generation_state' => 'failed']);
         $this->actingAs($admin)->post(route('admin.content.resume', $id), ['version' => 1])->assertRedirect();
         Queue::assertPushed(GenerateChapterSection::class, 2);
