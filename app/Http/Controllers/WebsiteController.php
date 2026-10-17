@@ -56,7 +56,7 @@ class WebsiteController extends Controller
         $curriculum = ['S' => [], 'QB' => [], 'LN' => [], 'tests' => [], 'categories' => [], 'chapterUrls' => [], 'quizUrls' => []];
         $quizIds = [];
         foreach ($subjects as $item) {
-            if (in_array($item->slug, ['current-affairs', 'general-knowledge'], true)) {
+            if (in_array($item->slug, ['current-affairs', 'general-knowledge'], true) && ! ($request->routeIs('learn') && $subject === $item->slug && $item->chapters->get($chapter)?->content_verified_at)) {
                 $quizzes = Quiz::published()->where(fn ($query) => $query->where('subject_id', $item->id)->orWhereHas('chapter', fn ($query) => $query->where('subject_id', $item->id)))->orderByDesc('quiz_date')->orderByDesc('id')->get();
                 $curriculum['S'][] = [$item->name, $item->category, $item->description ?? '', $quizzes->pluck('title')->all()];
                 foreach ($quizzes as $index => $quiz) {
@@ -75,9 +75,9 @@ class WebsiteController extends Controller
                 $curriculum['categories'][$key] = $entry->category;
                 $entry->setRelation('subject', $item);
                 $curriculum['chapterUrls'][$key] = $entry->readingUrl($index);
-                if ($item->slug !== 'current-affairs' && $entry->content) {
+                if ($entry->content) {
                     $curriculum['LN'][$key] = ['sub' => $entry->description ?? '', 'icon' => 'fa-book', 'time' => $entry->lessons.' lessons', 's' => [['h' => $entry->title, 'i' => 'fa-book', 'p' => [$entry->content]]], 'sum' => []];
-                } elseif ($item->slug !== 'current-affairs' && $entry->notes) {
+                } elseif ($entry->notes) {
                     $curriculum['LN'][$key] = $entry->notes;
                 }
                 if ($item->slug === 'history' && filled($entry->study_guide)) {
@@ -90,6 +90,21 @@ class WebsiteController extends Controller
                         $notes['sub'] = $entry->study_guide['sub'] ?? '';
                     }
                     $curriculum['LN'][$key] = $notes;
+                }
+                if ($entry->content_verified_at) {
+                    $links = [];
+                    foreach ($item->chapters as $relatedIndex => $relatedChapter) {
+                        $canReadRelated = ! in_array($item->slug, ['current-affairs', 'general-knowledge'], true) || $relatedChapter->content_verified_at !== null;
+                        if ($canReadRelated && $relatedChapter->id !== $entry->id && ($relatedChapter->content || $relatedChapter->notes || $relatedChapter->study_guide)) {
+                            $relatedChapter->setRelation('subject', $item);
+                            $links[] = '<li><a href="'.e($relatedChapter->readingUrl($relatedIndex)).'">'.e($relatedChapter->title).'</a></li>';
+                        }
+                    }
+                    if ($links) {
+                        $curriculum['LN'][$key]['s'][] = ['h' => 'Related chapters', 'i' => 'fa-book', 'p' => ['<ul>'.implode('', $links).'</ul>']];
+                    }
+                    $reviewedQuizId = $entry->content_evidence['quiz_id'] ?? null;
+                    $entry->setRelation('quizzes', $entry->quizzes->sortByDesc(fn (Quiz $quiz): int => $quiz->id === $reviewedQuizId ? 1 : 0)->values());
                 }
                 $curriculum['tests'][$key] = $entry->quizzes->map(fn ($q) => ['id' => $q->id, 'title' => $q->title, 'quiz_date' => $q->quiz_date?->toDateString(), 'date_label' => $q->quiz_date?->format('d M Y'), 'duration' => $q->duration, 'pass' => $q->passing_score, 'count' => count($q->questions), 'url' => $q->publicUrl()])->all();
                 $selectedTest = $test ?? ($request->routeIs('quiz') ? $request->integer('test') : null);

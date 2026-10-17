@@ -14,6 +14,13 @@
         @endforeach
         @foreach($curriculum['tests'] as $key => $tests)@if(str_starts_with($key, $selectedSubject->slug.':'))@foreach($tests as $quiz)<article class="box seo-topic"><h2><a href="{{ $quiz['url'] }}">{{ App\WebsiteText::mcq($quiz['title']) }}</a></h2><p>{{ $quiz['count'] }} practice questions</p><a class="btn btn-l" href="{{ $quiz['url'] }}">{{ __('Open MCQ') }}</a></article>@endforeach @endif @endforeach
       @endif</div>
+      @if(request()->routeIs('subject') && $selectedSubject && in_array($selectedSubject->slug, ['current-affairs', 'general-knowledge'], true))
+      <section class="box seo-topic"><h2>Reviewed chapter guides</h2><ul>
+      @foreach($selectedSubject->chapters as $chapterIndex => $guideChapter)
+      @if($guideChapter->content_verified_at)<li><a href="{{ $guideChapter->readingUrl($chapterIndex) }}">{{ $guideChapter->title }}</a></li>@endif
+      @endforeach
+      </ul></section>
+      @endif
     </div>
     <aside class="box side"><h3>{{ __('All subjects') }}</h3><div id="sl"></div></aside>
   </div>

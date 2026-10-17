@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ChapterContentController;
 use App\Http\Controllers\DailyQuizController;
 use App\Http\Controllers\ExamNotificationController;
 use App\Http\Controllers\GoogleAuthController;
@@ -84,6 +85,14 @@ Route::get('/reset-password/{token}', [PageController::class, 'resetForm'])->nam
 Route::post('/reset-password', [PageController::class, 'reset'])->middleware('throttle:5,1')->name('password.update');
 Route::get('/{page}', [PageController::class, 'show'])->whereIn('page', ['about', 'contact', 'help', 'careers', 'privacy', 'terms', 'cookies', 'leaderboard', 'forgot-password'])->name('page');
 Route::middleware('auth')->group(function () {
+    Route::get('/admin/chapter-content', [ChapterContentController::class, 'index'])->name('admin.content.index');
+    Route::post('/admin/chapter-content', [ChapterContentController::class, 'store'])->middleware('throttle:6,1')->name('admin.content.store');
+    Route::get('/admin/chapter-content/{revision}', [ChapterContentController::class, 'show'])->whereNumber('revision')->name('admin.content.show');
+    Route::put('/admin/chapter-content/{revision}', [ChapterContentController::class, 'update'])->whereNumber('revision')->name('admin.content.update');
+    Route::post('/admin/chapter-content/{revision}/verify', [ChapterContentController::class, 'verify'])->whereNumber('revision')->name('admin.content.verify');
+    Route::post('/admin/chapter-content/{revision}/publish', [ChapterContentController::class, 'publish'])->whereNumber('revision')->name('admin.content.publish');
+    Route::post('/admin/chapter-content/{revision}/resume', [ChapterContentController::class, 'resume'])->whereNumber('revision')->name('admin.content.resume');
+    Route::post('/admin/chapter-content/{revision}/archive', [ChapterContentController::class, 'archive'])->whereNumber('revision')->name('admin.content.archive');
     Route::post('/admin/import', [WordImportController::class, 'store'])->middleware('throttle:10,1')->name('admin.import.store');
     Route::get('/admin/seo', [PageSeoController::class, 'index'])->name('admin.seo.index');
     Route::put('/admin/seo', [PageSeoController::class, 'update'])->name('admin.seo.update');

@@ -18,7 +18,7 @@ class Chapter extends Model
 
     protected function casts(): array
     {
-        return ['notes' => 'array', 'study_guide' => 'array'];
+        return ['notes' => 'array', 'study_guide' => 'array', 'content_evidence' => 'array', 'content_verified_at' => 'datetime', 'content_review_due_at' => 'datetime'];
     }
 
     public function subject(): BelongsTo

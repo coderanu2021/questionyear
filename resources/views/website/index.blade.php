@@ -12,6 +12,15 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <link rel="stylesheet" href="{{ asset('css/website.css') }}?v={{ filemtime(public_path('css/website.css')) }}"><meta name="csrf-token" content="{{ csrf_token() }}">
 @include('website.partials.favicon')
+@if($serverChapter?->content_verified_at)
+@php
+    $schemaBaseUrl = rtrim(config('app.url'), '/');
+    $schemaUrl = in_array(parse_url($schemaBaseUrl, PHP_URL_HOST), ['localhost', '127.0.0.1', '::1', null], true) ? request()->url() : $schemaBaseUrl.request()->getPathInfo();
+    $learningSchema = ['@context' => 'https://schema.org', '@type' => 'LearningResource', 'name' => $serverChapter->title, 'description' => $serverChapter->meta_description, 'inLanguage' => 'en-IN', 'learningResourceType' => 'Study guide', 'educationalUse' => 'Study and revision', 'dateModified' => $serverChapter->updated_at->toIso8601String(), 'url' => $schemaUrl, 'citation' => array_column($serverChapter->content_evidence['sources'] ?? [], 'url')];
+    $faqSchema = ['@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => array_map(fn ($faq) => ['@type' => 'Question', 'name' => $faq['q'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $faq['a']]], $serverChapter->content_evidence['faqs'] ?? [])];
+@endphp
+<script type="application/ld+json">{!! json_encode([$learningSchema, $faqSchema], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!}</script>
+@endif
 </head>
 <body>
 @include('website.partials.header')
