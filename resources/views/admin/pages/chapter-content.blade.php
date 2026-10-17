@@ -24,7 +24,7 @@
 <button class="btn pri">Prepare batch</button>
 </form>
 <details><summary>Draft JSON format for import</summary><p>Each imported object needs the brief above plus a payload object with: seo_title, meta_description, slug, sections [{heading, html, source_ids}], exam_facts [strings], misconceptions [strings], summary [strings], questions [{q, o: [four choices], c: zero-based answer index, explanation, source_ids}], faqs [{q, a}], uncertainties [strings]. Every approved syllabus heading must appear exactly once as a section. HTML uses paragraphs, H3 headings, lists and tables. Include at least 20 MCQs and 5–10 FAQs. All imported content still requires review and verification.</p></details>
-<p>Worker command: <code>php artisan queue:work chapter-content --queue=chapter-content --timeout=65 --tries=3</code>. Keep this worker supervised on the server. Refresh to see progress.</p>
+<p>Worker command: <code>php artisan queue:work chapter-content --queue=chapter-content --timeout=150 --tries=3</code>. Keep this worker supervised on the server. Refresh to see progress.</p>
 </section>
 <section class="card content-panel"><h2>Working revisions and history</h2><div class="tw"><table><thead><tr><th>Revision / batch</th><th>Chapter</th><th>Status</th><th>Progress</th><th></th></tr></thead><tbody>
 @forelse($revisions as $entry)<tr><td>#{{ $entry->id }}<small>{{ $entry->batch_id }}</small></td><td>{{ $chapters->firstWhere('id', $entry->chapter_id)?->title }}</td><td>{{ $entry->status }}</td><td>{{ $entry->generation_state }}</td><td><a class="btn" href="{{ route('admin.content.show', $entry->id) }}">Review</a></td></tr>@empty<tr><td colspan="5">No revisions yet.</td></tr>@endforelse
@@ -61,4 +61,3 @@
 @endif
 </main>
 </body></html>
-

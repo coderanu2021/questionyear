@@ -83,6 +83,7 @@ class PracticeQuestionGenerator
                             if (! in_array($question['q'], $exclude, true)) {
                                 $exclude[] = $question['q'];
                             }
+
                             continue;
                         }
                         $fresh->push(['question' => $question, 'subject_id' => $subject->id]);
@@ -180,7 +181,7 @@ class PracticeQuestionGenerator
         return $questions;
     }
 
-    private function findAvailableModel(string $key, string $unavailableModel): ?string
+    public function findAvailableModel(string $key, string $unavailableModel): ?string
     {
         $pageToken = null;
         do {

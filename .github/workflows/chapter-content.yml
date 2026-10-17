@@ -66,7 +66,7 @@ jobs:
           [[ -f .env && -f artisan ]]
           flock -n storage/framework/chapter-content-worker.lock \
             php artisan queue:work chapter-content --queue=chapter-content \
-            --stop-when-empty --timeout=65 --tries=3 --max-time=900 --max-jobs=40 --no-interaction
+            --stop-when-empty --timeout=150 --tries=3 --max-time=900 --max-jobs=40 --no-interaction
           if [[ -f storage/logs/laravel.log ]]; then
             grep -Eo 'Content provider request failed \(HTTP [0-9]+\)' storage/logs/laravel.log | tail -n 3 || true
           fi

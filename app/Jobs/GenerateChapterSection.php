@@ -19,7 +19,7 @@ class GenerateChapterSection implements ShouldQueue
 
     public int $tries = 3;
 
-    public int $timeout = 65;
+    public int $timeout = 150;
 
     public bool $failOnTimeout = true;
 
@@ -38,7 +38,7 @@ class GenerateChapterSection implements ShouldQueue
     /** @return list<WithoutOverlapping> */
     public function middleware(): array
     {
-        return [(new WithoutOverlapping('chapter-content-'.$this->revisionId))->releaseAfter(15)->expireAfter(120)];
+        return [(new WithoutOverlapping('chapter-content-'.$this->revisionId))->releaseAfter(15)->expireAfter(160)];
     }
 
     public function handle(ChapterContentWorkflow $workflow, ChapterContentGenerator $generator): void

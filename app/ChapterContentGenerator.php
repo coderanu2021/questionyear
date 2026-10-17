@@ -3,12 +3,15 @@
 namespace App;
 
 use App\Models\Chapter;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use RuntimeException;
 
 class ChapterContentGenerator
 {
+    public function __construct(public PracticeQuestionGenerator $models) {}
+
     /** @param array<string, mixed> $revision
      * @return array<string, mixed>
      */
@@ -33,11 +36,23 @@ class ChapterContentGenerator
         if (! $key || ! is_string($model) || ! preg_match('/^[A-Za-z0-9._-]+$/', $model)) {
             throw new RuntimeException('Configure a Gemini API key and valid model.');
         }
-        $response = Http::withHeaders(['x-goog-api-key' => $key])->connectTimeout(5)->timeout(50)
-            ->post('https://generativelanguage.googleapis.com/v1beta/models/'.$model.':generateContent', [
-                'contents' => [['parts' => [['text' => $prompt]]]],
-                'generationConfig' => ['responseMimeType' => 'application/json', 'maxOutputTokens' => 12000, 'temperature' => 0.4],
-            ]);
+        $modelCacheKey = 'chapter-content-model:'.hash('sha256', $key.'|'.$model);
+        $model = Cache::get($modelCacheKey, $model);
+        $client = Http::withHeaders(['x-goog-api-key' => $key])->connectTimeout(5)->timeout(50);
+        $request = [
+            'contents' => [['parts' => [['text' => $prompt]]]],
+            'generationConfig' => ['responseMimeType' => 'application/json', 'maxOutputTokens' => 12000, 'temperature' => 0.4],
+        ];
+        $response = $client->post('https://generativelanguage.googleapis.com/v1beta/models/'.$model.':generateContent', $request);
+        if ($response->status() === 404) {
+            $fallback = $this->models->findAvailableModel($key, $model);
+            if ($fallback !== null) {
+                $response = $client->post('https://generativelanguage.googleapis.com/v1beta/models/'.$fallback.':generateContent', $request);
+                if ($response->successful()) {
+                    Cache::put($modelCacheKey, $fallback, now()->addMinutes(30));
+                }
+            }
+        }
         if (! $response->successful()) {
             throw new RuntimeException('Content provider request failed (HTTP '.$response->status().').');
         }

@@ -232,6 +232,25 @@ class ChapterContentWorkflowTest extends TestCase
         Queue::assertPushed(GenerateChapterSection::class, fn ($next): bool => $next->stage === 1);
     }
 
+    public function test_unavailable_model_uses_an_advertised_fallback_and_caches_it(): void
+    {
+        Queue::fake();
+        config(['services.gemini.key' => 'test-key', 'services.gemini.model' => 'missing-model']);
+        $workflow = app(ChapterContentWorkflow::class);
+        $id = $workflow->start([$this->brief(Chapter::factory()->create())], $this->admin()->id)[0];
+        $section = $this->payload()['sections'][0] + ['uncertainties' => []];
+        Http::fake([
+            '*/models/missing-model:generateContent' => Http::response([], 404),
+            '*/models/gemini-2.5-flash-lite:generateContent' => Http::response(['candidates' => [['finishReason' => 'STOP', 'content' => ['parts' => [['text' => json_encode($section)]]]]]]),
+            '*/v1beta/models*' => Http::response(['models' => [['name' => 'models/gemini-2.5-flash-lite', 'supportedGenerationMethods' => ['generateContent']]]]),
+        ]);
+        $generator = app(ChapterContentGenerator::class);
+        $this->assertEquals($section, $generator->generate($workflow->revision($id), 0));
+        $this->assertEquals($section, $generator->generate($workflow->revision($id), 0));
+        Http::assertSentCount(4);
+        $this->assertDatabaseHas('chapter_content_revisions', ['id' => $id, 'status' => 'draft']);
+    }
+
     public function test_truncated_provider_output_is_not_committed_and_failed_jobs_can_resume(): void
     {
         Queue::fake();
