@@ -124,6 +124,7 @@ jobs:
           php artisan migrate --force --no-interaction
           php artisan db:seed --class=IdbiBankNewsSeeder --force --no-interaction
           php artisan db:seed --class=OctoberCurrentAffairsSeeder --force --no-interaction
+          php artisan db:seed --class=BiharExamNewsSeeder --force --no-interaction
           php artisan optimize --no-interaction
           php artisan queue:restart --no-interaction
           git log -1 --oneline
