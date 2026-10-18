@@ -31,6 +31,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Configure SSH
         run: |
@@ -96,13 +98,18 @@ jobs:
       - name: Update server checkout to this commit
         run: |
           set -euo pipefail
+          git bundle create "$RUNNER_TEMP/deployment.bundle" HEAD
+          scp "$RUNNER_TEMP/deployment.bundle" "lightsail-deploy:$LIGHTSAIL_DEPLOY_PATH/storage/app/deployment-$GITHUB_SHA.bundle"
           ssh lightsail-deploy "bash -s -- $(printf '%q' "$LIGHTSAIL_DEPLOY_PATH") $(printf '%q' "$GITHUB_SHA")" <<'REMOTE'
           set -euo pipefail
           cd "$1"
-          git fetch origin main
+          bundle="storage/app/deployment-$2.bundle"
+          git bundle verify "$bundle"
+          git fetch "$bundle" HEAD
           git cat-file -e "$2^{commit}"
           git merge --ff-only "$2"
           [[ "$(git rev-parse HEAD)" == "$2" ]]
+          rm -f "$bundle"
           REMOTE
 
       - name: Upload built frontend assets
