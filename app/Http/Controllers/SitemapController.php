@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use App\Models\Quiz;
 use App\Models\Subject;
+use App\WebsiteNavigation;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -25,8 +26,11 @@ class SitemapController extends Controller
         foreach (['about', 'contact', 'help', 'careers', 'privacy', 'terms', 'cookies', 'leaderboard'] as $page) {
             $urls[route('page', $page)] = null;
         }
-        foreach (['neet', 'jee', 'cbse-board', 'state-psc'] as $exam) {
-            $urls[route('exam', $exam)] = null;
+        foreach (['exams.index', 'practice.index', 'current-affairs'] as $name) {
+            $urls[route($name)] = null;
+        }
+        foreach (app(WebsiteNavigation::class)->exams() as $exam) {
+            $urls[$exam['url']] = null;
         }
         $subjects = Subject::with(['chapters' => fn ($query) => $query->where('status', 'published')->orderBy('id'), 'chapters.quizzes'])->orderBy('id')->get();
         foreach (['railways', ...array_keys(ExamNotificationController::NOTICES)] as $exam) {

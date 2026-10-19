@@ -111,16 +111,15 @@ class ExamNotificationTest extends TestCase
         $this->get('/notifications/2027/unknown')->assertNotFound();
     }
 
-    public function test_exam_cards_lead_to_the_correct_notices(): void
+    public function test_exam_cards_lead_to_hubs_and_existing_notice_urls_remain_available(): void
     {
-        foreach (['upsc' => 'upsc', 'railways' => 'railways', 'railway' => 'railways'] as $exam => $target) {
-            $this->get(route('exam', $exam))->assertStatus(301)->assertRedirect(route('notifications.show', ['exam' => $target]));
+        foreach (['upsc', 'ssc', 'banking', 'railways'] as $exam) {
+            $this->get(route('exam', $exam))->assertOk()->assertSee('preparation hub');
         }
-        $this->get('/')->assertOk()->assertSee(route('notifications.index'), false)
-            ->assertSee(route('notifications.show', ['exam' => 'upsc']), false)
-            ->assertSee(route('notifications.show', ['exam' => 'railways']), false)
-            ->assertDontSee('href="/exams/upsc"', false)->assertDontSee('href="/exams/railways"', false)
-            ->assertDontSee('href="/exams/ssc"', false)->assertDontSee('href="/exams/banking"', false);
+        $this->get('/exams/railway')->assertStatus(301)->assertRedirect(route('exam', 'railways'));
+        $this->get('/')->assertOk()->assertSee(route('exam', 'upsc'), false)
+            ->assertSee(route('exam', 'railways'), false)->assertSee(route('exam', 'ssc'), false)
+            ->assertSee(route('exam', 'banking'), false);
     }
 
     public function test_notification_pages_have_canonicals_and_are_in_the_sitemap(): void

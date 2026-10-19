@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\ChapterContentController;
 use App\Http\Controllers\DailyQuizController;
 use App\Http\Controllers\ExamNotificationController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SiteSettingsController;
 use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\WordImportController;
+use App\WebsiteNavigation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -76,6 +78,11 @@ Route::get('/site-logo/{filename}', [SiteSettingsController::class, 'logo'])->wh
 Route::get('/site-favicon/current', [SiteSettingsController::class, 'favicon'])->defaults('filename', 'current')->name('site.favicon.current');
 Route::get('/site-favicon/{filename}', [SiteSettingsController::class, 'favicon'])->where('filename', '[A-Za-z0-9]+\.(ico|jpg|jpeg|png|webp|gif)')->name('site.favicon');
 Route::get('/exams/{exam}', [PageController::class, 'exam'])->name('exam');
+Route::get('/exams', [BrowseController::class, 'exams'])->name('exams.index');
+Route::get('/practice', [BrowseController::class, 'practice'])->name('practice.index');
+Route::get('/subjects/{group}', [BrowseController::class, 'subjects'])->whereIn('group', array_keys(WebsiteNavigation::SUBJECT_GROUPS))->name('subjects.group');
+Route::get('/current-affairs', [BrowseController::class, 'currentAffairs'])->name('current-affairs');
+Route::get('/study-tips', [BrowseController::class, 'studyTips'])->name('study-tips');
 Route::get('/progress', fn (Request $request) => app(PageController::class)->show($request, 'progress'))->middleware('auth')->name('progress');
 Route::get('/feedback', fn (Request $request) => app(PageController::class)->show($request, 'feedback'))->name('feedback');
 Route::post('/feedback', [PageController::class, 'feedback'])->middleware('throttle:5,1')->name('feedback.send');

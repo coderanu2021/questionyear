@@ -21,12 +21,6 @@ function render(){
 fl.onclick=e=>{const b=e.target.closest("[data-c]");if(b){cat=b.dataset.c;render()}};
 document.getElementById("q").oninput=e=>{term=e.target.value.trim().toLowerCase();render();if(term)document.getElementById("subjects").scrollIntoView()};
 render();
-const sb=document.getElementById("sb"),mg=document.getElementById("mega"),nav=document.getElementById("nav");
-sb.onclick=()=>{nav.classList.remove("show");const o=mg.classList.toggle("open");sb.setAttribute("aria-expanded",o)};
-document.querySelectorAll("[data-s]").forEach(a=>a.onclick=()=>{const i=document.getElementById("q");i.value=a.dataset.s;term=a.dataset.s;render()});
-document.addEventListener("click",e=>{if(!e.target.closest("header")){mg.classList.remove("open");sb.setAttribute("aria-expanded","false")}});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){mg.classList.remove("open");sb.setAttribute("aria-expanded","false")}});
-document.getElementById("mb").onclick=()=>{mg.classList.remove("open");sb.setAttribute("aria-expanded","false");nav.classList.toggle("show")};
 document.getElementById("th").onclick=()=>{
   const r=document.documentElement,d=matchMedia("(prefers-color-scheme:dark)").matches;
   const cur=r.dataset.theme||(d?"dark":"light");r.dataset.theme=cur==="dark"?"light":"dark";
@@ -63,7 +57,7 @@ document.getElementById("dw").textContent=dt.toLocaleDateString("en-IN",{weekday
 const QB=window.CURRICULUM.QB;const LN=window.CURRICULUM.LN;
 const HT=document.title;let curSub=null,curId="",curIdx=0,qs=null,qi=0,qsc=0,qans=[],tmr=null,t0=0;
 function linkify(sel){document.querySelectorAll(sel).forEach(a=>{const o=SUB.find(x=>(x.n===a.textContent.trim()||tr(x.n)===a.textContent.trim()));if(o)a.href=localizedPath("/subject/"+o.id);else if(sel===".mega a")a.href=localizedPath("/#subjects")})}
-linkify(".mega a");linkify("footer .fcols>div:nth-child(2) a");
+
 
 /* chapter list: opens the Learn page first */
 function renderChaps(){
@@ -244,7 +238,8 @@ function authPage(mode){
 function amsg(t,ok){const e=$("am");e.textContent=t;e.className="msg"+(t?(ok?" ok":" bad"):"")}
 function renderUser(){
   const on=!!CU;
-  ["si","gs","gb","msi"].forEach(id=>{const e=$(id);if(e)e.hidden=on});
+  ["gs","gb","msi"].forEach(id=>{const e=$(id);if(e)e.hidden=on});
+  $("si").textContent=on?tr("My learning"):tr("Sign in");$("si").href=localizedPath(on?"/my-learning":"/login");
   $("um").hidden=!on;if(!on){$("umd").hidden=true;return}
   const av=$("uav");av.textContent="";
   if(CU.pic){const im=new Image();im.src=CU.pic;im.alt="";im.referrerPolicy="no-referrer";av.appendChild(im)}else av.textContent=(CU.name||CU.email||"U").trim()[0].toUpperCase();
@@ -282,7 +277,7 @@ function route(){
   const h="#"+location.pathname;let m=h.match(/^#\/(subject|quiz|learn)\/([^/]+)(?:\/(\d+))?$/);
   if(!m){const entry=Object.entries(window.CURRICULUM.chapterUrls).find(([key,url])=>new URL(url,location.origin).pathname===location.pathname);if(entry){const [subject,index]=entry[0].split(":");m=["","learn",subject,index]}}
   if(!m){const entry=Object.entries(window.CURRICULUM.quizUrls).find(([key,url])=>new URL(url,location.origin).pathname===location.pathname);if(entry){const [subject,index]=entry[0].split(":");m=["","quiz",subject,index]}}
-  clearInterval(tmr);mg.classList.remove("open");sb.setAttribute("aria-expanded","false");nav.classList.remove("show");
+  clearInterval(tmr);window.closeSiteNavigation?.();
   const P=$("home"),SP=$("subj"),QP=$("quiz"),LP=$("learn"),AP=$("auth");P.hidden=SP.hidden=QP.hidden=LP.hidden=AP.hidden=true;
   if(h==="#/login"||h==="#/register"){if(CU){location.href=localizedPath("/");return}authPage(h.slice(2));AP.hidden=false;scrollTo(0,0);return}
   const x=m&&SUB.find(o=>o.id===m[2]);
