@@ -100,7 +100,12 @@ class ChapterContentController extends Controller
     public function publish(Request $request, int $revision, ChapterContentWorkflow $workflow): RedirectResponse
     {
         $this->authorizeAdmin($request);
-        $data = $request->validate(['version' => 'required|integer', 'approve_replacement' => 'sometimes|accepted']);
+        $data = $request->validate(['version' => 'required|integer', 'approve_replacement' => 'sometimes|accepted', 'publish_pending_review' => 'sometimes|accepted', 'publication_note' => 'required_with:publish_pending_review|nullable|string|min:30|max:10000']);
+        if ($request->boolean('publish_pending_review')) {
+            $workflow->publishPendingReview($revision, $data['version'], $request->boolean('approve_replacement'), $request->user()->id, $data['publication_note']);
+
+            return back()->with('status', 'Chapter and practice quiz published with factual review pending. No human verification was recorded.');
+        }
         $workflow->publish($revision, $data['version'], $request->boolean('approve_replacement'));
 
         return back()->with('status', 'Verified chapter and practice quiz published on the existing routes.');

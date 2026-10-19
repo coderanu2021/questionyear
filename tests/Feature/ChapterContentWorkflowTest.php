@@ -171,6 +171,55 @@ class ChapterContentWorkflowTest extends TestCase
         $this->assertDatabaseHas('chapter_content_revisions', ['id' => $revision['id'], 'status' => 'review', 'verified_hash' => null, 'verified_at' => null]);
     }
 
+    public function test_explicit_pending_review_publication_is_labelled_and_never_records_verification(): void
+    {
+        $admin = $this->admin();
+        $chapter = Chapter::factory()->create();
+        $revision = $this->draft($chapter, $admin);
+        $this->actingAs($admin);
+        $this->post(route('admin.content.publish', $revision['id']), ['version' => 2, 'approve_replacement' => 1, 'publish_pending_review' => 1])->assertSessionHasErrors('publication_note');
+        $this->post(route('admin.content.publish', $revision['id']), ['version' => 2, 'publish_pending_review' => 1, 'publication_note' => 'Owner requests publication now; human factual review will follow.'])->assertSessionHasErrors('replacement');
+        $this->post(route('admin.content.publish', $revision['id']), ['version' => 2, 'approve_replacement' => 1, 'publish_pending_review' => 1, 'publication_note' => 'Owner requests publication now; human factual review will follow.'])->assertRedirect();
+        $chapter->refresh();
+        $this->assertNull($chapter->content_verified_at);
+        $this->assertNull($chapter->content_evidence['reviewer_id']);
+        $this->assertSame('pending', $chapter->content_evidence['review_status']);
+        $this->assertSame($admin->id, $chapter->content_evidence['publication_authorization']['publisher_id']);
+        $this->assertStringContainsString('factual review pending', $chapter->quizzes()->sole()->title);
+        $this->assertDatabaseHas('chapter_content_revisions', ['id' => $revision['id'], 'status' => 'published', 'verified_at' => null, 'verified_by' => null, 'verified_hash' => null]);
+        $this->get($chapter->readingUrl(0))->assertOk()->assertSee('Factual review pending')->assertSee('Sources and references')->assertDontSee('LearningResource');
+        $this->post(route('admin.content.publish', $revision['id']), ['version' => 2, 'approve_replacement' => 1, 'publish_pending_review' => 1, 'publication_note' => 'Owner requests publication now; human factual review will follow.'])->assertConflict();
+        $this->assertDatabaseCount('quizzes', 1);
+    }
+
+    public function test_pending_review_publication_still_blocks_quality_failures_and_stale_content(): void
+    {
+        $admin = $this->admin();
+        $chapter = Chapter::factory()->create();
+        $revision = $this->draft($chapter, $admin);
+        $workflow = app(ChapterContentWorkflow::class);
+        $payload = $revision['payload'];
+        $payload['uncertainties'] = ['An important claim remains unresolved.'];
+        $workflow->save($revision['id'], 2, $payload);
+        $request = ['version' => 3, 'approve_replacement' => 1, 'publish_pending_review' => 1, 'publication_note' => 'Owner requests publication now; human factual review will follow.'];
+        $this->actingAs($admin)->post(route('admin.content.publish', $revision['id']), $request)->assertSessionHasErrors('quality');
+        $workflow->save($revision['id'], 3, $revision['payload']);
+        $request['version'] = 4;
+        $chapter->update(['content' => '<p>A later editorial change.</p>']);
+        $this->post(route('admin.content.publish', $revision['id']), $request)->assertConflict();
+        $this->assertDatabaseCount('quizzes', 0);
+    }
+
+    public function test_pending_review_publication_cannot_replace_a_verified_chapter(): void
+    {
+        $admin = $this->admin();
+        $chapter = Chapter::factory()->create(['content_verified_at' => now()]);
+        $revision = $this->draft($chapter, $admin);
+        $this->actingAs($admin)->post(route('admin.content.publish', $revision['id']), ['version' => 2, 'approve_replacement' => 1, 'publish_pending_review' => 1, 'publication_note' => 'Owner requests publication now; human factual review will follow.'])->assertConflict();
+        $this->assertSame('<p>Chapter notes.</p>', $chapter->fresh()->content);
+        $this->assertDatabaseCount('quizzes', 0);
+    }
+
     public function test_live_changes_since_generation_block_publication(): void
     {
         $admin = $this->admin();

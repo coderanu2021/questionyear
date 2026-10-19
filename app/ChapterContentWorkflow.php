@@ -155,12 +155,28 @@ class ChapterContentWorkflow
 
     public function publish(int $id, int $version, bool $approveReplacement): void
     {
-        DB::transaction(function () use ($id, $version, $approveReplacement): void {
+        $this->publishRevision($id, $version, $approveReplacement);
+    }
+
+    public function publishPendingReview(int $id, int $version, bool $approveReplacement, int $publisherId, string $note): void
+    {
+        Validator::make(['note' => $note], ['note' => 'required|string|min:30|max:10000'])->validate();
+        $this->publishRevision($id, $version, $approveReplacement, ['publisher_id' => $publisherId, 'note' => $note]);
+    }
+
+    /** @param array{publisher_id: int, note: string}|null $pendingReview */
+    private function publishRevision(int $id, int $version, bool $approveReplacement, ?array $pendingReview = null): void
+    {
+        DB::transaction(function () use ($id, $version, $approveReplacement, $pendingReview): void {
             $chapterId = $this->revision($id)['chapter_id'];
             $chapter = Chapter::lockForUpdate()->findOrFail($chapterId);
             DB::table('chapter_content_revisions')->where('id', $id)->lockForUpdate()->first();
             $revision = $this->revision($id);
-            abort_unless($revision['version'] === $version && $revision['status'] === 'verified' && $revision['verified_at'] && hash_equals($revision['verified_hash'] ?? '', self::hash(['payload' => $revision['payload'], 'brief' => $revision['brief']])), 409, 'Verify the current revision before publishing.');
+            if ($pendingReview !== null) {
+                abort_unless($revision['version'] === $version && $revision['status'] === 'review' && $revision['generation_state'] === 'complete' && ! $chapter->content_verified_at, 409, 'Pending-review publication requires a complete review draft and cannot replace verified content.');
+            } else {
+                abort_unless($revision['version'] === $version && $revision['status'] === 'verified' && $revision['verified_at'] && hash_equals($revision['verified_hash'] ?? '', self::hash(['payload' => $revision['payload'], 'brief' => $revision['brief']])), 409, 'Verify the current revision before publishing.');
+            }
             abort_unless(hash_equals($revision['original_hash'], self::hash($this->snapshot($chapter))), 409, 'The live chapter has changed since this revision started. Reconcile it before publishing.');
             if ($chapter->status === 'published' && ! $approveReplacement) {
                 throw ValidationException::withMessages(['replacement' => 'Explicitly approve replacing this published chapter. Its original snapshot is retained.']);
@@ -171,17 +187,18 @@ class ChapterContentWorkflow
                 throw ValidationException::withMessages(['quality' => $checks['errors']]);
             }
             $payload = $revision['payload'];
+            $notice = $pendingReview !== null ? '<h2>Factual review pending</h2><p>This AI-assisted chapter is published at the site owner\'s request before human factual review. Its explanations and practice answers have not yet completed human verification.</p>' : '';
             $chapter->fill([
-                'content' => $this->render($payload, $revision['brief']['sources']), 'notes' => null, 'study_guide' => null,
+                'content' => $notice.$this->render($payload, $revision['brief']['sources']), 'notes' => null, 'study_guide' => null,
                 'description' => $payload['meta_description'], 'meta_title' => $payload['seo_title'], 'meta_description' => $payload['meta_description'],
                 'lessons' => count($payload['sections']), 'status' => 'published',
-                'content_evidence' => ['revision_id' => $id, 'sources' => $revision['brief']['sources'], 'faqs' => $payload['faqs'], 'suggested_slug' => $payload['slug'], 'reviewer_id' => $revision['verified_by']],
-                'content_verified_at' => $revision['verified_at'], 'content_review_due_at' => now()->addDays($revision['brief']['review_after_days'] ?? 180),
+                'content_evidence' => ['revision_id' => $id, 'sources' => $revision['brief']['sources'], 'faqs' => $payload['faqs'], 'suggested_slug' => $payload['slug'], 'reviewer_id' => $pendingReview === null ? $revision['verified_by'] : null, 'review_status' => $pendingReview !== null ? 'pending' : 'verified', 'publication_authorization' => $pendingReview],
+                'content_verified_at' => $pendingReview === null ? $revision['verified_at'] : null, 'content_review_due_at' => $pendingReview !== null ? now() : now()->addDays($revision['brief']['review_after_days'] ?? 180),
             ])->save();
-            $quiz = $chapter->quizzes()->create(['title' => $chapter->title.' — Reviewed practice '.$id, 'questions' => $payload['questions'], 'duration' => 25, 'passing_score' => 40, 'status' => 'published']);
+            $quiz = $chapter->quizzes()->create(['title' => $chapter->title.($pendingReview !== null ? ' — Practice (factual review pending) ' : ' — Reviewed practice ').$id, 'questions' => $payload['questions'], 'duration' => 25, 'passing_score' => 40, 'status' => 'published']);
             $chapter->update(['content_evidence' => [...$chapter->content_evidence, 'quiz_id' => $quiz->id]]);
             DB::table('chapter_content_revisions')->where('id', $id)->update(['status' => 'published', 'published_at' => now(), 'version' => $version + 1, 'updated_at' => now()]);
-            Log::info('Verified chapter content published', ['revision_id' => $id, 'chapter_id' => $chapter->id, 'reviewer_id' => $revision['verified_by']]);
+            Log::info('Chapter content published', ['revision_id' => $id, 'chapter_id' => $chapter->id, 'reviewer_id' => $pendingReview === null ? $revision['verified_by'] : null, 'pending_review_authorization' => $pendingReview]);
         });
     }
 
