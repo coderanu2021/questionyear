@@ -26,8 +26,17 @@ class CanonicalUrlTest extends TestCase
     public function test_configured_public_origin_consolidates_http_and_www_variants(): void
     {
         config(['app.url' => 'https://questionyear.in']);
-        $this->get('http://www.questionyear.in/about?ref=duplicate')->assertOk()
+        $this->get('http://www.questionyear.in/about?ref=duplicate')->assertRedirect('https://questionyear.in/about?ref=duplicate')->assertStatus(301);
+        $this->get('https://questionyear.in/about?ref=duplicate')->assertOk()
             ->assertSee('<link rel="canonical" href="https://questionyear.in/about">', false);
+        $this->assertStringContainsString('RewriteRule ^ %1 [L,R=301]', file_get_contents(public_path('.htaccess')));
+    }
+
+    public function test_missing_pages_return_404_and_password_reset_pages_are_noindexed(): void
+    {
+        $this->get('/this-page-does-not-exist')->assertNotFound();
+        $this->get('/forgot-password')->assertOk()->assertSee('name="robots" content="noindex,follow"', false);
+        $this->get('/reset-password/sample-token')->assertOk()->assertSee('name="robots" content="noindex,follow"', false);
     }
 
     public function test_chapters_keep_their_own_canonical_and_auth_pages_are_noindex(): void
