@@ -13,9 +13,11 @@
 <body>
 @include('website.partials.header')
 <main class="wrap gov-jobs-page">
-    <div class="crumb"><a href="{{ route('home') }}">Home</a><span>/</span><b>Government jobs</b></div>
-    @php($jobsBreadcrumb = ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => [['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => route('home')], ['@type' => 'ListItem', 'position' => 2, 'name' => $title, 'item' => request()->url()]]])
-    <script type="application/ld+json">{!! json_encode($jobsBreadcrumb, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!}</script>
+    <div class="crumb"><a href="{{ route('home') }}">Home</a><span>/</span><a href="{{ route('jobs.index') }}">Government jobs</a>@if($category !== 'all')<span>/</span><b>{{ $title }}</b>@endif</div>
+    @php
+        $jobsBreadcrumbItems = [['name' => 'Home', 'url' => route('home')], ['name' => 'Government jobs', 'url' => route('jobs.index')], ...($category !== 'all' ? [['name' => $title, 'url' => request()->url()]] : [])];
+    @endphp
+    @include('website.partials.breadcrumb-schema', ['items' => $jobsBreadcrumbItems])
     <span class="daily-label">QUESTIONYEAR · OFFICIAL NOTICES</span>
     <h1>{{ $title }}</h1>
     <p class="sub">Recruitment, admit card and result updates summarized from official sources. Verify every detail in the linked notice.</p>

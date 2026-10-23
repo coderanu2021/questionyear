@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="{{ asset('css/website.css') }}?v={{ filemtime(public_path('css/website.css')) }}">
     @include('website.partials.favicon')
     @include('website.partials.canonical', ['socialCards' => true])
+    @php
+        $noticeBreadcrumbs = [['name' => 'Home', 'url' => route('home')], ['name' => 'Notifications', 'url' => route('notifications.index')], ...($exam ? [['name' => $exam === 'railways' ? 'Railways' : $notices[$exam]['title'], 'url' => request()->url()]] : [])];
+    @endphp
+    @include('website.partials.breadcrumb-schema', ['items' => $noticeBreadcrumbs])
 </head>
 <body>
 @include('website.partials.header')

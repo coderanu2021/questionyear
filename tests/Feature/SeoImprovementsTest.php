@@ -9,6 +9,7 @@ use App\Models\Quiz;
 use App\Models\Subject;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class SeoImprovementsTest extends TestCase
@@ -115,6 +116,27 @@ class SeoImprovementsTest extends TestCase
         $this->assertStringNotContainsString('administrator publishes', $html);
         $this->assertStringContainsString('"@type":"FAQPage"', $html);
         $this->assertStringContainsString('"name":"How can I practise for SSC or UPSC?"', $html);
+    }
+
+    public function test_breadcrumb_schema_covers_public_subject_browse_quiz_and_listing_pages(): void
+    {
+        $subject = Subject::factory()->create(['name' => 'History', 'slug' => 'history']);
+        $chapter = Chapter::factory()->for($subject)->create();
+        $quiz = Quiz::factory()->for($chapter)->create();
+
+        foreach ([
+            route('subject', $subject->slug),
+            route('exam', 'ssc'),
+            route('quiz.show', ['subject' => $subject->slug, 'quiz' => $quiz->id, 'slug' => Str::slug($quiz->title)]),
+            route('daily'),
+            route('blogs.index'),
+            route('news.index'),
+            route('page', 'about'),
+            route('notifications.index'),
+            route('jobs.index'),
+        ] as $url) {
+            $this->get($url)->assertOk()->assertSee('"@type":"BreadcrumbList"', false);
+        }
     }
 
     public function test_mcq_text_and_options_are_indexable_without_exposing_answers(): void

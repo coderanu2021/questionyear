@@ -11,6 +11,9 @@
 @if(!isset($post) && $posts->total() === 0)<meta name="robots" content="noindex,follow">@endif
 
 <link rel="stylesheet" href="{{ asset('css/website.css') }}?v={{ filemtime(public_path('css/website.css')) }}">@include('website.partials.favicon')@include('website.partials.canonical')
+@if(!isset($post))
+@include('website.partials.breadcrumb-schema', ['items' => [['name' => 'Home', 'url' => route('home')], ['name' => $listingTitle, 'url' => request()->url()] ]])
+@endif
 @if(isset($post))
 @php
     $articleSchema = ['@context' => 'https://schema.org', '@type' => $isNews ? 'NewsArticle' : 'Article', 'headline' => $post->title, 'description' => $post->excerpt ?: Illuminate\Support\Str::limit(strip_tags($post->content), 160), 'datePublished' => $post->published_at->toIso8601String(), 'dateModified' => $post->updated_at->toIso8601String(), 'author' => ['@type' => $post->author_name ? 'Person' : 'Organization', 'name' => $post->author_name ?: $siteSettings['site_title']], 'mainEntityOfPage' => request()->url()];
@@ -65,6 +68,7 @@
 </aside>
 </div>
 @else
+<div class="crumb"><a href="{{ route('home') }}">{{ __('Home') }}</a><span>/</span><b>{{ __($listingTitle) }}</b></div>
 <span class="daily-label">KEEP LEARNING</span><h1>{{ __($listingTitle) }}</h1><p class="sub">{{ $isNews ? 'The latest exam announcements, education news and updates.' : 'Study tips, fresh perspectives and ideas to help you prepare with confidence.' }}</p>
 <div class="blog-grid">@forelse($posts as $entry)@include('website.partials.blog-card', ['blog' => $entry])@empty<div class="box" style="padding:32px"><h2>New {{ strtolower($listingTitle) }} {{ $isNews ? 'is' : 'are' }} on the way</h2><p>{{ $isNews ? 'Check back soon for the latest news and announcements.' : 'Check back soon for study tips and learning insights.' }}</p></div>@endforelse</div>
 <div style="margin-top:28px">@if($posts->hasPages())<nav aria-label="Pagination" style="display:flex;gap:16px;align-items:center">@if($posts->previousPageUrl())<a class="btn" href="{{ $posts->previousPageUrl() }}">← Previous</a>@endif<span>Page {{ $posts->currentPage() }} of {{ $posts->lastPage() }}</span>@if($posts->nextPageUrl())<a class="btn" href="{{ $posts->nextPageUrl() }}">Next →</a>@endif</nav>@endif</div>

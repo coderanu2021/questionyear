@@ -41,8 +41,30 @@
 <script type="application/ld+json">{!! json_encode(empty($verifiedFaqs) ? [$learningSchema] : [$learningSchema, $faqSchema], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!}</script>
 @endif
 @if($serverQuiz)
-@php($quizSchema = ['@context' => 'https://schema.org', '@type' => 'Quiz', 'name' => $serverQuiz->title, 'url' => $serverQuiz->publicUrl(), 'numberOfQuestions' => count($serverQuiz->questions), 'educationalLevel' => $serverQuiz->learningSubject()->name])
+@php
+    $quizSchema = ['@context' => 'https://schema.org', '@type' => 'Quiz', 'name' => $serverQuiz->title, 'url' => $serverQuiz->publicUrl(), 'numberOfQuestions' => count($serverQuiz->questions), 'educationalLevel' => $serverQuiz->learningSubject()->name];
+@endphp
 <script type="application/ld+json">{!! json_encode($quizSchema, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!}</script>
+@endif
+@php
+    $pageBreadcrumbs = [['name' => 'Home', 'url' => route('home')]];
+@endphp
+@if(!request()->routeIs('home'))
+@php
+    if ($serverChapter) {
+        $pageBreadcrumbs[] = ['name' => $serverChapter->subject->name, 'url' => route('subject', $serverChapter->subject->slug)];
+        $pageBreadcrumbs[] = ['name' => $serverChapter->title, 'url' => request()->url()];
+    } elseif ($serverQuiz) {
+        $pageBreadcrumbs[] = ['name' => $serverQuiz->learningSubject()->name, 'url' => route('subject', $serverQuiz->learningSubject()->slug)];
+        $pageBreadcrumbs[] = ['name' => $serverQuiz->title, 'url' => request()->url()];
+    } elseif ($selectedSubject) {
+        $pageBreadcrumbs[] = ['name' => 'Subjects', 'url' => request()->url().'#subjects'];
+        $pageBreadcrumbs[] = ['name' => $selectedSubject->name, 'url' => request()->url()];
+    } elseif (request()->routeIs('login', 'register')) {
+        $pageBreadcrumbs[] = ['name' => request()->routeIs('login') ? 'Log in' : 'Register', 'url' => request()->url()];
+    }
+@endphp
+@include('website.partials.breadcrumb-schema', ['items' => $pageBreadcrumbs])
 @endif
 </head>
 <body>
