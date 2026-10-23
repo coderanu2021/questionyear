@@ -39,6 +39,27 @@
   <div class="dqd"><small id="dw">Today</small><b id="dd">1</b><span id="dm"></span></div>
 </div></section>
 
+@if(request()->routeIs('home'))
+<section class="gov-jobs-home"><div class="wrap">
+  <div class="gov-jobs-home-heading"><div><span class="daily-label">OFFICIAL GOVERNMENT UPDATES</span><h2>Today's New Jobs</h2><p class="sub">Recently checked notices from official sources.</p></div><a class="btn btn-l" href="{{ route('jobs.index') }}">All government notices →</a></div>
+  <div class="g4">
+    @forelse($todayJobNotifications as $notification)
+      <article class="card gov-job-home-card"><small>{{ $notification->organization ?: 'Check official notice' }}</small><h3><a href="{{ route('job-notices.show', ['year' => $notification->created_at->format('Y'), 'slug' => $notification->slug]) }}">{{ $notification->title }}</a></h3><p>{{ $notification->state ?: 'State: check official notice' }}</p><a href="{{ $notification->official_url }}" target="_blank" rel="noopener noreferrer">Official source ↗</a></article>
+    @empty
+      <div class="box gov-job-home-empty"><p>No new official notices were checked today. Browse all published notices.</p></div>
+    @endforelse
+  </div>
+  <h2 class="gov-jobs-home-subheading">Last date soon</h2>
+  <div class="g4">
+    @forelse($closingSoonJobNotifications as $notification)
+      <article class="card gov-job-home-card"><small>Last date: {{ $notification->last_date?->format('d M Y') ?? 'Check official notice' }}</small><h3><a href="{{ route('job-notices.show', ['year' => $notification->created_at->format('Y'), 'slug' => $notification->slug]) }}">{{ $notification->title }}</a></h3><p>{{ $notification->organization ?: 'Check official notice' }}</p><a href="{{ $notification->official_url }}" target="_blank" rel="noopener noreferrer">Official source ↗</a></article>
+    @empty
+      <div class="box gov-job-home-empty"><p>No confirmed closing dates within the next seven days.</p></div>
+    @endforelse
+  </div>
+</div></section>
+@endif
+
 <section id="popular"><div class="wrap"><h2>{{ __('Popular MCQs') }}</h2><p class="sub">{{ __('Published MCQs, ready to practice.') }}</p><div class="g4">@forelse(array_slice($popular,0,8) as $test)<a class="card q" href="{{ $test['url'] }}" style="--c:#0078d4"><h3>{{ App\WebsiteText::mcq($test['title']) }}</h3><p>{{ $test['count'] }} {{ ($test['question_answers'] ?? false) ? 'questions and answers' : 'questions' }}@unless($test['question_answers'] ?? false) · {{ $test['duration'] }} minutes @endunless</p><div class="card-f"><span>@if($test['question_answers'] ?? false){{ $test['date_label'] }}@else Pass {{ $test['pass'] }}% @endif</span><b>{{ ($test['question_answers'] ?? false) ? 'Read answers →' : 'Start →' }}</b></div></a>@empty<p>No MCQs published yet.</p>@endforelse</div></div></section>
 
 <section class="alt" id="exams"><div class="wrap"><h2>{{ __('Practice by exam') }}</h2><p class="sub">Find available practice, subject notes and updates for your exam.</p><div class="g4">@foreach($navigationMenus['Exams'] as $examLink)<a href="{{ $examLink['url'] }}" class="card ex"><div><h3>{{ $examLink['label'] }}</h3><p>Practice, notes and updates</p></div><span aria-hidden="true">→</span></a>@endforeach</div></div></section>

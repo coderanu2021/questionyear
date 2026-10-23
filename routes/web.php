@@ -8,6 +8,7 @@ use App\Http\Controllers\ChapterContentController;
 use App\Http\Controllers\DailyQuizController;
 use App\Http\Controllers\ExamNotificationController;
 use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\GovernmentJobController;
 use App\Http\Controllers\LearningController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PageSeoController;
@@ -71,10 +72,14 @@ foreach (['weekly', 'monthly'] as $period) {
 }
 Route::view('/upcoming', 'website.upcoming')->name('upcoming');
 Route::get('/notifications', [ExamNotificationController::class, 'index'])->name('notifications.index');
-Route::get('/government-jobs', [ExamNotificationController::class, 'hub'])->name('jobs.index');
-Route::get('/government-jobs/{category}', [ExamNotificationController::class, 'hub'])->whereIn('category', array_keys(ExamNotificationController::CATEGORIES))->name('jobs.category');
+Route::get('/government-jobs', [GovernmentJobController::class, 'index'])->name('jobs.index');
+Route::get('/government-jobs/state/{state}', [GovernmentJobController::class, 'state'])->name('jobs.state');
+Route::get('/government-jobs/qualification/{level}', [GovernmentJobController::class, 'qualification'])->name('jobs.qualification');
+Route::get('/government-jobs/department/{department}', [GovernmentJobController::class, 'department'])->name('jobs.department');
+Route::get('/government-jobs/{category}', [GovernmentJobController::class, 'index'])->whereIn('category', array_keys(ExamNotificationController::CATEGORIES))->name('jobs.category');
 Route::get('/notifications/2027', fn (): RedirectResponse => redirect()->route('notifications.index', [], 301));
 Route::get('/notifications/2027/{exam}', [ExamNotificationController::class, 'index'])->whereIn('exam', ['railways', ...array_keys(ExamNotificationController::NOTICES)])->name('notifications.show');
+Route::get('/notifications/{year}/{slug}', [GovernmentJobController::class, 'show'])->where(['year' => '\\d{4}', 'slug' => '[A-Za-z0-9-]+'])->name('job-notices.show');
 Route::get('/site-logo/{filename}', [SiteSettingsController::class, 'logo'])->where('filename', '[A-Za-z0-9]+\.(jpg|jpeg|png|webp|gif)')->name('site.logo');
 Route::get('/site-favicon/current', [SiteSettingsController::class, 'favicon'])->defaults('filename', 'current')->name('site.favicon.current');
 Route::get('/site-favicon/{filename}', [SiteSettingsController::class, 'favicon'])->where('filename', '[A-Za-z0-9]+\.(ico|jpg|jpeg|png|webp|gif)')->name('site.favicon');

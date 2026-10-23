@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\JobNotification;
 use App\Models\Post;
 use App\Models\Quiz;
 use App\Models\Subject;
@@ -9,6 +10,7 @@ use App\WebsiteNavigation;
 use Illuminate\Http\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class SitemapController extends Controller
 {
@@ -21,6 +23,18 @@ class SitemapController extends Controller
         foreach (array_keys(ExamNotificationController::CATEGORIES) as $category) {
             if ($category !== 'all') {
                 $urls[route('jobs.category', ['category' => $category])] = null;
+            }
+        }
+        foreach (['10th-pass', '12th-pass', 'graduate', 'postgraduate', 'diploma', 'other'] as $level) {
+            $urls[route('jobs.qualification', ['level' => $level])] = null;
+        }
+        foreach (JobNotification::query()->whereIn('status', ['published', 'closed'])->whereNotNull('official_url')->get() as $notification) {
+            $urls[route('job-notices.show', ['year' => $notification->created_at->format('Y'), 'slug' => $notification->slug])] = $notification->updated_at;
+            if ($notification->state) {
+                $urls[route('jobs.state', ['state' => Str::slug($notification->state)])] = null;
+            }
+            if ($notification->organization) {
+                $urls[route('jobs.department', ['department' => Str::slug($notification->organization)])] = null;
             }
         }
         foreach (['about', 'contact', 'help', 'careers', 'privacy', 'terms', 'cookies', 'leaderboard'] as $page) {

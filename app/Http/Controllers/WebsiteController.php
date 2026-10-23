@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\LearningTracker;
 use App\Models\Attempt;
+use App\Models\JobNotification;
 use App\Models\Post;
 use App\Models\Quiz;
 use App\Models\Subject;
@@ -46,6 +47,14 @@ class WebsiteController extends Controller
 
         $latestNews = $request->routeIs('home')
             ? Post::where('type', 'news')->where('status', 'published')->where('published_at', '<=', now())->orderByDesc('published_at')->orderByDesc('id')->limit(4)->get()
+            : collect();
+
+        $todayJobNotifications = $request->routeIs('home')
+            ? JobNotification::query()->where('status', 'published')->whereDate('source_checked_at', today())->whereNotNull('official_url')->orderByDesc('source_checked_at')->limit(4)->get()
+            : collect();
+
+        $closingSoonJobNotifications = $request->routeIs('home')
+            ? JobNotification::query()->where('status', 'published')->whereNotNull('last_date')->whereDate('last_date', '>=', today())->whereDate('last_date', '<=', today()->addDays(7))->whereNotNull('official_url')->orderBy('last_date')->limit(4)->get()
             : collect();
 
         if ($request->routeIs('login', 'register') && $request->user()) {
@@ -161,7 +170,7 @@ class WebsiteController extends Controller
             }
         }
 
-        return view('website.index', ['subjectHasContent' => $subjectHasContent, 'selectedSubject' => $selected ?? null, 'serverChapter' => $request->routeIs('learn', 'chapter') ? $seoChapter : null, 'serverChapterData' => $request->routeIs('learn', 'chapter') && $seoChapter ? ($curriculum['LN'][$subject.':'.$chapter] ?? null) : null, 'serverQuiz' => $seoQuiz, 'questionAnswerQuiz' => in_array($subject, ['current-affairs', 'general-knowledge'], true) && $request->routeIs('quiz.show') ? $request->route('quiz') : null, 'seoChapter' => $seoChapter, 'latestBlogs' => $latestBlogs, 'latestNews' => $latestNews, 'chapterHeading' => $request->routeIs('learn', 'chapter') ? $seoChapter?->title : null, 'chapterMetaTitle' => $seoChapter?->meta_title, 'seoTitle' => $seoTitle, 'seoDescription' => $seoDescription, 'seoKeywords' => $seoKeywords, 'curriculum' => $curriculum, 'quizIds' => $quizIds, 'currentUser' => $request->user()?->only('name', 'email'), 'popular' => $popular, 'chapterCount' => $subjects->sum(fn ($s) => $s->chapters->count()), 'subjectCount' => $subjects->count(), 'questionCount' => Quiz::published()->multipleChoice()->get()->sum(fn ($q) => count($q->questions))]);
+        return view('website.index', ['subjectHasContent' => $subjectHasContent, 'selectedSubject' => $selected ?? null, 'serverChapter' => $request->routeIs('learn', 'chapter') ? $seoChapter : null, 'serverChapterData' => $request->routeIs('learn', 'chapter') && $seoChapter ? ($curriculum['LN'][$subject.':'.$chapter] ?? null) : null, 'serverQuiz' => $seoQuiz, 'questionAnswerQuiz' => in_array($subject, ['current-affairs', 'general-knowledge'], true) && $request->routeIs('quiz.show') ? $request->route('quiz') : null, 'seoChapter' => $seoChapter, 'latestBlogs' => $latestBlogs, 'latestNews' => $latestNews, 'todayJobNotifications' => $todayJobNotifications, 'closingSoonJobNotifications' => $closingSoonJobNotifications, 'chapterHeading' => $request->routeIs('learn', 'chapter') ? $seoChapter?->title : null, 'chapterMetaTitle' => $seoChapter?->meta_title, 'seoTitle' => $seoTitle, 'seoDescription' => $seoDescription, 'seoKeywords' => $seoKeywords, 'curriculum' => $curriculum, 'quizIds' => $quizIds, 'currentUser' => $request->user()?->only('name', 'email'), 'popular' => $popular, 'chapterCount' => $subjects->sum(fn ($s) => $s->chapters->count()), 'subjectCount' => $subjects->count(), 'questionCount' => Quiz::published()->multipleChoice()->get()->sum(fn ($q) => count($q->questions))]);
     }
 
     public function answer(Request $request, Quiz $quiz): JsonResponse

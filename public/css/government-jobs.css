@@ -1,0 +1,38 @@
+.gov-jobs-page{padding-top:28px;padding-bottom:56px}
+.gov-jobs-page h1{margin:10px 0}
+.gov-jobs-page>.sub{max-width:76ch}
+.gov-jobs-filter-form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:12px;align-items:end;margin:22px 0}
+.gov-jobs-filter-form label{display:grid;gap:6px;font-size:13px;font-weight:600}
+.gov-jobs-filter-form input,.gov-jobs-filter-form select{width:100%;min-height:42px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--box);color:var(--text)}
+.gov-jobs-list{display:grid;gap:16px;margin:22px 0}
+.gov-job-directory-links{display:flex;gap:8px 14px;flex-wrap:wrap;align-items:center;margin:18px 0;color:var(--muted);font-size:13px}
+.gov-job-directory-links strong{color:var(--text)}
+.gov-job-card{padding:20px}
+.gov-job-card h2{margin:8px 0 4px;font-size:21px}
+.gov-job-card h2 a{color:inherit;text-decoration:none}
+.gov-job-card h2 a:hover{text-decoration:underline}
+.gov-job-card-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px}
+.gov-job-card-heading p,.gov-job-checked{color:var(--muted)}
+.gov-job-checked{text-align:right;white-space:nowrap;font-size:13px}
+.gov-job-card>p{margin:14px 0;color:var(--muted)}
+.gov-job-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}
+.gov-job-facts div{min-width:0}
+.gov-job-facts dt{font-size:12px;color:var(--muted)}
+.gov-job-facts dd{margin:4px 0 0;font-weight:600;overflow-wrap:anywhere}
+.gov-job-links{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.gov-job-empty{padding:24px}
+.gov-job-detail-card{padding:24px;display:grid;gap:24px}
+.gov-job-detail-card h2{font-size:19px;margin-bottom:10px}
+.gov-job-detail-facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+.gov-job-detail-card .notification-checked{margin:0}
+.gov-jobs-home-heading{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:20px}
+.gov-jobs-home-heading h2{margin:6px 0}
+.gov-job-home-card h3{margin:8px 0}
+.gov-job-home-card h3 a{color:inherit;text-decoration:none}
+.gov-job-home-card small,.gov-job-home-card p{color:var(--muted)}
+.gov-job-home-card>a{font-size:13px}
+.gov-job-home-empty{padding:18px}
+.gov-jobs-home-subheading{margin:28px 0 16px}
+@media(max-width:900px){.gov-jobs-filter-form{grid-template-columns:repeat(2,minmax(0,1fr))}.gov-jobs-filter-form button{min-height:42px}}
+@media(max-width:600px){.gov-jobs-filter-form,.gov-job-facts,.gov-job-detail-facts{grid-template-columns:1fr}.gov-job-card-heading{flex-direction:column}.gov-job-checked{text-align:left}.gov-job-links{align-items:flex-start;flex-direction:column}}
+@media(max-width:600px){.gov-jobs-home-heading{align-items:flex-start;flex-direction:column}}
