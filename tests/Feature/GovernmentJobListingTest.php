@@ -33,7 +33,7 @@ class GovernmentJobListingTest extends TestCase
             'title' => 'Assistant Examination Result', 'slug' => 'assistant-exam-result', 'notice_type' => 'result',
             'status' => 'published', 'official_url' => 'https://ssc.gov.in/result', 'last_date' => null,
         ]);
-        JobNotification::factory()->create(['title' => 'Clerk Recruitment Notice', 'slug' => 'clerk-recruitment', 'notice_type' => 'job', 'status' => 'published']);
+        JobNotification::factory()->create(['title' => 'Clerk Recruitment Notice', 'slug' => 'clerk-recruitment', 'notice_type' => 'job', 'status' => 'published', 'start_date' => today()]);
 
         $this->get(route('jobs.category', ['category' => 'results']))->assertOk()
             ->assertSee('Assistant Examination Result')->assertDontSee('Clerk Recruitment Notice');
@@ -59,5 +59,29 @@ class GovernmentJobListingTest extends TestCase
         $this->get(route('jobs.qualification', ['level' => 'graduate']))->assertOk()->assertSee($notice->title);
         $this->get(route('jobs.department', ['department' => 'rajasthan-public-service-commission']))->assertOk()->assertSee($notice->title);
         $this->get(route('home'))->assertOk()->assertSee("Today's New Jobs", false)->assertSee('Last date soon')->assertSee($notice->title);
+    }
+
+    public function test_homepage_lists_six_latest_published_official_jobs_and_job_detail_links_related_notices(): void
+    {
+        $jobs = collect(range(1, 7))->map(fn (int $number) => JobNotification::factory()->create([
+            'title' => 'Official recruitment '.$number,
+            'slug' => 'official-recruitment-'.$number,
+            'state' => 'Delhi',
+            'status' => 'published',
+            'official_url' => 'https://ssc.gov.in/notice/'.$number,
+            'source_checked_at' => now()->subMinutes(8 - $number),
+        ]));
+        JobNotification::factory()->create(['title' => 'Pending recruitment', 'status' => 'pending']);
+
+        $homepage = $this->get(route('home'))->assertOk()->assertSee('Latest published jobs');
+        foreach ($jobs->reverse()->take(6) as $job) {
+            $homepage->assertSee($job->title);
+        }
+        $homepage->assertDontSee('Official recruitment 1')->assertDontSee('Pending recruitment');
+
+        $firstJob = $jobs->last();
+        $detail = $this->get(route('job-notices.show', ['year' => $firstJob->created_at->format('Y'), 'slug' => $firstJob->slug]))
+            ->assertOk()->assertSee('Related government notices')->assertSee('"@type":"BreadcrumbList"', false);
+        $detail->assertSee('Official recruitment 7')->assertSee('Official recruitment 6');
     }
 }

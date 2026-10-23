@@ -51,6 +51,14 @@
       <div class="box gov-job-home-empty"><p>No new official notices were checked today. Browse all published notices.</p></div>
     @endforelse
   </div>
+  <h2 class="gov-jobs-home-subheading">Latest published jobs</h2>
+  <div class="g4">
+    @forelse($latestJobNotifications as $notification)
+      <article class="card gov-job-home-card"><small>{{ $notification->organization ?: 'Check official notice' }}</small><h3><a href="{{ route('job-notices.show', ['year' => $notification->created_at->format('Y'), 'slug' => $notification->slug]) }}">{{ $notification->title }}</a></h3><p>{{ $notification->state ?: 'State: check official notice' }}</p><a href="{{ $notification->official_url }}" target="_blank" rel="noopener noreferrer">Official source ↗</a></article>
+    @empty
+      <div class="box gov-job-home-empty"><p>No published official notices are available yet.</p></div>
+    @endforelse
+  </div>
   <h2 class="gov-jobs-home-subheading">Last date soon</h2>
   <div class="g4">
     @forelse($closingSoonJobNotifications as $notification)

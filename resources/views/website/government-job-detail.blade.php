@@ -42,6 +42,9 @@
         <p class="notification-checked">Dates, vacancies and eligibility can change through official corrigenda. Confirm them in the linked notice before acting.</p>
     </article>
     <p><a href="{{ route('jobs.index') }}">← Browse all government notices</a></p>
+    @if($relatedJobs->isNotEmpty())
+    <section class="gov-job-related" aria-labelledby="related-jobs-heading"><h2 id="related-jobs-heading">Related government notices</h2><div class="g4">@foreach($relatedJobs as $relatedJob)<article class="card gov-job-home-card"><small>{{ $relatedJob->organization ?: 'Check official notice' }}</small><h3><a href="{{ route('job-notices.show', ['year' => $relatedJob->created_at->format('Y'), 'slug' => $relatedJob->slug]) }}">{{ $relatedJob->title }}</a></h3><a href="{{ $relatedJob->official_url }}" target="_blank" rel="noopener noreferrer">Official source ↗</a></article>@endforeach</div></section>
+    @endif
 </main>
 @include('website.partials.footer')
 <script src="{{ asset('js/navigation.js') }}"></script>

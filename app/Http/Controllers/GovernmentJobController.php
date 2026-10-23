@@ -97,6 +97,15 @@ class GovernmentJobController extends Controller
             ->whereNotNull('official_url')
             ->firstOrFail();
 
-        return view('website.government-job-detail', ['notification' => $notification, 'title' => $notification->title]);
+        $relatedJobs = JobNotification::query()
+            ->where('status', 'published')
+            ->whereNotNull('official_url')
+            ->where('id', '!=', $notification->id)
+            ->when($notification->state, fn ($query, string $state) => $query->where('state', $state))
+            ->orderByDesc('source_checked_at')
+            ->limit(4)
+            ->get();
+
+        return view('website.government-job-detail', ['notification' => $notification, 'title' => $notification->title, 'relatedJobs' => $relatedJobs]);
     }
 }
