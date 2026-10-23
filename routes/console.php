@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('practice:generate')->hourlyAt(5)->timezone('Asia/Kolkata')->withoutOverlapping();
+Schedule::command('jobs:fetch')->everyThreeHours()->timezone('Asia/Kolkata')->withoutOverlapping();
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
