@@ -8,9 +8,9 @@
     <link rel="stylesheet" href="{{ asset('css/website.css') }}?v={{ filemtime(public_path('css/website.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/government-jobs.css') }}?v={{ filemtime(public_path('css/government-jobs.css')) }}">
     @include('website.partials.favicon')
-    @if($notification->notice_type === 'job')
+    @if(($notification->notice_type ?? 'job') === 'job' && $notification->start_date && $notification->official_url && $notification->organization)
         @php
-            $jobPostingSchema = ['@context' => 'https://schema.org', '@type' => 'JobPosting', 'title' => $notification->title, 'description' => $notification->summary ?: $notification->title, 'datePosted' => $notification->created_at->toDateString(), 'hiringOrganization' => ['@type' => 'Organization', 'name' => $notification->organization ?: 'Check official notice'], 'url' => request()->url(), 'applicantLocationRequirements' => ['@type' => 'Country', 'name' => 'India']];
+            $jobPostingSchema = ['@context' => 'https://schema.org', '@type' => 'JobPosting', 'title' => $notification->title, 'description' => $notification->summary ?: $notification->title, 'datePosted' => $notification->start_date->toDateString(), 'hiringOrganization' => ['@type' => 'Organization', 'name' => $notification->organization], 'url' => request()->url(), 'applicantLocationRequirements' => ['@type' => 'Country', 'name' => 'India'], 'sameAs' => $notification->official_url];
             if ($notification->last_date) { $jobPostingSchema['validThrough'] = $notification->last_date->toDateString(); }
         @endphp
         <script type="application/ld+json">{!! json_encode($jobPostingSchema, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!}</script>
@@ -20,6 +20,8 @@
 @include('website.partials.header')
 <main class="wrap gov-jobs-page gov-job-detail">
     <div class="crumb"><a href="{{ route('home') }}">Home</a><span>/</span><a href="{{ route('jobs.index') }}">Government jobs</a><span>/</span><b>{{ $notification->title }}</b></div>
+    @php($jobBreadcrumb = ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => [['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => route('home')], ['@type' => 'ListItem', 'position' => 2, 'name' => 'Government jobs', 'item' => route('jobs.index')], ['@type' => 'ListItem', 'position' => 3, 'name' => $notification->title, 'item' => request()->url()]]])
+    <script type="application/ld+json">{!! json_encode($jobBreadcrumb, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!}</script>
     <span class="daily-label">OFFICIAL GOVERNMENT NOTICE · {{ strtoupper(str_replace('-', ' ', $notification->notice_type ?? 'job')) }}</span>
     <h1>{{ $notification->title }}</h1>
     <p class="sub">{{ $notification->organization ?: 'Organization: check official notice' }} · {{ $notification->state ?: 'State: check official notice' }}</p>

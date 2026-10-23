@@ -7,6 +7,15 @@
 @if(request()->routeIs('login', 'register'))<meta name="robots" content="noindex,follow">@endif
 @if(request()->routeIs('subject') && !$subjectHasContent)<meta name="robots" content="noindex,follow">@endif
 @include('website.partials.seo', ['defaultTitle' => $seoTitle, 'defaultDescription' => $seoDescription, 'defaultKeywords' => $seoKeywords, 'preservePageTitle' => true])
+@if(request()->routeIs('home'))
+@php
+    $homeSchema = [
+        ['@context' => 'https://schema.org', '@type' => 'Organization', 'name' => $siteSettings['site_title'], 'url' => route('home')],
+        ['@context' => 'https://schema.org', '@type' => 'WebSite', 'name' => $siteSettings['site_title'], 'url' => route('home')],
+    ];
+@endphp
+<script type="application/ld+json">{!! json_encode($homeSchema, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!}</script>
+@endif
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
@@ -18,9 +27,14 @@
     $schemaBaseUrl = rtrim(config('app.url'), '/');
     $schemaUrl = in_array(parse_url($schemaBaseUrl, PHP_URL_HOST), ['localhost', '127.0.0.1', '::1', null], true) ? request()->url() : $schemaBaseUrl.request()->getPathInfo();
     $learningSchema = ['@context' => 'https://schema.org', '@type' => 'LearningResource', 'name' => $serverChapter->title, 'description' => $serverChapter->meta_description, 'inLanguage' => 'en-IN', 'learningResourceType' => 'Study guide', 'educationalUse' => 'Study and revision', 'dateModified' => $serverChapter->updated_at->toIso8601String(), 'url' => $schemaUrl, 'citation' => array_column($serverChapter->content_evidence['sources'] ?? [], 'url')];
-    $faqSchema = ['@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => array_map(fn ($faq) => ['@type' => 'Question', 'name' => $faq['q'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $faq['a']]], $serverChapter->content_evidence['faqs'] ?? [])];
+    $verifiedFaqs = $serverChapter->content_evidence['faqs'] ?? [];
+    $faqSchema = ['@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => array_map(fn ($faq) => ['@type' => 'Question', 'name' => $faq['q'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $faq['a']]], $verifiedFaqs)];
 @endphp
-<script type="application/ld+json">{!! json_encode([$learningSchema, $faqSchema], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!}</script>
+<script type="application/ld+json">{!! json_encode(empty($verifiedFaqs) ? [$learningSchema] : [$learningSchema, $faqSchema], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!}</script>
+@endif
+@if($serverQuiz)
+@php($quizSchema = ['@context' => 'https://schema.org', '@type' => 'Quiz', 'name' => $serverQuiz->title, 'url' => $serverQuiz->publicUrl(), 'numberOfQuestions' => count($serverQuiz->questions), 'educationalLevel' => $serverQuiz->learningSubject()->name])
+<script type="application/ld+json">{!! json_encode($quizSchema, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!}</script>
 @endif
 </head>
 <body>

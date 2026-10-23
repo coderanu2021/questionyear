@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Chapter;
+use App\Models\JobNotification;
 use App\Models\Post;
 use App\Models\Quiz;
 use App\Models\Subject;
@@ -73,6 +74,29 @@ class SeoImprovementsTest extends TestCase
         $this->assertStringContainsString('<strong data-n="1">1</strong><span>Subjects</span>', $html);
         $this->assertStringContainsString('<strong data-n="1">1</strong><span>MCQs ready</span>', $html);
         $this->assertStringContainsString('<strong data-n="1">1</strong><span>Practice questions</span>', $html);
+    }
+
+    public function test_structured_data_is_present_only_for_verified_page_facts(): void
+    {
+        $home = $this->get(route('home'))->assertOk()->getContent();
+        $this->assertStringContainsString('"@type":"Organization"', $home);
+        $this->assertStringContainsString('"@type":"WebSite"', $home);
+
+        $quiz = Quiz::factory()->create(['title' => 'Verified Practice Quiz']);
+        $this->get($quiz->publicUrl())->assertOk()->assertSee('"@type":"Quiz"', false);
+
+        $post = Post::factory()->published()->create(['type' => 'news', 'title' => 'Verified exam update']);
+        $this->get(route('news.show', $post->slug))->assertOk()
+            ->assertSee('"@type":"NewsArticle"', false)
+            ->assertSee('"@type":"BreadcrumbList"', false);
+
+        $notification = JobNotification::factory()->create(['status' => 'published', 'start_date' => null]);
+        $jobPage = $this->get(route('job-notices.show', ['year' => $notification->created_at->format('Y'), 'slug' => $notification->slug]))->assertOk();
+        $jobPage->assertDontSee('"@type":"JobPosting"', false)->assertSee('"@type":"BreadcrumbList"', false);
+
+        $notification->update(['start_date' => today(), 'official_url' => 'https://ssc.gov.in/notice']);
+        $this->get(route('job-notices.show', ['year' => $notification->created_at->format('Y'), 'slug' => $notification->slug]))
+            ->assertOk()->assertSee('"@type":"JobPosting"', false);
     }
 
     public function test_homepage_hides_empty_counters_instead_of_rendering_zeroes(): void

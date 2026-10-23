@@ -11,6 +11,14 @@
 @if(!isset($post) && $posts->total() === 0)<meta name="robots" content="noindex,follow">@endif
 
 <link rel="stylesheet" href="{{ asset('css/website.css') }}?v={{ filemtime(public_path('css/website.css')) }}">@include('website.partials.favicon')@include('website.partials.canonical')
+@if(isset($post))
+@php
+    $articleSchema = ['@context' => 'https://schema.org', '@type' => $isNews ? 'NewsArticle' : 'Article', 'headline' => $post->title, 'description' => $post->excerpt ?: Illuminate\Support\Str::limit(strip_tags($post->content), 160), 'datePublished' => $post->published_at->toIso8601String(), 'dateModified' => $post->updated_at->toIso8601String(), 'author' => ['@type' => 'Organization', 'name' => $siteSettings['site_title']], 'mainEntityOfPage' => request()->url()];
+    if ($post->thumbnailUrl()) { $articleSchema['image'] = [$post->thumbnailUrl()]; }
+    $postBreadcrumb = ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => [['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => route('home')], ['@type' => 'ListItem', 'position' => 2, 'name' => $listingTitle, 'item' => route($listingRoute)], ['@type' => 'ListItem', 'position' => 3, 'name' => $post->title, 'item' => request()->url()]]];
+@endphp
+<script type="application/ld+json">{!! json_encode([$articleSchema, $postBreadcrumb], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!}</script>
+@endif
 </head><body class="blog-page">
 @include('website.partials.header')
 @if(auth()->check())<script>window.CURRENT_USER={{ Illuminate\Support\Js::from(auth()->user()->only('name', 'email')) }};</script>@endif
