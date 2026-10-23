@@ -13,8 +13,9 @@
 <link rel="stylesheet" href="{{ asset('css/website.css') }}?v={{ filemtime(public_path('css/website.css')) }}">@include('website.partials.favicon')@include('website.partials.canonical')
 @if(isset($post))
 @php
-    $articleSchema = ['@context' => 'https://schema.org', '@type' => $isNews ? 'NewsArticle' : 'Article', 'headline' => $post->title, 'description' => $post->excerpt ?: Illuminate\Support\Str::limit(strip_tags($post->content), 160), 'datePublished' => $post->published_at->toIso8601String(), 'dateModified' => $post->updated_at->toIso8601String(), 'author' => ['@type' => 'Organization', 'name' => $siteSettings['site_title']], 'mainEntityOfPage' => request()->url()];
+    $articleSchema = ['@context' => 'https://schema.org', '@type' => $isNews ? 'NewsArticle' : 'Article', 'headline' => $post->title, 'description' => $post->excerpt ?: Illuminate\Support\Str::limit(strip_tags($post->content), 160), 'datePublished' => $post->published_at->toIso8601String(), 'dateModified' => $post->updated_at->toIso8601String(), 'author' => ['@type' => $post->author_name ? 'Person' : 'Organization', 'name' => $post->author_name ?: $siteSettings['site_title']], 'mainEntityOfPage' => request()->url()];
     if ($post->thumbnailUrl()) { $articleSchema['image'] = [$post->thumbnailUrl()]; }
+    if ($post->official_source_url) { $articleSchema['citation'] = $post->official_source_url; }
     $postBreadcrumb = ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => [['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => route('home')], ['@type' => 'ListItem', 'position' => 2, 'name' => $listingTitle, 'item' => route($listingRoute)], ['@type' => 'ListItem', 'position' => 3, 'name' => $post->title, 'item' => request()->url()]]];
 @endphp
 <script type="application/ld+json">{!! json_encode([$articleSchema, $postBreadcrumb], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!}</script>
@@ -29,8 +30,10 @@
 <article class="blog-article" id="blog-article">
 <span class="blog-label">{{ $isNews ? 'NEWS & UPDATES' : 'STUDY & LEARNING' }}</span>
 <h1>{{ $post->title }}</h1>
-<div class="blog-meta"><span class="blog-author-mark" aria-hidden="true">Q</span><time datetime="{{ $post->published_at->toDateString() }}">📅 {{ $post->published_at->format('d M Y') }}</time><span>⏱ {{ $post->readingMinutes() }} min read</span><span>✍ {{ $siteSettings['site_title'] }}</span></div>
+<div class="blog-meta"><span class="blog-author-mark" aria-hidden="true">Q</span><span>By {{ $post->author_name ?: $siteSettings['site_title'] }}</span><time datetime="{{ $post->published_at->toDateString() }}">📅 Published {{ $post->published_at->format('d M Y') }}</time>@if($post->updated_at->gt($post->published_at))<time datetime="{{ $post->updated_at->toDateString() }}">Updated {{ $post->updated_at->format('d M Y') }}</time>@endif<span>⏱ {{ $post->readingMinutes() }} min read</span></div>
 @if($post->excerpt)<p class="blog-lead">{{ $post->excerpt }}</p>@endif
+@if($post->thumbnailUrl())<img class="blog-featured-image" src="{{ $post->thumbnailUrl() }}" alt="{{ $post->featured_image_alt ?: $post->title }}" loading="eager" decoding="async" width="1200" height="675">@endif
+@if($post->official_source_url)<p class="blog-official-source"><a href="{{ $post->official_source_url }}" target="_blank" rel="noopener noreferrer">Official source ↗</a></p>@endif
 <div class="blog-content">{!! App\PostContent::render($post->content) !!}</div>
 <a class="blog-back" href="{{ route($listingRoute) }}">← All {{ strtolower($listingTitle) }}</a>
 </article>

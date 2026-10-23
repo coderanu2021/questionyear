@@ -47,6 +47,34 @@ class PostsTest extends TestCase
         $this->assertDatabaseHas('page_seo', ['page_key' => 'post:'.$post->id, 'meta_keywords' => null]);
     }
 
+    public function test_post_editorial_metadata_is_saved_and_rendered_on_cards_and_articles(): void
+    {
+        $this->actingAs(User::factory()->create(['role' => 'admin', 'status' => 'active']));
+        $data = [
+            'title' => 'Official exam notice explained',
+            'type' => 'news',
+            'status' => 'published',
+            'content' => '<p>Summary from the notice.</p>',
+            'featured_image_url' => 'https://questionyear.in/images/exam-notice.webp',
+            'featured_image_alt' => 'Official examination notice on a desk',
+            'author_name' => 'Editorial Team',
+            'official_source_url' => 'https://ssc.gov.in/notice',
+        ];
+
+        $this->post(route('admin.posts.store'), $data)->assertRedirect();
+        $post = Post::firstOrFail();
+        $this->assertSame($data['featured_image_url'], $post->featured_image_url);
+        $this->assertSame($data['official_source_url'], $post->official_source_url);
+        $this->get(route('news.index'))->assertOk()->assertSee($data['featured_image_alt'])->assertSee('loading="lazy"', false);
+        $this->get(route('news.show', $post->slug))->assertOk()
+            ->assertSee('By Editorial Team')
+            ->assertSee('Published')
+            ->assertSee('Official source')
+            ->assertSee($data['official_source_url'])
+            ->assertSee('citation', false);
+        $this->get(route('admin.posts.edit', $post))->assertOk()->assertSee('name="author_name"', false)->assertSee('name="featured_image_alt"', false);
+    }
+
     public function test_editor_images_can_be_uploaded_and_served(): void
     {
         Storage::fake('local');

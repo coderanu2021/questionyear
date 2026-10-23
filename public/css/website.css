@@ -395,6 +395,7 @@ nav.show{display:block}nav ul{flex-direction:column}.mega{max-height:70vh;overfl
 .blog-detail .blog-content h3{font-size:19px}
 .blog-detail .blog-content h2,.blog-detail .blog-content h3{scroll-margin-top:130px}
 .blog-detail .blog-meta{align-items:center;gap:12px;font-size:12px;padding-bottom:20px;margin-bottom:24px}
+.blog-featured-image{display:block;width:100%;height:auto;max-height:675px;object-fit:cover;border-radius:16px;margin:0 0 24px}.blog-official-source{margin:0 0 24px}
 .blog-author-mark{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;font-weight:800}
 .blog-sidebar{display:grid;gap:20px;position:sticky;top:120px;max-height:calc(100dvh - 140px);overflow-y:auto;scrollbar-width:thin;min-width:0}
 .blog-sidebar-card{border:1px solid var(--line);border-radius:12px;background:var(--card);padding:22px}

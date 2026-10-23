@@ -13,10 +13,14 @@ class Post extends Model
     /** @use HasFactory<PostFactory> */
     use HasFactory;
 
-    protected $fillable = ['type', 'title', 'slug', 'excerpt', 'content', 'status', 'published_at'];
+    protected $fillable = ['type', 'title', 'slug', 'excerpt', 'content', 'status', 'published_at', 'featured_image_url', 'featured_image_alt', 'author_name', 'official_source_url'];
 
     public function thumbnailUrl(): ?string
     {
+        if (filled($this->featured_image_url)) {
+            return $this->featured_image_url;
+        }
+
         $html = PostContent::render($this->content ?? '');
         if (preg_match('/<img\b[^>]*\bsrc="([^"]+)"/i', $html, $matches)) {
             return html_entity_decode($matches[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');

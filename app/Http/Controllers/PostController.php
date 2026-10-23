@@ -142,7 +142,7 @@ class PostController extends Controller
         return redirect()->route('admin.posts.index')->with('status', 'Post deleted.');
     }
 
-    /** @return array{type: string, title: string, slug: string, excerpt: ?string, content: string, status: string, published_at: mixed} */
+    /** @return array<string, mixed> */
     private function validatedPost(Request $request, ?Post $post = null): array
     {
         $request->validate([
@@ -157,6 +157,10 @@ class PostController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:255', Rule::unique('posts', 'slug')->ignore($post)],
             'excerpt' => ['nullable', 'string', 'max:1000'],
+            'featured_image_url' => ['nullable', 'url', 'max:2048'],
+            'featured_image_alt' => ['nullable', 'string', 'max:255'],
+            'author_name' => ['nullable', 'string', 'max:255'],
+            'official_source_url' => ['nullable', 'url', 'max:2048'],
             'content' => ['required', 'string', 'max:100000'],
             'status' => ['required', Rule::in(['draft', 'published'])],
         ]);
