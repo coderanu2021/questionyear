@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Attempt;
 use App\Models\Chapter;
+use App\Models\JobNotification;
 use App\Models\Message;
 use App\Models\Quiz;
 use App\Models\Subject;
@@ -31,7 +32,7 @@ class AdminController extends Controller
     public function index(Request $request, string $page = 'dashboard'): View
     {
         $this->authorizeAdmin($request);
-        abort_unless(in_array($page, ['dashboard', 'chapters', 'tests', 'users', 'analytics', 'messages', 'settings', 'practice', 'import']), 404);
+        abort_unless(in_array($page, ['dashboard', 'chapters', 'tests', 'users', 'analytics', 'messages', 'settings', 'practice', 'import', 'job-notices']), 404);
 
         $practicePeriods = [];
         if ($page === 'practice') {
@@ -45,7 +46,19 @@ class AdminController extends Controller
             }
         }
 
-        return view('admin.index', ['state' => $this->state(), 'page' => $page, 'practicePeriods' => $practicePeriods, 'importSubjects' => $page === 'import' ? Subject::whereNotIn('slug', ['current-affairs', 'general-knowledge'])->orderBy('name')->get() : []]);
+        $jobNotifications = null;
+        if ($page === 'job-notices') {
+            $reviewDecision = $request->query('review') === 'rejected' ? 'rejected' : null;
+            $jobNotifications = JobNotification::query()
+                ->with('rawNotice.source')
+                ->where('status', 'pending')
+                ->where('review_decision', $reviewDecision)
+                ->orderByDesc('source_checked_at')
+                ->paginate(25)
+                ->withQueryString();
+        }
+
+        return view('admin.index', ['state' => $this->state(), 'page' => $page, 'practicePeriods' => $practicePeriods, 'importSubjects' => $page === 'import' ? Subject::whereNotIn('slug', ['current-affairs', 'general-knowledge'])->orderBy('name')->get() : [], 'jobNotifications' => $jobNotifications]);
     }
 
     public function generatePractice(Request $request, PracticeQuestionGenerator $generator): RedirectResponse|JsonResponse

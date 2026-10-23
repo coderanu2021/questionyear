@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminJobNotificationController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\ChapterContentController;
 use App\Http\Controllers\DailyQuizController;
@@ -92,6 +93,12 @@ Route::get('/reset-password/{token}', [PageController::class, 'resetForm'])->nam
 Route::post('/reset-password', [PageController::class, 'reset'])->middleware('throttle:5,1')->name('password.update');
 Route::get('/{page}', [PageController::class, 'show'])->whereIn('page', ['about', 'contact', 'help', 'careers', 'privacy', 'terms', 'cookies', 'leaderboard', 'forgot-password'])->name('page');
 Route::middleware('auth')->group(function () {
+    Route::get('/admin/job-notices', [AdminController::class, 'index'])->defaults('page', 'job-notices')->name('admin.job-notices.index');
+    Route::post('/admin/job-notices/bulk-publish', [AdminJobNotificationController::class, 'bulkPublish'])->name('admin.job-notices.bulk-publish');
+    Route::put('/admin/job-notices/{jobNotification}', [AdminJobNotificationController::class, 'update'])->whereNumber('jobNotification')->name('admin.job-notices.update');
+    Route::post('/admin/job-notices/{jobNotification}/approve', [AdminJobNotificationController::class, 'approve'])->whereNumber('jobNotification')->name('admin.job-notices.approve');
+    Route::post('/admin/job-notices/{jobNotification}/reject', [AdminJobNotificationController::class, 'reject'])->whereNumber('jobNotification')->name('admin.job-notices.reject');
+    Route::post('/admin/job-notices/{jobNotification}/restore', [AdminJobNotificationController::class, 'restore'])->whereNumber('jobNotification')->name('admin.job-notices.restore');
     Route::get('/admin/chapter-content', [ChapterContentController::class, 'index'])->name('admin.content.index');
     Route::post('/admin/chapter-content', [ChapterContentController::class, 'store'])->middleware('throttle:6,1')->name('admin.content.store');
     Route::get('/admin/chapter-content/{revision}', [ChapterContentController::class, 'show'])->whereNumber('revision')->name('admin.content.show');
