@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\JobNotification;
+use App\Services\JobAlerts\GovernmentJobAlertDispatcher;
 use App\Services\JobSources\OfficialSourceUrlPolicy;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
@@ -135,6 +136,7 @@ class AdminJobNotificationController extends Controller
                     'reviewed_at' => now(),
                     'review_note' => null,
                 ])->save();
+                app(GovernmentJobAlertDispatcher::class)->dispatch($jobNotification);
             }
         });
     }

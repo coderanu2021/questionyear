@@ -4,6 +4,7 @@ namespace App\Services\JobSources;
 
 use App\Models\JobNotification;
 use App\Models\RawNotice;
+use App\Services\JobAlerts\GovernmentJobAlertDispatcher;
 use DateTimeImmutable;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
@@ -75,6 +76,10 @@ class JobNoticeExtractor
         ]);
 
         $this->markExtracted($rawNotice);
+
+        if ($notification->wasRecentlyCreated && $notification->status === 'published') {
+            app(GovernmentJobAlertDispatcher::class)->dispatch($notification);
+        }
 
         return [
             'notification' => $notification,

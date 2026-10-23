@@ -9,6 +9,7 @@ use App\Http\Controllers\DailyQuizController;
 use App\Http\Controllers\ExamNotificationController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\GovernmentJobController;
+use App\Http\Controllers\JobPushSubscriptionController;
 use App\Http\Controllers\LearningController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PageSeoController;
@@ -73,6 +74,9 @@ foreach (['weekly', 'monthly'] as $period) {
 Route::view('/upcoming', 'website.upcoming')->name('upcoming');
 Route::get('/notifications', [ExamNotificationController::class, 'index'])->name('notifications.index');
 Route::get('/government-jobs', [GovernmentJobController::class, 'index'])->name('jobs.index');
+Route::get('/government-jobs/push-key', [JobPushSubscriptionController::class, 'key'])->name('jobs.push.key');
+Route::post('/government-jobs/push-subscriptions', [JobPushSubscriptionController::class, 'store'])->middleware('throttle:10,1')->name('jobs.push.store');
+Route::delete('/government-jobs/push-subscriptions', [JobPushSubscriptionController::class, 'destroy'])->middleware('throttle:10,1')->name('jobs.push.destroy');
 Route::get('/government-jobs/state/{state}', [GovernmentJobController::class, 'state'])->name('jobs.state');
 Route::get('/government-jobs/qualification/{level}', [GovernmentJobController::class, 'qualification'])->name('jobs.qualification');
 Route::get('/government-jobs/department/{department}', [GovernmentJobController::class, 'department'])->name('jobs.department');

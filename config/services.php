@@ -15,6 +15,14 @@ return [
         'auto_publish' => (bool) env('JOB_NOTICES_AUTO_PUBLISH', false),
         'minimum_confidence' => (float) env('JOB_NOTICES_MIN_CONFIDENCE', 0.95),
     ],
+    'job_alerts' => [
+        'telegram_bot_token' => env('JOB_ALERT_TELEGRAM_BOT_TOKEN'),
+        'telegram_chat_id' => env('JOB_ALERT_TELEGRAM_CHAT_ID'),
+        'email_recipients' => array_values(array_filter(array_map('trim', explode(',', (string) env('JOB_ALERT_EMAIL_RECIPIENTS', ''))))),
+        'vapid_subject' => env('JOB_PUSH_VAPID_SUBJECT', 'mailto:admin@example.com'),
+        'vapid_public_key' => env('JOB_PUSH_VAPID_PUBLIC_KEY'),
+        'vapid_private_key' => str_replace('\\n', "\n", (string) env('JOB_PUSH_VAPID_PRIVATE_KEY', '')),
+    ],
 
     /*
     |--------------------------------------------------------------------------

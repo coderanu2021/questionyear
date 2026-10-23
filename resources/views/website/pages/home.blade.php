@@ -41,7 +41,7 @@
 
 @if(request()->routeIs('home'))
 <section class="gov-jobs-home"><div class="wrap">
-  <div class="gov-jobs-home-heading"><div><span class="daily-label">OFFICIAL GOVERNMENT UPDATES</span><h2>Today's New Jobs</h2><p class="sub">Recently checked notices from official sources.</p></div><a class="btn btn-l" href="{{ route('jobs.index') }}">All government notices →</a></div>
+  <div class="gov-jobs-home-heading"><div><span class="daily-label">OFFICIAL GOVERNMENT UPDATES</span><h2>Today's New Jobs</h2><p class="sub">Recently checked notices from official sources.</p>@include('website.partials.job-push-subscribe')</div><a class="btn btn-l" href="{{ route('jobs.index') }}">All government notices →</a></div>
   <div class="g4">
     @forelse($todayJobNotifications as $notification)
       <article class="card gov-job-home-card"><small>{{ $notification->organization ?: 'Check official notice' }}</small><h3><a href="{{ route('job-notices.show', ['year' => $notification->created_at->format('Y'), 'slug' => $notification->slug]) }}">{{ $notification->title }}</a></h3><p>{{ $notification->state ?: 'State: check official notice' }}</p><a href="{{ $notification->official_url }}" target="_blank" rel="noopener noreferrer">Official source ↗</a></article>
