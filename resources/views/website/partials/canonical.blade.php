@@ -8,4 +8,4 @@
         : ($canonicalPath === request()->getPathInfo() ? request()->url() : request()->getSchemeAndHttpHost().$canonicalPath);
 @endphp
 <link rel="canonical" href="{{ $canonicalUrl }}">
-@if($socialCards ?? false)<meta property="og:url" content="{{ $canonicalUrl }}">@endif
+@if($socialCards ?? true)<meta property="og:url" content="{{ $canonicalUrl }}"><meta name="twitter:url" content="{{ $canonicalUrl }}">@endif

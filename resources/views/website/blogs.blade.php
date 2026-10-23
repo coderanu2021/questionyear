@@ -7,7 +7,7 @@
 <!DOCTYPE html>
 <html lang="{{ app()->getLocale() }}">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="csrf-token" content="{{ csrf_token() }}">
-@include('website.partials.seo', ['defaultTitle' => (isset($post) ? $post->title : $listingTitle).' – '.$siteSettings['site_title'], 'defaultDescription' => isset($post) ? ($post->excerpt ?: Illuminate\Support\Str::limit(strip_tags($post->content), 160)) : ($isNews ? 'Latest exam news, announcements and education updates.' : 'Study tips, exam preparation and learning insights.')])
+@include('website.partials.seo', ['defaultTitle' => (isset($post) ? $post->title : $listingTitle).' – '.$siteSettings['site_title'], 'defaultDescription' => isset($post) ? ($post->excerpt ?: Illuminate\Support\Str::limit(strip_tags($post->content), 160)) : ($isNews ? 'Latest exam news, announcements and education updates.' : 'Study tips, exam preparation and learning insights.'), 'socialType' => isset($post) ? 'article' : 'website'])
 @if(!isset($post) && $posts->total() === 0)<meta name="robots" content="noindex,follow">@endif
 
 <link rel="stylesheet" href="{{ asset('css/website.css') }}?v={{ filemtime(public_path('css/website.css')) }}">@include('website.partials.favicon')@include('website.partials.canonical')

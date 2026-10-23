@@ -3,6 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\Chapter;
+use App\Models\JobNotification;
+use App\Models\Post;
+use App\Models\Quiz;
 use App\Models\Subject;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -52,5 +55,36 @@ class CanonicalUrlTest extends TestCase
 
         $this->get('/current-affairs?period=daily')->assertRedirect($cleanUrl)->assertStatus(301);
         $this->get($cleanUrl)->assertOk()->assertSee('<link rel="canonical" href="'.$cleanUrl.'">', false);
+    }
+
+    public function test_public_page_types_render_canonical_open_graph_and_twitter_metadata(): void
+    {
+        $subject = Subject::factory()->create(['slug' => 'history']);
+        $chapter = Chapter::factory()->for($subject)->create(['status' => 'published']);
+        $quiz = Quiz::factory()->for($chapter)->create();
+        $blog = Post::factory()->published()->create(['type' => 'blog']);
+        $news = Post::factory()->published()->create(['type' => 'news']);
+        $job = JobNotification::factory()->create(['status' => 'published', 'official_url' => 'https://example.gov.in/notice']);
+        $pages = [
+            route('home') => 'website',
+            route('subject', $subject->slug) => 'website',
+            $quiz->publicUrl() => 'website',
+            route('blogs.show', $blog->slug) => 'article',
+            route('news.show', $news->slug) => 'article',
+            route('jobs.index') => 'website',
+            route('job-notices.show', ['year' => $job->created_at->format('Y'), 'slug' => $job->slug]) => 'website',
+            route('exam', 'upsc') => 'website',
+        ];
+
+        foreach ($pages as $url => $type) {
+            $response = $this->get($url)->assertOk();
+            $response->assertSee('<link rel="canonical" href="'.$url.'">', false)
+                ->assertSee('<meta property="og:url" content="'.$url.'">', false)
+                ->assertSee('<meta property="og:type" content="'.$type.'">', false)
+                ->assertSee('<meta name="twitter:url" content="'.$url.'">', false)
+                ->assertSee('<meta name="twitter:card" content="summary">', false)
+                ->assertSee('<meta name="twitter:title"', false)
+                ->assertSee('<meta name="twitter:description"', false);
+        }
     }
 }

@@ -13,12 +13,12 @@
 <title>{{ $pageMetadata['title'] }}</title>
 <meta name="description" content="{{ $pageMetadata['description'] }}">
 <meta name="keywords" content="{{ $pageMetadata['keywords'] }}">
-@if($socialCards ?? false)
-<meta property="og:type" content="website">
+@if($socialCards ?? true)
+<meta property="og:type" content="{{ $socialType ?? 'website' }}">
 <meta property="og:site_name" content="{{ $siteSettings['site_title'] }}">
 <meta property="og:title" content="{{ $pageMetadata['title'] }}">
 <meta property="og:description" content="{{ $pageMetadata['description'] }}">
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="{{ $twitterCard ?? 'summary' }}">
 <meta name="twitter:title" content="{{ $pageMetadata['title'] }}">
 <meta name="twitter:description" content="{{ $pageMetadata['description'] }}">
 @endif
