@@ -107,6 +107,16 @@ class SeoImprovementsTest extends TestCase
         $this->assertStringNotContainsString('<strong>0</strong>', $html);
     }
 
+    public function test_homepage_faq_answers_are_user_facing_and_have_matching_schema(): void
+    {
+        $html = $this->get(route('home'))->assertOk()->getContent();
+
+        $this->assertStringContainsString('How can I practise for SSC or UPSC?', $html);
+        $this->assertStringNotContainsString('administrator publishes', $html);
+        $this->assertStringContainsString('"@type":"FAQPage"', $html);
+        $this->assertStringContainsString('"name":"How can I practise for SSC or UPSC?"', $html);
+    }
+
     public function test_mcq_text_and_options_are_indexable_without_exposing_answers(): void
     {
         $quiz = Quiz::factory()->create(['title' => 'Prehistoric Period MCQ', 'questions' => [['q' => 'Which age used polished stone tools?', 'o' => ['Paleolithic', 'Mesolithic', 'Neolithic', 'Iron Age'], 'c' => 2, 'explanation' => 'Secret grading explanation']]]);

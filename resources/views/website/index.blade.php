@@ -13,6 +13,14 @@
         ['@context' => 'https://schema.org', '@type' => 'Organization', 'name' => $siteSettings['site_title'], 'url' => route('home')],
         ['@context' => 'https://schema.org', '@type' => 'WebSite', 'name' => $siteSettings['site_title'], 'url' => route('home')],
     ];
+    $homeFaqs = [
+        ['question' => 'Is '.$siteSettings['site_title'].' free to use?', 'answer' => 'Yes. Daily MCQs and subject practice are free. You can create an account to save scores and streaks.'],
+        ['question' => 'How can I practise for SSC or UPSC?', 'answer' => 'Choose an exam from Practice by exam, then use the available subject notes, topic-wise MCQs and mock tests to revise.'],
+        ['question' => 'Do I get explanations for answers?', 'answer' => 'Yes. Practice questions show the correct answer and an explanation after you submit your response.'],
+        ['question' => 'Can I practise one topic at a time?', 'answer' => 'Yes. Choose a subject and open a topic-wise set, or use a mixed set when you want to practise across topics.'],
+        ['question' => 'Can I use questionyear on my phone?', 'answer' => 'Yes. The site works in a mobile browser, so you can practise without installing an app.'],
+    ];
+    $homeSchema[] = ['@context' => 'https://schema.org', '@type' => 'FAQPage', 'mainEntity' => array_map(fn (array $faq): array => ['@type' => 'Question', 'name' => $faq['question'], 'acceptedAnswer' => ['@type' => 'Answer', 'text' => $faq['answer']]], $homeFaqs)];
 @endphp
 <script type="application/ld+json">{!! json_encode($homeSchema, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!}</script>
 @endif
