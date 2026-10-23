@@ -1,0 +1,14 @@
+.job-source-status{margin-bottom:16px;padding:14px 18px;color:var(--ok)}
+.job-source-errors{margin-bottom:16px;padding:14px 18px;color:var(--bad)}
+.job-source-errors ul{margin:8px 0 0 20px}
+.job-source-policy-note{margin-bottom:18px;padding:16px 18px}
+.job-source-policy-note p{margin-top:6px;color:var(--mute)}
+.job-source-card{margin-bottom:16px}
+.job-source-title{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px}
+.job-source-title h3{margin:0 0 6px}
+.job-source-title a{overflow-wrap:anywhere}
+.job-source-card .f{margin-bottom:12px}
+.job-source-review-meta{margin:0 0 14px;color:var(--mute);font-size:13px}
+.job-source-check{display:flex;align-items:flex-start;gap:9px;margin:12px 0;color:var(--text)}
+.job-source-check input{margin-top:4px}
+@media(max-width:600px){.job-source-title{flex-direction:column}}

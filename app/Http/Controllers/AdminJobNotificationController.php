@@ -123,6 +123,10 @@ class AdminJobNotificationController extends Controller
         if (! $jobNotification->official_url || ! $urlPolicy->allows($jobNotification->official_url, $jobNotification->official_url)) {
             throw ValidationException::withMessages(['official_url' => 'A valid official government source link is required before publishing.']);
         }
+
+        if (! $jobNotification->rawNotice?->source?->terms_allows_automated_access) {
+            throw ValidationException::withMessages(['official_url' => "Review and approve this source's official website terms before publishing notices fetched from it."]);
+        }
     }
 
     /** @param Collection<int, JobNotification> $jobNotifications */

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminJobNotificationController;
+use App\Http\Controllers\AdminJobSourceController;
 use App\Http\Controllers\BrowseController;
 use App\Http\Controllers\ChapterContentController;
 use App\Http\Controllers\DailyQuizController;
@@ -103,6 +104,8 @@ Route::post('/reset-password', [PageController::class, 'reset'])->middleware('th
 Route::get('/{page}', [PageController::class, 'show'])->whereIn('page', ['about', 'contact', 'help', 'careers', 'privacy', 'terms', 'cookies', 'leaderboard', 'forgot-password'])->name('page');
 Route::middleware('auth')->group(function () {
     Route::get('/admin/job-notices', [AdminController::class, 'index'])->defaults('page', 'job-notices')->name('admin.job-notices.index');
+    Route::get('/admin/job-sources', [AdminController::class, 'index'])->defaults('page', 'job-sources')->name('admin.job-sources.index');
+    Route::put('/admin/job-sources/{jobSource}', [AdminJobSourceController::class, 'update'])->whereNumber('jobSource')->name('admin.job-sources.update');
     Route::post('/admin/job-notices/bulk-publish', [AdminJobNotificationController::class, 'bulkPublish'])->name('admin.job-notices.bulk-publish');
     Route::put('/admin/job-notices/{jobNotification}', [AdminJobNotificationController::class, 'update'])->whereNumber('jobNotification')->name('admin.job-notices.update');
     Route::post('/admin/job-notices/{jobNotification}/approve', [AdminJobNotificationController::class, 'approve'])->whereNumber('jobNotification')->name('admin.job-notices.approve');

@@ -9,6 +9,7 @@ use App\Models\JobNotification;
 use App\Models\JobPushSubscription;
 use App\Models\JobSource;
 use App\Models\RawNotice;
+use App\Models\User;
 use App\Services\JobAlerts\GovernmentJobAlertDispatcher;
 use App\Services\JobAlerts\WebPushService;
 use App\Services\JobParsers\HtmlJobNoticeParser;
@@ -52,7 +53,7 @@ class GovernmentJobsPipelineTest extends TestCase
     public function test_ai_extraction_is_mocked_pending_and_leaves_unconfirmed_fields_null(): void
     {
         config(['services.gemini.key' => 'test-key', 'services.gemini.model' => 'test-model', 'services.job_notices.auto_publish' => false]);
-        $source = JobSource::factory()->create(['url' => 'https://ssc.gov.in/', 'trusted' => true]);
+        $source = JobSource::factory()->create(['url' => 'https://ssc.gov.in/', 'trusted' => true, 'terms_allows_automated_access' => true]);
         $rawNotice = RawNotice::factory()->create(['source_id' => $source->id, 'url' => 'https://ssc.gov.in/notice.pdf']);
         $extraction = [
             'org' => 'Staff Selection Commission', 'post' => 'Junior Assistant', 'summary' => 'Applications are invited for the advertised post.',
@@ -77,7 +78,7 @@ class GovernmentJobsPipelineTest extends TestCase
     {
         Bus::fake();
         config(['services.gemini.key' => 'test-key', 'services.gemini.model' => 'test-model', 'services.job_notices.auto_publish' => true, 'services.job_notices.minimum_confidence' => 0.95]);
-        $source = JobSource::factory()->create(['url' => 'https://upsc.gov.in/', 'trusted' => true]);
+        $source = JobSource::factory()->create(['url' => 'https://upsc.gov.in/', 'trusted' => true, 'terms_allows_automated_access' => true]);
         $rawNotice = RawNotice::factory()->create(['source_id' => $source->id, 'url' => 'https://upsc.gov.in/notice.pdf']);
         $extraction = [
             'org' => 'Union Public Service Commission', 'post' => 'Assistant Director', 'summary' => 'The official notice invites applications.',
@@ -136,8 +137,8 @@ class GovernmentJobsPipelineTest extends TestCase
     public function test_one_official_source_failure_does_not_stop_other_sources(): void
     {
         Cache::flush();
-        JobSource::factory()->create(['name' => 'SSC', 'url' => 'https://ssc.gov.in/notices', 'parser' => 'html']);
-        JobSource::factory()->create(['name' => 'UPSC', 'url' => 'https://upsc.gov.in/notices', 'parser' => 'html']);
+        JobSource::factory()->create(['name' => 'SSC', 'url' => 'https://ssc.gov.in/notices', 'parser' => 'html', 'terms_allows_automated_access' => true]);
+        JobSource::factory()->create(['name' => 'UPSC', 'url' => 'https://upsc.gov.in/notices', 'parser' => 'html', 'terms_allows_automated_access' => true]);
         $client = \Mockery::mock(ClientInterface::class);
         $client->shouldReceive('request')->atLeast()->once()->andReturnUsing(function (string $method, mixed $url): Response {
             $url = (string) $url;
@@ -167,6 +168,35 @@ class GovernmentJobsPipelineTest extends TestCase
 
         $this->assertSame(['sources' => 2, 'fetched' => 1, 'skipped' => 0, 'failed' => 1], $summary);
         $this->assertDatabaseHas('raw_notices', ['source_id' => 2, 'url' => 'https://upsc.gov.in/recruitment.html']);
+    }
+
+    public function test_unreviewed_source_terms_pause_fetching_without_network_requests(): void
+    {
+        JobSource::factory()->create(['url' => 'https://ssc.gov.in/notices', 'terms_allows_automated_access' => false]);
+        $client = \Mockery::mock(ClientInterface::class);
+        $client->shouldNotReceive('request');
+        $pacer = \Mockery::mock(HostRequestPacer::class);
+        $urlPolicy = new OfficialSourceUrlPolicy;
+        $httpClient = new OfficialSourceHttpClient($client, $pacer, $urlPolicy);
+        $fetcher = new GovernmentJobFetcher($httpClient, $urlPolicy, new RobotsPolicy($httpClient, $urlPolicy, $pacer), new HtmlJobNoticeParser, new RssJobNoticeParser, new PdfJobNoticeParser);
+
+        $this->assertSame(['sources' => 1, 'fetched' => 0, 'skipped' => 1, 'failed' => 0], $fetcher->fetchActiveSources());
+    }
+
+    public function test_admin_must_link_same_site_policy_before_approving_source_access(): void
+    {
+        $source = JobSource::factory()->create(['url' => 'https://ssc.gov.in/', 'terms_allows_automated_access' => false]);
+        $admin = User::factory()->create(['role' => 'admin', 'status' => 'active']);
+
+        $this->actingAs($admin)->get(route('admin.job-sources.index'))->assertOk()->assertSee('Fetch paused');
+        $this->actingAs($admin)->put(route('admin.job-sources.update', $source), [
+            'active' => '1',
+            'terms_url' => 'https://ssc.gov.in/website-policy',
+            'terms_allows_automated_access' => '1',
+        ])->assertRedirect(route('admin.job-sources.index'));
+
+        $this->assertDatabaseHas('job_sources', ['id' => $source->id, 'terms_url' => 'https://ssc.gov.in/website-policy', 'terms_allows_automated_access' => true]);
+        $this->assertNotNull($source->fresh()->terms_reviewed_at);
     }
 
     public function test_push_subscription_accepts_supported_https_hosts_and_rejects_other_hosts(): void

@@ -29,6 +29,12 @@ class GovernmentJobFetcher
         foreach (JobSource::query()->where('active', true)->orderBy('id')->get() as $source) {
             $summary['sources']++;
 
+            if (! $source->terms_allows_automated_access) {
+                $summary['skipped']++;
+
+                continue;
+            }
+
             try {
                 $result = $this->fetchSource($source);
                 $summary['fetched'] += $result['fetched'];

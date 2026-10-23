@@ -27,6 +27,9 @@ class JobSourceFactory extends Factory
             'active' => true,
             'trusted' => false,
             'last_run_at' => null,
+            'terms_url' => null,
+            'terms_reviewed_at' => null,
+            'terms_allows_automated_access' => false,
         ];
     }
 }

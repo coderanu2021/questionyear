@@ -46,6 +46,7 @@ class JobNoticeExtractor
         $confidence = $data['confidence'] ?? null;
         $autoPublished = (bool) config('services.job_notices.auto_publish', false)
             && $rawNotice->source->trusted
+            && $rawNotice->source->terms_allows_automated_access
             && $confidence !== null
             && $confidence >= (float) config('services.job_notices.minimum_confidence', 0.95)
             && $title !== ''
