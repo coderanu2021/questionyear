@@ -145,6 +145,7 @@ class WebsiteController extends Controller
         $seoQuiz = $request->routeIs('quiz.show') ? $request->route('quiz') : null;
         $settings = SiteSettings::values();
         $defaultTitle = match (true) {
+            $request->routeIs('home') => 'Latest Govt Jobs '.now()->year.', Free GK MCQs & Previous Year Questions | '.$settings['site_title'],
             $seoQuiz !== null => $seoQuiz->title.' – '.$settings['site_title'],
             $seoChapter !== null => $seoChapter->title.' – '.$settings['site_title'],
             $request->routeIs('login') => 'Log in – '.$settings['site_title'],
@@ -154,6 +155,7 @@ class WebsiteController extends Controller
         };
         $seoTitle = $seoQuiz === null ? ($seoChapter?->meta_title ?: $defaultTitle) : $defaultTitle;
         $defaultDescription = match (true) {
+            $request->routeIs('home') => 'Find Latest Govt Jobs, practise free GK MCQs, and explore previous year questions for competitive exams and focused exam preparation with questionyear.',
             $seoQuiz !== null => 'Practice '.$seoQuiz->title.' with '.count($seoQuiz->questions).' '.($seoQuiz->isQuestionAnswer() ? 'questions and answers' : 'multiple-choice questions and answer explanations').'. Study '.$seoQuiz->learningSubject()->name.' on '.$settings['site_title'].'.',
             $seoChapter !== null => $seoChapter->description ?: 'Study '.$seoChapter->title.' with '.$seoChapter->subject->name.' chapter notes, key facts and revision material on '.$settings['site_title'].'.',
             isset($selected) => 'Explore '.$selected->name.' '.(in_array($selected->slug, ['current-affairs', 'general-knowledge'], true) ? 'questions and answers' : 'chapter notes and topic-wise practice MCQs').'. '.$selected->description,
@@ -170,7 +172,7 @@ class WebsiteController extends Controller
             }
         }
 
-        return view('website.index', ['subjectHasContent' => $subjectHasContent, 'selectedSubject' => $selected ?? null, 'serverChapter' => $request->routeIs('learn', 'chapter') ? $seoChapter : null, 'serverChapterData' => $request->routeIs('learn', 'chapter') && $seoChapter ? ($curriculum['LN'][$subject.':'.$chapter] ?? null) : null, 'serverQuiz' => $seoQuiz, 'questionAnswerQuiz' => in_array($subject, ['current-affairs', 'general-knowledge'], true) && $request->routeIs('quiz.show') ? $request->route('quiz') : null, 'seoChapter' => $seoChapter, 'latestBlogs' => $latestBlogs, 'latestNews' => $latestNews, 'todayJobNotifications' => $todayJobNotifications, 'closingSoonJobNotifications' => $closingSoonJobNotifications, 'chapterHeading' => $request->routeIs('learn', 'chapter') ? $seoChapter?->title : null, 'chapterMetaTitle' => $seoChapter?->meta_title, 'seoTitle' => $seoTitle, 'seoDescription' => $seoDescription, 'seoKeywords' => $seoKeywords, 'curriculum' => $curriculum, 'quizIds' => $quizIds, 'currentUser' => $request->user()?->only('name', 'email'), 'popular' => $popular, 'chapterCount' => $subjects->sum(fn ($s) => $s->chapters->count()), 'subjectCount' => $subjects->count(), 'questionCount' => Quiz::published()->multipleChoice()->get()->sum(fn ($q) => count($q->questions))]);
+        return view('website.index', ['subjectHasContent' => $subjectHasContent, 'selectedSubject' => $selected ?? null, 'serverChapter' => $request->routeIs('learn', 'chapter') ? $seoChapter : null, 'serverChapterData' => $request->routeIs('learn', 'chapter') && $seoChapter ? ($curriculum['LN'][$subject.':'.$chapter] ?? null) : null, 'serverQuiz' => $seoQuiz, 'questionAnswerQuiz' => in_array($subject, ['current-affairs', 'general-knowledge'], true) && $request->routeIs('quiz.show') ? $request->route('quiz') : null, 'seoChapter' => $seoChapter, 'latestBlogs' => $latestBlogs, 'latestNews' => $latestNews, 'todayJobNotifications' => $todayJobNotifications, 'closingSoonJobNotifications' => $closingSoonJobNotifications, 'chapterHeading' => $request->routeIs('learn', 'chapter') ? $seoChapter?->title : null, 'chapterMetaTitle' => $seoChapter?->meta_title, 'seoTitle' => $seoTitle, 'seoDescription' => $seoDescription, 'seoKeywords' => $seoKeywords, 'curriculum' => $curriculum, 'quizIds' => $quizIds, 'currentUser' => $request->user()?->only('name', 'email'), 'popular' => $popular, 'chapterCount' => $subjects->sum(fn ($s) => $s->chapters->count()), 'subjectCount' => $subjects->count(), 'mcqSetCount' => Quiz::published()->multipleChoice()->count(), 'questionCount' => Quiz::published()->multipleChoice()->get()->sum(fn ($q) => count($q->questions))]);
     }
 
     public function answer(Request $request, Quiz $quiz): JsonResponse

@@ -2,7 +2,7 @@
 <div class="hero"><div class="wrap">
   <div>
     @if(request()->routeIs('home'))
-    <h1>{{ __($siteSettings['home_title']) }}</h1>
+    <h1>Latest Govt Jobs, Free GK MCQs &amp; Previous Year Questions</h1>
     @else
     <h2>{{ __($siteSettings['home_title']) }}</h2>
     @endif
@@ -19,12 +19,14 @@
   </div>
 </div></div>
 
+@if($chapterCount > 0 || $subjectCount > 0 || $mcqSetCount > 0 || $questionCount > 0)
 <div class="wrap strip"><div class="box">
-  <div><strong data-n="{{ $chapterCount }}">0</strong><span>{{ __('Chapters') }}</span></div>
-  <div><strong data-n="{{ $subjectCount }}">0</strong><span>{{ __('Subjects') }}</span></div>
-  <div><strong data-n="{{ count($popular) }}">0</strong><span>{{ __('MCQs ready') }}</span></div>
-  <div><strong data-n="{{ $questionCount }}">0</strong><span>{{ __('Practice questions') }}</span></div>
+  @if($chapterCount > 0)<div><strong data-n="{{ $chapterCount }}">{{ number_format($chapterCount) }}</strong><span>{{ __('Chapters') }}</span></div>@endif
+  @if($subjectCount > 0)<div><strong data-n="{{ $subjectCount }}">{{ number_format($subjectCount) }}</strong><span>{{ __('Subjects') }}</span></div>@endif
+  @if($mcqSetCount > 0)<div><strong data-n="{{ $mcqSetCount }}">{{ number_format($mcqSetCount) }}</strong><span>{{ __('MCQs ready') }}</span></div>@endif
+  @if($questionCount > 0)<div><strong data-n="{{ $questionCount }}">{{ number_format($questionCount) }}</strong><span>{{ __('Practice questions') }}</span></div>@endif
 </div></div>
+@endif
 
 <section id="subjects"><div class="wrap">
   <h2>{{ __('Choose a subject') }}</h2>

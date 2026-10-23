@@ -23,14 +23,14 @@ class PageSeoTest extends TestCase
             ->assertSee('<title>Custom &amp; &quot;Homepage&quot;</title>', false)
             ->assertSee('name="description" content="Description &lt;safe&gt;"', false)
             ->assertSee('name="keywords" content="study, practice"', false)
-            ->assertSee('Practice any subject. Know where you stand.');
+            ->assertSee('Latest Govt Jobs, Free GK MCQs &amp; Previous Year Questions', false);
         $this->assertSame(1, preg_match_all('/<title>/', $response->getContent()));
         foreach (['description', 'keywords'] as $name) {
             $this->assertSame(1, preg_match_all('/<meta name="'.$name.'"/', $response->getContent()));
         }
         $this->get(route('admin.seo.index', ['page_key' => 'route:home']))->assertOk()->assertSee('Custom &amp; &quot;Homepage&quot;', false);
         $this->put(route('admin.seo.update'), ['page_key' => 'route:home', 'meta_title' => '', 'meta_description' => '', 'meta_keywords' => ''])->assertRedirect();
-        $this->get(route('home'))->assertOk()->assertSee('<title>Free GK MCQs &amp; Chapter Notes | questionyear</title>', false)->assertDontSee('Description &lt;safe&gt;', false);
+        $this->get(route('home'))->assertOk()->assertSee('<title>Latest Govt Jobs '.now()->year.', Free GK MCQs &amp; Previous Year Questions | questionyear</title>', false)->assertDontSee('Description &lt;safe&gt;', false);
     }
 
     public function test_static_practice_auth_and_error_pages_render_saved_metadata(): void

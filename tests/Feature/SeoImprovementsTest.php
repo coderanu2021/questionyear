@@ -46,7 +46,7 @@ class SeoImprovementsTest extends TestCase
         $subject = Subject::factory()->create(['name' => 'History', 'slug' => 'history']);
         $chapter = Chapter::factory()->for($subject)->create(['title' => 'Prehistoric Period']);
         $quiz = Quiz::factory()->for($chapter)->create(['title' => 'Prehistoric MCQs']);
-        $home = $this->get(route('home'))->assertOk()->assertSee('<title>Free GK MCQs &amp; Chapter Notes | questionyear</title>', false);
+        $home = $this->get(route('home'))->assertOk()->assertSee('<title>Latest Govt Jobs '.now()->year.', Free GK MCQs &amp; Previous Year Questions | questionyear</title>', false);
         $this->assertStringContainsString('<h3>History</h3>', $this->withoutScripts($home->getContent()));
         $subjectPage = $this->get(route('subject', $subject->slug))->assertOk()->assertSee('History Notes & Practice MCQs');
         $html = $this->withoutScripts($subjectPage->getContent());
@@ -54,6 +54,33 @@ class SeoImprovementsTest extends TestCase
         $this->assertStringContainsString('href="'.$chapter->readingUrl(0).'"', $html);
         $this->assertStringContainsString('href="'.$quiz->publicUrl().'"', $html);
         $this->assertStringNotContainsString('name="robots" content="noindex', $html);
+    }
+
+    public function test_homepage_has_keyword_metadata_a_single_h1_and_server_rendered_nonzero_counts(): void
+    {
+        $subject = Subject::factory()->create(['name' => 'History', 'slug' => 'history']);
+        $chapter = Chapter::factory()->for($subject)->create(['status' => 'published']);
+        Quiz::factory()->for($chapter)->create(['questions' => [['q' => 'Question?', 'o' => ['A', 'B', 'C', 'D'], 'c' => 0]]]);
+
+        $response = $this->get(route('home'))->assertOk()
+            ->assertSee('<title>Latest Govt Jobs '.now()->year.', Free GK MCQs &amp; Previous Year Questions | questionyear</title>', false)
+            ->assertSee('name="description" content="Find Latest Govt Jobs, practise free GK MCQs, and explore previous year questions for competitive exams and focused exam preparation with questionyear."', false);
+        $html = $this->withoutScripts($response->getContent());
+
+        $this->assertSame(1, preg_match_all('/<h1\b/i', $html));
+        $this->assertStringContainsString('<h1>Latest Govt Jobs, Free GK MCQs &amp; Previous Year Questions</h1>', $html);
+        $this->assertStringContainsString('<strong data-n="1">1</strong><span>Chapters</span>', $html);
+        $this->assertStringContainsString('<strong data-n="1">1</strong><span>Subjects</span>', $html);
+        $this->assertStringContainsString('<strong data-n="1">1</strong><span>MCQs ready</span>', $html);
+        $this->assertStringContainsString('<strong data-n="1">1</strong><span>Practice questions</span>', $html);
+    }
+
+    public function test_homepage_hides_empty_counters_instead_of_rendering_zeroes(): void
+    {
+        $html = $this->withoutScripts($this->get(route('home'))->assertOk()->getContent());
+
+        $this->assertStringNotContainsString('data-n="0"', $html);
+        $this->assertStringNotContainsString('<strong>0</strong>', $html);
     }
 
     public function test_mcq_text_and_options_are_indexable_without_exposing_answers(): void

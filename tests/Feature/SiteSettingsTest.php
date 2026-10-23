@@ -18,7 +18,7 @@ class SiteSettingsTest extends TestCase
 
     public function test_default_site_name_and_contact_email_appear_on_public_pages(): void
     {
-        $this->get(route('home'))->assertOk()->assertSee('<title>Free GK MCQs &amp; Chapter Notes | questionyear</title>', false)->assertSee('mailto:questionyear2026@gmail.com', false)->assertDontSee('QuizHub');
+        $this->get(route('home'))->assertOk()->assertSee('<title>Latest Govt Jobs '.now()->year.', Free GK MCQs &amp; Previous Year Questions | questionyear</title>', false)->assertSee('mailto:questionyear2026@gmail.com', false)->assertDontSee('QuizHub');
         foreach (['/contact', '/about', '/daily-quiz', '/upcoming', '/missing-page'] as $url) {
             $this->get($url)->assertSee('questionyear')->assertDontSee('QuizHub');
         }
@@ -42,7 +42,7 @@ class SiteSettingsTest extends TestCase
         $this->actingAs(User::factory()->create(['role' => 'admin']));
         $payload = [...$this->payload(), 'site_title' => 'My Learning Site', 'site_description' => 'Updated default SEO description.', 'contact_email' => 'support@example.com', 'home_title' => 'A new homepage heading', 'home_description' => 'Our new introduction.', 'about_content' => "About our learning platform.\nMore details.", 'footer_description' => 'Updated footer content.', 'contact_description' => 'Get in touch with our team.'];
         $this->put(route('admin.settings.update'), $payload)->assertRedirect(route('admin', ['page' => 'settings']));
-        $this->get(route('home'))->assertSee('<title>Free GK MCQs &amp; Chapter Notes | My Learning Site</title>', false)->assertSee('content="Updated default SEO description."', false)->assertSee('A new homepage heading')->assertSee('Our new introduction.')->assertSee('Updated footer content.')->assertSee('mailto:support@example.com', false);
+        $this->get(route('home'))->assertSee('<title>Latest Govt Jobs '.now()->year.', Free GK MCQs &amp; Previous Year Questions | My Learning Site</title>', false)->assertSee('content="Find Latest Govt Jobs, practise free GK MCQs, and explore previous year questions for competitive exams and focused exam preparation with questionyear."', false)->assertSee('Latest Govt Jobs, Free GK MCQs & Previous Year Questions')->assertSee('Our new introduction.')->assertSee('Updated footer content.')->assertSee('mailto:support@example.com', false);
         $this->get('/about')->assertSee('About My Learning Site')->assertSee('About our learning platform.');
         $this->get('/contact')->assertSee('Get in touch with our team.')->assertSee('support@example.com');
         $this->get(route('daily'))->assertSee('Daily MCQ – My Learning Site');
@@ -57,8 +57,8 @@ class SiteSettingsTest extends TestCase
     {
         DB::table('site_settings')->where('id', 1)->update(['values' => json_encode(['site_description' => 'Free quiz practice & daily quizzes.', 'home_description' => 'Practice quizzes with answers.', 'footer_description' => 'Daily quiz practice.']), 'updated_at' => now()]);
         $this->get(route('home'))->assertOk()
-            ->assertSee('<title>Free GK MCQs &amp; Chapter Notes | questionyear</title>', false)
-            ->assertSee('content="Free MCQ practice &amp; daily MCQs."', false)
+            ->assertSee('<title>Latest Govt Jobs '.now()->year.', Free GK MCQs &amp; Previous Year Questions | questionyear</title>', false)
+            ->assertSee('content="Find Latest Govt Jobs, practise free GK MCQs, and explore previous year questions for competitive exams and focused exam preparation with questionyear."', false)
             ->assertSee('Practice MCQs with answers.')
             ->assertSee('Daily MCQ practice.')
             ->assertSee('href="'.route('daily').'"', false);
