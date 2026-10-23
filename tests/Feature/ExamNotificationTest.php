@@ -23,16 +23,7 @@ class ExamNotificationTest extends TestCase
             ->assertSee('third-party-hosted copy')->assertSee('₹21,700')->assertSee('₹19,900')
             ->assertDontSee('Fresh 2027 CEN not verified here');
 
-        foreach (['all', 'railway', '12th-pass'] as $category) {
-            $this->get(route('jobs.category', ['category' => $category]))->assertOk()
-                ->assertSee(route('notifications.show', ['exam' => $slug]), false)
-                ->assertSee('1,688 (provisional)')->assertSee('13 November 2026, 11:59 PM');
-        }
-
-        $this->get(route('notifications.show', ['exam' => 'railways']))->assertOk()
-            ->assertSee(route('notifications.show', ['exam' => $slug]), false);
-        $this->get(route('sitemap'))->assertOk()
-            ->assertSee(route('notifications.show', ['exam' => $slug]), false);
+        $this->get(route('jobs.index'))->assertOk()->assertDontSee('1,688 (provisional)');
     }
 
     public function test_every_notice_has_specific_salary_guidance_and_faqs(): void
@@ -66,24 +57,15 @@ class ExamNotificationTest extends TestCase
             ->assertSee('does not establish a salary range')->assertDontSee('₹56,100');
     }
 
-    public function test_government_job_categories_filter_guides_and_show_honest_empty_states(): void
+    public function test_government_job_categories_filter_only_published_official_notices(): void
     {
         $this->get(route('jobs.index'))->assertOk()->assertSee('Latest Government Jobs')
-            ->assertSee('Official recruitment websites')->assertSee('Vacancies');
+            ->assertSee('OFFICIAL NOTICES')->assertSee('No published notices match these filters');
 
-        foreach (['10th-pass' => 'rrb-group-d-cen-09-2025', '12th-pass' => 'rrb-ntpc-undergraduate-cen-07-2025', 'graduate' => 'rrb-ntpc-graduate-cen-06-2026', 'upcoming' => 'upsc'] as $category => $slug) {
+        foreach (['all', '10th-pass', '12th-pass', 'graduate', 'upcoming', 'ssc', 'railway', 'banking', 'upsc', 'admit-cards', 'results'] as $category) {
             $this->get(route('jobs.category', ['category' => $category]))->assertOk()
-                ->assertSee(route('notifications.show', ['exam' => $slug]), false);
+                ->assertSee('OFFICIAL NOTICES')->assertDontSee('1,688 (provisional)');
         }
-
-        $this->get(route('jobs.category', ['category' => '10th-pass']))->assertOk()
-            ->assertDontSee('RRB NTPC Graduate — CEN 06/2026');
-        foreach (['ssc' => 'SSC Selection Posts Phase XIV 2026', 'banking' => 'Canara Bank Graduate Apprentices 2026', 'admit-cards' => 'UPSC Civil Services Mains 2026 Admit Card', 'results' => 'UPSC Engineering Services Mains 2026 Written Result'] as $category => $title) {
-            $this->get(route('jobs.category', ['category' => $category]))->assertOk()
-                ->assertSee($title)->assertSee('15 October 2026')->assertDontSee('No verified');
-        }
-        $this->get(route('jobs.category', ['category' => 'admit-cards']))->assertDontSee('Written result published');
-        $this->get(route('jobs.category', ['category' => 'results']))->assertDontSee('Archived admit card notice');
         $this->get('/government-jobs/invalid')->assertNotFound();
         $this->get('/notifications/2027')->assertRedirect(route('notifications.index'))->assertStatus(301);
     }

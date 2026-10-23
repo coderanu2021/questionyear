@@ -8,7 +8,7 @@ class ExamNotificationController extends Controller
 {
     public const CATEGORIES = [
         'all' => 'Latest Government Jobs',
-        'upcoming' => 'Upcoming Government Jobs 2027',
+        'upcoming' => 'Upcoming Government Jobs',
         '10th-pass' => '10th Pass Government Jobs',
         '12th-pass' => '12th Pass Government Jobs',
         'graduate' => 'Graduate Government Jobs',
