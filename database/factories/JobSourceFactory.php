@@ -25,6 +25,7 @@ class JobSourceFactory extends Factory
             'category' => 'recruitment',
             'parser' => 'html',
             'active' => true,
+            'trusted' => false,
             'last_run_at' => null,
         ];
     }

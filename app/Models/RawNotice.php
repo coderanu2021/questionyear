@@ -17,7 +17,11 @@ class RawNotice extends Model
 
     protected function casts(): array
     {
-        return ['fetched_at' => 'datetime'];
+        return [
+            'fetched_at' => 'datetime',
+            'extraction_attempts' => 'integer',
+            'extracted_at' => 'datetime',
+        ];
     }
 
     public function source(): BelongsTo

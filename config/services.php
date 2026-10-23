@@ -11,6 +11,11 @@ return [
         'model' => preg_replace('#^models/#', '', trim((string) env('GEMINI_MODEL', 'gemini-3.5-flash-lite'))),
     ],
 
+    'job_notices' => [
+        'auto_publish' => (bool) env('JOB_NOTICES_AUTO_PUBLISH', false),
+        'minimum_confidence' => (float) env('JOB_NOTICES_MIN_CONFIDENCE', 0.95),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services

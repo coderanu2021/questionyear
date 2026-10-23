@@ -16,7 +16,7 @@ class JobSource extends Model
 
     protected function casts(): array
     {
-        return ['active' => 'boolean', 'last_run_at' => 'datetime'];
+        return ['active' => 'boolean', 'trusted' => 'boolean', 'last_run_at' => 'datetime'];
     }
 
     public function rawNotices(): HasMany

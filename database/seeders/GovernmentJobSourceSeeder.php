@@ -31,6 +31,7 @@ class GovernmentJobSourceSeeder extends Seeder
                 'type' => 'html',
                 'parser' => 'html',
                 'active' => true,
+                'trusted' => true,
             ]);
         }
     }

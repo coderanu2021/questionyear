@@ -25,6 +25,10 @@ class RawNoticeFactory extends Factory
             'hash' => hash('sha256', fake()->unique()->sentence()),
             'raw_text' => fake()->paragraphs(3, true),
             'fetched_at' => now(),
+            'extraction_status' => 'pending',
+            'extraction_attempts' => 0,
+            'extracted_at' => null,
+            'last_extraction_error' => null,
         ];
     }
 }

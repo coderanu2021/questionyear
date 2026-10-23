@@ -22,6 +22,7 @@ class JobNotification extends Model
             'start_date' => 'date',
             'last_date' => 'date',
             'source_checked_at' => 'datetime',
+            'confidence' => 'float',
         ];
     }
 
