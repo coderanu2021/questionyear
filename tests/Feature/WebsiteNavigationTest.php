@@ -95,9 +95,9 @@ class WebsiteNavigationTest extends TestCase
         Quiz::factory()->create(['chapter_id' => null, 'subject_id' => $subject->id, 'title' => 'Monday CA', 'status' => 'published', 'quiz_date' => '2026-10-19']);
         Quiz::factory()->create(['chapter_id' => null, 'subject_id' => $subject->id, 'title' => 'Earlier CA', 'status' => 'published', 'quiz_date' => '2026-10-10']);
         Quiz::factory()->create(['chapter_id' => null, 'subject_id' => $subject->id, 'title' => 'Undated CA', 'status' => 'published', 'quiz_date' => null]);
-        $this->get(route('current-affairs', ['period' => 'daily']))->assertOk()->assertSee($today->publicUrl(), false)->assertDontSee('Monday CA')->assertDontSee('Undated CA');
-        $this->get(route('current-affairs', ['period' => 'weekly']))->assertOk()->assertSee('Monday CA')->assertDontSee('Earlier CA');
-        $this->get(route('current-affairs', ['period' => 'monthly']))->assertOk()->assertSee('Earlier CA')->assertDontSee('Undated CA');
+        $this->get(route('current-affairs.period', ['period' => 'daily']))->assertOk()->assertSee($today->publicUrl(), false)->assertDontSee('Monday CA')->assertDontSee('Undated CA');
+        $this->get(route('current-affairs.period', ['period' => 'weekly']))->assertOk()->assertSee('Monday CA')->assertDontSee('Earlier CA');
+        $this->get(route('current-affairs.period', ['period' => 'monthly']))->assertOk()->assertSee('Earlier CA')->assertDontSee('Undated CA');
         $this->get(route('current-affairs'))->assertOk()->assertSee('Undated CA');
         $this->get('/current-affairs?period=invalid')->assertSessionHasErrors('period');
     }

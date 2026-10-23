@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Quiz;
 use App\WebsiteNavigation;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
@@ -79,10 +80,26 @@ class BrowseController extends Controller
         return $this->page($mock ? 'Mock tests' : 'Topic-wise practice sets', 'Choose a published question set or build a timed mock test. Daily, weekly and monthly MCQs remain at their existing URLs.', $sections);
     }
 
-    public function currentAffairs(Request $request, WebsiteNavigation $navigation): View
+    public function currentAffairs(Request $request, WebsiteNavigation $navigation): View|RedirectResponse
     {
         $data = $request->validate(['period' => 'sometimes|in:daily,weekly,monthly']);
         $period = $data['period'] ?? null;
+        if ($period !== null) {
+            return redirect()->route('current-affairs.period', ['period' => $period], 301);
+        }
+
+        return $this->currentAffairsPage(null, $navigation);
+    }
+
+    public function currentAffairsPeriod(string $period, WebsiteNavigation $navigation): View
+    {
+        abort_unless(in_array($period, ['daily', 'weekly', 'monthly'], true), 404);
+
+        return $this->currentAffairsPage($period, $navigation);
+    }
+
+    private function currentAffairsPage(?string $period, WebsiteNavigation $navigation): View
+    {
         $sets = $navigation->quizzes()->filter(fn (Quiz $quiz): bool => $quiz->isCurrentAffairs());
         if ($period) {
             $start = now('Asia/Kolkata')->startOfDay();

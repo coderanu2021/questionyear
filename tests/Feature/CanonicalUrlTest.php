@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Chapter;
+use App\Models\Subject;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -34,5 +35,22 @@ class CanonicalUrlTest extends TestCase
         foreach (['/login', '/register'] as $path) {
             $this->get($path)->assertOk()->assertSee('<meta name="robots" content="noindex,follow">', false);
         }
+    }
+
+    public function test_legacy_plural_subject_urls_redirect_to_the_singular_canonical_url(): void
+    {
+        $subject = Subject::factory()->create(['slug' => 'custom-subject']);
+
+        $this->get('/subjects/'.$subject->slug)->assertRedirect(route('subject', $subject->slug))->assertStatus(301);
+        $this->get('/subject/'.$subject->slug)->assertOk()->assertSee('<link rel="canonical" href="'.route('subject', $subject->slug).'">', false);
+        $this->get('/subjects/science')->assertOk();
+    }
+
+    public function test_current_affairs_period_query_urls_redirect_to_clean_canonical_routes(): void
+    {
+        $cleanUrl = route('current-affairs.period', ['period' => 'daily']);
+
+        $this->get('/current-affairs?period=daily')->assertRedirect($cleanUrl)->assertStatus(301);
+        $this->get($cleanUrl)->assertOk()->assertSee('<link rel="canonical" href="'.$cleanUrl.'">', false);
     }
 }

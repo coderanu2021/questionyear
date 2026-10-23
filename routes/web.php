@@ -19,6 +19,7 @@ use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SiteSettingsController;
 use App\Http\Controllers\WebsiteController;
 use App\Http\Controllers\WordImportController;
+use App\Models\Subject;
 use App\WebsiteNavigation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -92,7 +93,13 @@ Route::get('/exams/{exam}', [PageController::class, 'exam'])->name('exam');
 Route::get('/exams', [BrowseController::class, 'exams'])->name('exams.index');
 Route::get('/practice', [BrowseController::class, 'practice'])->name('practice.index');
 Route::get('/subjects/{group}', [BrowseController::class, 'subjects'])->whereIn('group', array_keys(WebsiteNavigation::SUBJECT_GROUPS))->name('subjects.group');
+Route::get('/subjects/{subject}', function (string $subject): RedirectResponse {
+    abort_unless(Subject::where('slug', $subject)->exists(), 404);
+
+    return redirect()->route('subject', ['subject' => $subject], 301);
+})->where('subject', '[a-z0-9]+(?:-[a-z0-9]+)*')->name('subjects.redirect');
 Route::get('/current-affairs', [BrowseController::class, 'currentAffairs'])->name('current-affairs');
+Route::get('/current-affairs/{period}', [BrowseController::class, 'currentAffairsPeriod'])->whereIn('period', ['daily', 'weekly', 'monthly'])->name('current-affairs.period');
 Route::get('/study-tips', [BrowseController::class, 'studyTips'])->name('study-tips');
 Route::get('/progress', fn (Request $request) => app(PageController::class)->show($request, 'progress'))->middleware('auth')->name('progress');
 Route::get('/feedback', fn (Request $request) => app(PageController::class)->show($request, 'feedback'))->name('feedback');

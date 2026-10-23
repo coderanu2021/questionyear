@@ -131,7 +131,7 @@ class WebsiteNavigation
             'Practice' => [['label' => 'Daily MCQ', 'url' => route('daily')], ['label' => 'Weekly MCQ', 'url' => route('weekly')], ['label' => 'Monthly MCQ', 'url' => route('monthly')], ['label' => 'Mock Tests', 'url' => route('practice.index', ['mode' => 'mock'])], ['label' => 'Topic-wise Sets', 'url' => route('practice.index')], ['label' => 'Leaderboard', 'url' => route('learning.leaderboard')]],
             'Exams' => $this->exams(),
             'Govt Jobs' => array_map(fn (string $category): array => ['label' => $category === 'all' ? 'Latest Government Jobs' : ExamNotificationController::CATEGORIES[$category], 'url' => $category === 'all' ? route('jobs.index') : route('jobs.category', ['category' => $category])], ['all', 'upcoming', 'admit-cards', 'results', '10th-pass', '12th-pass', 'graduate']),
-            'Current Affairs' => [['label' => 'All Current Affairs', 'url' => route('current-affairs')], ['label' => 'Daily Capsule', 'url' => route('current-affairs', ['period' => 'daily'])], ['label' => 'Weekly Capsule', 'url' => route('current-affairs', ['period' => 'weekly'])], ['label' => 'Monthly Question Sets', 'url' => route('current-affairs', ['period' => 'monthly'])]],
+            'Current Affairs' => [['label' => 'All Current Affairs', 'url' => route('current-affairs')], ['label' => 'Daily Capsule', 'url' => route('current-affairs.period', ['period' => 'daily'])], ['label' => 'Weekly Capsule', 'url' => route('current-affairs.period', ['period' => 'weekly'])], ['label' => 'Monthly Question Sets', 'url' => route('current-affairs.period', ['period' => 'monthly'])]],
             'Updates' => $updates,
         ];
     }
