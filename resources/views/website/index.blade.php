@@ -21,6 +21,45 @@
 @endphp
 <script type="application/ld+json">{!! json_encode([$learningSchema, $faqSchema], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!}</script>
 @endif
+@if($serverQuiz)
+@php
+    $schemaBaseUrl = rtrim(config('app.url'), '/');
+    $quizSchemaUrl = in_array(parse_url($schemaBaseUrl, PHP_URL_HOST), ['localhost', '127.0.0.1', '::1', null], true) ? request()->url() : $schemaBaseUrl.request()->getPathInfo();
+    $quizIsQa = $serverQuiz->isQuestionAnswer();
+    $quizSchemaDesc = Str::limit(trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags($seoDescription)))), 160);
+    if ($quizIsQa) {
+        $quizSchema = [
+            '@context'             => 'https://schema.org',
+            '@type'                => 'FAQPage',
+            'name'                 => $serverQuiz->title,
+            'description'          => $quizSchemaDesc,
+            'inLanguage'           => 'en-IN',
+            'url'                  => $quizSchemaUrl,
+            'dateModified'         => $serverQuiz->updated_at->toIso8601String(),
+            'mainEntity'           => array_map(fn ($q) => [
+                '@type'            => 'Question',
+                'name'             => $q['q'],
+                'acceptedAnswer'   => ['@type' => 'Answer', 'text' => $q['answer']],
+            ], array_slice($serverQuiz->questionAnswers(), 0, 20)),
+        ];
+    } else {
+        $quizSchema = [
+            '@context'             => 'https://schema.org',
+            '@type'                => 'Quiz',
+            'name'                 => $serverQuiz->title,
+            'description'          => $quizSchemaDesc,
+            'inLanguage'           => 'en-IN',
+            'url'                  => $quizSchemaUrl,
+            'dateModified'         => $serverQuiz->updated_at->toIso8601String(),
+            'educationalUse'       => 'Practice',
+            'learningResourceType' => 'Quiz',
+            'numberOfQuestions'    => count($serverQuiz->questions),
+            'about'                => ['@type' => 'Thing', 'name' => $serverQuiz->learningSubject()->name],
+        ];
+    }
+@endphp
+<script type="application/ld+json">{!! json_encode($quizSchema, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE) !!}</script>
+@endif
 </head>
 <body>
 @include('website.partials.header')

@@ -12,8 +12,7 @@
 @endphp
 <title>{{ $pageMetadata['title'] }}</title>
 <meta name="description" content="{{ $pageMetadata['description'] }}">
-<meta name="keywords" content="{{ $pageMetadata['keywords'] }}">
-@if($socialCards ?? false)
+@if($pageMetadata['keywords'])<meta name="keywords" content="{{ $pageMetadata['keywords'] }}">@endif
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="{{ $siteSettings['site_title'] }}">
 <meta property="og:title" content="{{ $pageMetadata['title'] }}">
@@ -21,5 +20,4 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="{{ $pageMetadata['title'] }}">
 <meta name="twitter:description" content="{{ $pageMetadata['description'] }}">
-@endif
 @if($preservePageTitle ?? false)<script>window.PAGE_SEO_TITLE={{ Illuminate\Support\Js::from($pageMetadata['title']) }};</script>@endif
