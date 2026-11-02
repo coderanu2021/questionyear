@@ -125,3 +125,7 @@ Route::get('/{category}/{chapterSlug}', [WebsiteController::class, 'historyChapt
     ->whereIn('category', ['ancient-history', 'medieval-history', 'modern-history'])
     ->where('chapterSlug', '[a-z0-9]+(?:-[a-z0-9]+)*')
     ->name('chapter');
+
+Route::get('/polity/{chapterSlug}', [WebsiteController::class, 'polityChapter'])
+    ->where('chapterSlug', '[a-z0-9]+(?:-[a-z0-9]+)*')
+    ->name('polity.chapter');

@@ -27,6 +27,16 @@ class WebsiteController extends Controller
         return $this->index($request, $subject->slug, $matches->keys()->first());
     }
 
+    public function polityChapter(Request $request, string $chapterSlug): View|RedirectResponse
+    {
+        $subject = Subject::where('slug', 'polity')->firstOrFail();
+        $chapters = $subject->chapters()->where('status', 'published')->orderBy('id')->get();
+        $matches = $chapters->filter(fn ($entry) => Str::slug($entry->title) === $chapterSlug);
+        abort_unless($matches->count() === 1, 404);
+
+        return $this->index($request, $subject->slug, $matches->keys()->first());
+    }
+
     public function quizPage(Request $request, string $subject, Quiz $quiz, string $slug): View|RedirectResponse
     {
         abort_unless($quiz->isPublished() && $quiz->learningSubject()->slug === $subject, 404);
