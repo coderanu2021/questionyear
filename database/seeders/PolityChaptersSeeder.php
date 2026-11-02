@@ -19,10 +19,10 @@ class PolityChaptersSeeder extends Seeder
 
         DB::transaction(function () use ($chapters): void {
             $subject = Subject::firstOrCreate(
-                ['slug' => 'polity'],
+                ['slug' => 'political-science'],
                 [
-                    'name' => 'Polity',
-                    'category' => 'General',
+                    'name' => 'Political Science',
+                    'category' => 'Humanities',
                     'description' => 'Indian Polity and Constitution notes for UPSC, SSC, Railway and State PSC exams.',
                 ]
             );

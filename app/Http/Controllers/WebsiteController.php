@@ -29,7 +29,7 @@ class WebsiteController extends Controller
 
     public function polityChapter(Request $request, string $chapterSlug): View|RedirectResponse
     {
-        $subject = Subject::where('slug', 'polity')->firstOrFail();
+        $subject = Subject::where('slug', 'political-science')->firstOrFail();
         $chapters = $subject->chapters()->where('status', 'published')->orderBy('id')->get();
         $matches = $chapters->filter(fn ($entry) => Str::slug($entry->title) === $chapterSlug);
         abort_unless($matches->count() === 1, 404);

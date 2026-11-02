@@ -37,7 +37,7 @@ class Chapter extends Model
             return route('chapter', ['category' => Str::slug($this->category), 'chapterSlug' => Str::slug($this->title)]);
         }
 
-        if ($this->subject->slug === 'polity') {
+        if ($this->subject->slug === 'political-science') {
             return route('polity.chapter', ['chapterSlug' => Str::slug($this->title)]);
         }
 
